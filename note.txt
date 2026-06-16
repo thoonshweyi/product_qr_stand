@@ -1,0 +1,29 @@
+=open terminal
+npm install -D tailwindcss postcss autoprefixer
+
+=>Create tailwind.config file
+npx tailwindcss init
+
+=>Add PostCSS file
+=go to tailwind.congig.js
+=and write down in content: ["./public/**/*.html"]
+
+content: [
+    './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+    './storage/framework/views/*.php',
+    './resources/views/**/*.blade.php',
+    './resources/js/**/*.js',
+],
+
+=>resources/css/app.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+=>Import CSS in resources/js/app.js
+import './bootstrap';
+import '../css/app.css';
+
+=>Load Vite in Blade
+resources/views/layouts/app.blade.php, put this inside <head>:
+@vite(['resources/css/app.css', 'resources/js/app.js'])

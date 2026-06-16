@@ -1,5 +1,6 @@
 
 
+        <script src="{{ asset('/assets/libs/flowbite-admin/app.bundle.js') }}"></script>
 
         {{-- 
         <!-- Start Right Navbar -->

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // return view('welcome');
+    return redirect()->route('dashboards.index');
 });
 
 Route::get('/dashboard', function () {
@@ -26,6 +28,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    Route::get("/dashboards",[DashboardsController::class,'index'])->name("dashboards.index");
 });
 
 require __DIR__.'/auth.php';
