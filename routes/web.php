@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +32,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get("/dashboards",[DashboardsController::class,'index'])->name("dashboards.index");
+
+    Route::resource("users",UsersController::class);
 });
 
 require __DIR__.'/auth.php';

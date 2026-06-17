@@ -42,4 +42,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getAvatarAttribute()
+    {
+        $words = explode(' ', trim($this->name));
+
+        return collect($words)
+            ->filter()
+            ->map(fn ($word) => strtoupper(substr($word, 0, 1)))
+            ->take(2)
+            ->implode('');
+    }
 }
