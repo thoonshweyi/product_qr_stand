@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get("/dashboards",[DashboardsController::class,'index'])->name("dashboards.index");
 
     Route::resource("users",UsersController::class);
+    Route::resource("branches",BranchesController::class);
 });
 
 require __DIR__.'/auth.php';

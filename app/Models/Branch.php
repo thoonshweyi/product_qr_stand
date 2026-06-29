@@ -16,7 +16,18 @@ class Branch extends Model
         'branch_name',
         'branch_code',
         'branch_short_name',
+        'branch_address',
+        'branch_phone_no',
+        'erp_branch_id'
     ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
+    public function status(){
+        return $this->belongsTo(Status::class);
+    }
 
 
 }
