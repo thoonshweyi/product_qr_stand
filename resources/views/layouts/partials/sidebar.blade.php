@@ -32,7 +32,7 @@
                                 <a href="{{ url('/users') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">User List</a>
                             </li>
                             <li>
-                                <a href="{{ url('/') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Roles</a>
+                                <a href="{{ url('/roles') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Roles</a>
                             </li>
                             <li>
                                 <a href="{{ url('/') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Permissions</a>
@@ -49,7 +49,7 @@
                             </button>
                             <ul id="dropdown-crud" class="space-y-2 py-2 hidden">
                             <li>
-                                <a href="{{ url('/') }}" class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700">Statuses</a>
+                                <a href="{{ url('/statuses') }}" class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700">Statuses</a>
                             </li>
                             <li>
                                 <a href="{{ url('/branches') }}" class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700">Branches</a>

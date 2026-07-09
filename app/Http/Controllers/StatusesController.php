@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Status;
 use Illuminate\Http\Request;
 
 class StatusesController extends Controller
@@ -11,7 +12,8 @@ class StatusesController extends Controller
      */
     public function index()
     {
-        //
+        $statuses = Status::orderBy('id','asc')->paginate(10);
+        return view("statuses.index",compact("statuses"));
     }
 
     /**

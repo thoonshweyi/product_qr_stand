@@ -144,7 +144,9 @@
                         @endforeach
                     </tbody>
                 </table>
-                {{ $branches->links() }}
+                <div class="p-4">
+                    {{ $branches->links() }}
+                </div>
             </div>
         </div>
     </div>
