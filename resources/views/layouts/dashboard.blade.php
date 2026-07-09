@@ -42,6 +42,8 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+        @yield("css")
+
 
     </head>
     <body class="bg-gray-50 dark:bg-gray-800">
@@ -76,6 +78,16 @@
             <!-- <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script> -->
             <script src="{{ asset('/assets/libs/flowbite-admin/app.bundle.js') }}"></script>
         <!-- End Script -->
+
+
         
+        <!-- Start Using Own Links -->
+        <!-- jquery js1 -->
+        <!-- <script src="https://code.jquery.com/jquery-3.6.3.min.js" type="text/javascript"></script> -->
+        <script src="{{asset('./assets/libs/jquery-3.6.0/jquery-3.6.0.min.js')}}" type="text/javascript"></script>
+        
+        @yield("scripts")
+
+        <!-- End Using Own Links -->
     </body>
 </html>

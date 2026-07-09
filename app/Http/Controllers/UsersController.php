@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class UsersController extends Controller
         $branches = Branch::where('status_id',3)->orderBy('id','asc')->get();
         $departments = Department::where('status_id',3)->orderBy('id','asc')->get();
         $categories = Category::where('status_id',3)->orderBy('id','asc')->get();
+        $roles = Role::where('status_id',3)->orderBy('id','asc')->get();
 
         $users = $results->paginate(15);
         // dd($users);
@@ -26,7 +28,8 @@ class UsersController extends Controller
             "statuses",
             "branches",
             "departments",
-            "categories"
+            "categories",
+            "roles"
         ));
     }
 

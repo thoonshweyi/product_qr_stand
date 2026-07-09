@@ -84,6 +84,9 @@
                                 Name
                             </th>
                             <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
+                                Status
+                            </th>
+                            <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
                                 User
                             </th>
                              <th scope="col" class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400">
@@ -98,7 +101,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                        @foreach($roles as $idx=>$status)
+                        @foreach($roles as $idx=>$role)
                         <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                             <td class="w-4 p-4">
                                 <div class="flex items-center">
@@ -109,16 +112,33 @@
                             <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
                                 {{$idx + $roles->firstItem()}}
                             </td>
-                            <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
-                                <!-- <img class="w-10 h-10 rounded-full" src="/images/roles/{{-- .avatar --}}" alt="{{-- .name --}} avatar"> -->
+                            <td class="flex items-center p-4 mr-12 space-x-2 whitespace-nowrap">
+                                <img class="w-10 h-10 rounded-full" src="{{ asset($role->image) }}" alt="{{-- .name --}} avatar">
                                 <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    <div class="text-base font-semibold text-gray-900 dark:text-white">{{ $status->name }}</div>
+                                    <div class="text-base font-semibold text-gray-900 dark:text-white">{{ $role->name }}</div>
                                     <!-- <div class="text-sm font-normal text-gray-500 dark:text-gray-400">{{-- .email --}}</div> -->
                                 </div>
                             </td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $status->user->name }}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $status->user->created_at->format('Y-m-d h:i:s A') }}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $status->user->created_at->format('Y-m-d h:i:s A') }}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <label class="relative inline-flex cursor-pointer items-center">
+                                    <input
+                                        type="checkbox"
+                                        class="peer sr-only change-btn"
+                                        {{ $role->status_id === 3 ? "checked" : "" }}
+                                        data-id="{{ $role->id }}"
+                                    />
+
+                                    <div
+                                        class="h-5 w-9 rounded-full bg-gray-300 transition-colors
+                                            after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4
+                                            after:rounded-full after:bg-white after:transition-transform
+                                            peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
+                                    </div>
+                                </label>
+                            </td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $role->user->name }}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $role->user->created_at->format('Y-m-d h:i:s A') }}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $role->user->created_at->format('Y-m-d h:i:s A') }}</td>
                             <td class="p-4 space-x-2 whitespace-nowrap">
                                 <button type="button" data-modal-target="edit-role-modal" data-modal-toggle="edit-role-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>

@@ -290,9 +290,10 @@
                         <div class="col-span-6 sm:col-span-3">
                             <label for="role_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role <span class="text-red-700">*</span></label>
                             <select name="role_id" id="role_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
-                                <option value="Administrator">Administrator</option>
-                                <option value="Editor">Editor</option>
-                                <option value="Viewer">Viewer</option>
+                                <option value="" selected disabled>Choose a role</option>
+                                @foreach($roles as $role)
+                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
@@ -312,16 +313,16 @@
                             <input type="email" name="email" id="email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="example@company.com" required>
                         </div> -->
                        <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Branch <span class="text-red-700">*</span></label>
-                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <label for="branch_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Branch <span class="text-red-700">*</span></label>
+                            <select name="branch_id" id="branch_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Other Branches</label>
-                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" multiple>
+                            <label for="branch_ids" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Other Branches</label>
+                            <select name="branch_ids[]" id="branch_ids" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" multiple>
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
                                 @endforeach
@@ -329,8 +330,8 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department</label>
-                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <label for="department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department <span class="text-red-700">*</span></label>
+                            <select name="department_id[]" id="department_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                                 @foreach($departments as $department)
                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                                 @endforeach
@@ -338,8 +339,8 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categories</label>
-                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categories <span class="text-red-700">*</span></label>
+                            <select name="category_ids[]" id="category_ids" class="!w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
@@ -347,7 +348,7 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3s">
-                            <label for="employee_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
+                            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password <span class="text-red-700">*</span></label>
                             <input type="password" name="password" id="password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                         </div>
                        
@@ -387,6 +388,20 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section("css")
+     <link href="{{ asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
+@endsection
 
+@section("scripts")
+    <script src="{{ asset('assets/libs/select2/select2.min.js') }}"></script>
+
+    <script type="text/javascript">
+        // $('#branch_id').select2({
+        //     // width: '100%',
+        //     placeholder: 'Choose autorize person',
+        // });
+    </script>
+    
 @endsection
