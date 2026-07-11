@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="flex items-center ml-auto space-x-2 sm:space-x-3">
-                <button type="button" data-modal-target="add-user-modal" data-modal-toggle="add-user-modal" class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                <button type="button" id="createmodal-btn" data-modal-target="create-edit-modals" data-modal-toggle="create-edit-modals" class="inline-flex items-center justify-center w-1/2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                     <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
                     Add user
                 </button>
@@ -262,45 +262,46 @@
 </div>
 
 <!-- Add User Modal -->
-<div class="fixed left-0 right-0 z-50 !items-start justify-center hidden overflow-x-hidden overflow-y-auto top-4 md:inset-0 h-modal sm:h-full" id="add-user-modal">
+<div id="create-edit-modal" class="fixed left-0 right-0 z-50 !items-start justify-center hidden overflow-x-hidden overflow-y-auto top-4 md:inset-0 h-modal sm:h-full bg-black/50 modals">
     <div class="relative w-full h-full max-w-5xl px-4 md:h-auto">
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
             <!-- Modal header -->
             <div class="flex items-start justify-between p-5 border-b rounded-t dark:border-gray-700 border-gray-200">
-                <h3 class="text-xl font-semibold dark:text-white">
+                <h3 class="text-xl font-semibold dark:text-white modal-title">
                     Add new user
                 </h3>
-                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white" data-modal-toggle="add-user-modal">
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white close-modal-btn" data-modal-toggle="create-edit-modal">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
                 </button>
             </div>
             <!-- Modal body -->
             <div class="p-6 space-y-6">
-                <form action="#">
+                <form id="create-edit-form" action="{{ route('users.store') }}" method="POST">
+                    @csrf
                     <div class="grid grid-cols-6 gap-6">
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Full Name <span class="text-red-700">*</span></label>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Full Name <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text name_error"></span></label>
                             <input type="text" name="name" id="name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="employee_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Employee ID <span class="text-red-700">*</span></label>
+                            <label for="employee_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Employee ID <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text employee_id_error"></span></label>
                             <input type="text" name="employee_id" id="employee_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="role_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role <span class="text-red-700">*</span></label>
-                            <select name="role_id" id="role_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
-                                <option value="" selected disabled>Choose a role</option>
-                                @foreach($roles as $role)
-                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text status_id_error"></span></label>
+                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                                @foreach($statuses as $status)
+                                <option value="{{ $status->id }}">{{ $status->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-700">*</span></label>
-                            <select name="status_id" id="status_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
-                                @foreach($statuses as $status)
-                                <option value="{{ $status->id }}">{{ $status->name }}</option>
+                            <label for="role_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
+                            <select name="role_id" id="role_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="">
+                                <option value="" selected disabled>Choose a role</option>
+                                @foreach($roles as $role)
+                                <option value="{{ $role->id }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -313,7 +314,7 @@
                             <input type="email" name="email" id="email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="example@company.com" required>
                         </div> -->
                        <div class="col-span-6 sm:col-span-3">
-                            <label for="branch_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Branch <span class="text-red-700">*</span></label>
+                            <label for="branch_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Branch <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text branch_id_error"></span></label>
                             <select name="branch_id" id="branch_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
@@ -330,8 +331,8 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department <span class="text-red-700">*</span></label>
-                            <select name="department_id[]" id="department_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <label for="department_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Department <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text department_id_error"></span></label>
+                            <select name="department_id" id="department_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                                 @foreach($departments as $department)
                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
                                 @endforeach
@@ -339,8 +340,9 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3">
-                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categories <span class="text-red-700">*</span></label>
-                            <select name="category_ids[]" id="category_ids" class="!w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Catetory </label>
+                            <select name="category_ids[]" id="category_ids" class="!w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required multiple>
+                                <option value="" disabled>Choose a category</option>
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
@@ -348,7 +350,7 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3s">
-                            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password <span class="text-red-700">*</span></label>
+                            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text password_error"></span></label>
                             <input type="password" name="password" id="password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
                         </div>
                        
@@ -356,7 +358,7 @@
                 </div>
                 <!-- Modal footer -->
                 <div class="items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-700">
-                    <button class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" type="submit">Add user</button>
+                    <button id="create-edit-btn" type="button" class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" type="submit">Add user</button>
                 </div>
             </form>
         </div>
@@ -391,17 +393,190 @@
 @endsection
 
 @section("css")
-     <link href="{{ asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
+     <style>
+        
+     </style>
 @endsection
 
 @section("scripts")
-    <script src="{{ asset('assets/libs/select2/select2.min.js') }}"></script>
 
     <script type="text/javascript">
-        // $('#branch_id').select2({
-        //     // width: '100%',
-        //     placeholder: 'Choose autorize person',
-        // });
+        $('#branch_id').select2({
+            placeholder: 'Choose Branch',
+        });
+
+        $('#branch_ids').select2({
+            placeholder: 'Choose Other Branches',
+        });
+
+        $('#department_id').select2({
+            placeholder: 'Choose a Department',
+        });
+
+        $('#category_ids').select2({
+            placeholder: 'Choose a Category',
+        });
+
+
+        // Start Create-Edit User 
+
+        // start create
+        $("#createmodal-btn").click(function(){
+            console.log('Create')
+
+            // clear form data
+            $("#create-edit-form").trigger("reset");
+            
+            $("#create-edit-modal .modal-title").text("Create User");
+            $("#create-edit-btn").html("Add New User");
+            $("#create-edit-btn").val("action-create");
+
+            // $("#create-edit-modal").modal("show"); // toggle() can also used.
+            $("#create-edit-modal").removeClass("hidden").addClass("flex");
+        });
+        
+
+
+        function validateForm() {
+            const errors = {};
+
+            const name = $("#name").val().trim();
+            const employeeId = $("#employee_id").val();
+            const statusId = $("#status_id").val();
+            const branchId = $("#branch_id").val();
+            const departmentId = $("#department_id").val();
+            const password = $("#password").val().trim();
+
+            if (!name) {
+                errors.name = "Name is required.";
+            }
+
+            if (!employeeId) {
+                errors.employee_id = "Employee is required.";
+            }
+
+            if (!statusId) {
+                errors.status_id = "Status is required.";
+            }
+
+            if (!branchId) {
+                errors.branch_id = "Branch is required.";
+            }
+
+            if (!departmentId) {
+                errors.department_id = "Department is required.";
+            }
+
+            if (!password) {
+                errors.password = "Password is required.";
+            }
+
+            $(".error-text").text("");
+
+            $.each(errors, function (field, message) {
+                $("." + field + "_error").text(message);
+            });
+
+            return Object.keys(errors).length === 0;
+        }
+
+        $("#create-edit-btn").click(function(e){
+            e.preventDefault();
+            if(validateForm()){
+                let actiontype = $("#create-edit-btn").val();
+                console.log(actiontype);
+                $(this).html("Sending....");
+
+                if(actiontype === "action-create"){
+                        // Do Create
+                        $.ajax({
+                            url:"{{ route('users.store') }}",
+                            type:"POST",
+                            dataType: "json",
+                            data:$("#create-edit-form").serialize(),
+                            success:function(response){
+                                console.log(response);
+
+                                const data = response;
+                                if(data.success == true){
+                                    // console.log(this.data); // name=&price=&duration=&packageid=
+
+                                    // $("#create-edit-form")[0].reset();
+                                    $("#create-edit-form").trigger("reset");
+
+                                    //    $("#create-edit-modal").modal("hide"); // toggle
+                                    $("#create-edit-modal").addClass("hidden").removeClass("flex");
+
+                                    
+                                    $("#create-edit-btn").html("Save Change");
+
+                                //    fetchalldatas();
+
+                                    Swal.fire({
+                                        title: "Added!",
+                                        text: "Added Successfully!",
+                                        icon: "success"
+                                    });
+                                }else{
+                                    $("#create-edit-btn").html("Save Change");
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "User Save Error!!",
+                                        text: "Something went wrong while adding new user.",
+                                    });
+                                }
+                            },
+                            error:function(response){
+                                console.log("Error: ",response);
+                                $("#create-edit-btn").html("Save Change");
+
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'User Save Error',
+                                    text: 'There is an error in adding new user.!!',
+                                });
+                            }
+                        });
+                }else  if(actiontype === "action-edit"){
+                //      const getid = $("#packageid").val();
+                //      $.ajax({
+                //           url:`/packages/${getid}`,
+                //           type:"PUT",
+                //           dataType: "json",
+                //           data:$("#createform").serialize(),
+                //           success:function(response){
+                //                console.log(response);
+                //                // console.log(this.data); // name=&price=&duration=&packageid=
+
+                //                // $("#createform")[0].reset();
+                //                $("#createform").trigger("reset");
+
+                //                $("#createmodal").modal("hide"); // toggle
+                                
+                //                $("#create-btn").html("Save Change");
+
+                //                fetchalldatas();
+
+                //                Swal.fire({
+                //                     title: "Updated",
+                //                     text: "Update Successfully!",
+                //                     icon: "success"
+                //                });
+                //           },
+                //           error:function(response){
+                //                console.log("Error: ",response);
+                //                $("#create-btn").html("Save Change");
+                //           }
+                //      });
+                }
+            }
+
+        });
+        
+        // End Create-Edit User
+
+
+        
     </script>
     
 @endsection

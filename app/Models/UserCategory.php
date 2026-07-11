@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserBranch extends Model
+class UserCategory extends Model
 {
     use HasFactory;
-    protected $table = "user_branches";
+    protected $table = "user_categories";
     protected $primaryKey = "id";
-    protected $fillable = ['branch_id','user_id'];
+    protected $fillable = ['category_id','user_id'];
 }

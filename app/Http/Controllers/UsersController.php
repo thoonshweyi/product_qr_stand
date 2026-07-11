@@ -6,9 +6,13 @@ use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Department;
 use App\Models\Role;
+use App\Models\RoleUser;
 use App\Models\Status;
 use App\Models\User;
+use App\Models\UserBranch;
+use App\Models\UserCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -36,15 +40,55 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            "name"=>"required",
+            "employee_id"=>"required",
+            "status_id"=>"required",
+            "branch_id"=>"required",
+            "department_id"=>"required",
+            "password"=> "required"
+        ]);
+
+
+        // dd("hay");
+
+        $user = User::create([
+            'name' => $request['name'],
+            'email' => $request["email"],
+            'password' => Hash::make($request["password"]),
+            'employee_id' => $request["employee_id"],
+            'branch_id' => $request["branch_id"],
+            'status_id' => $request["status_id"],
+            'department_id' => $request["department_id"],
+        ]);
+
        
+        if(!empty($request["branch_ids"])){
+            foreach($request["branch_ids"] as $branch){
+                $branchdatas = [
+                    'user_id'=> $user["id"],
+                    'branch_id'=> $branch
+                ];
+                UserBranch::insert($branchdatas);
+            }
+        }
 
-        //    $roleuser = new RoleUser();
-        //    $roleuser->role_id = $request["role_id"];
-        //    $roleuser->user_id = $request["user_id"];
-        //    $roleuser->save();
+        if(!empty($request["category_ids"])){
+            foreach ($request["category_ids"] as $category_id) {
+                $user_category = new UserCategory();
+                $user_category->user_id = $user->id;
+                $user_category->category_id = $category_id;
+                $user_category->save();
+            }
+        }
+
+        $roleuser = new RoleUser();
+        $roleuser->role_id = $request["role_id"];
+        $roleuser->user_id = $user["id"];
+        $roleuser->save();
 
 
-       return redirect(route("roleusers.index"));
+        return $this->sendRespond($user,"New User created successfully");
     }
 
 }

@@ -40,10 +40,19 @@
             </script>
         <!-- End Header -->
 
+
+
+
+        <!-- Standard Practice: Import Library Files -->
+        <!-- fontawesome css1 -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        @yield("css")
+        <!-- select2 css1 js1 -->
+        <link href="{{ asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
 
+        <!-- custom css css1 -->
+        <link rel="stylesheet" href="{{ asset('/assets/dist/css/style.css') }}">
+        @yield("css")
 
     </head>
     <body class="bg-gray-50 dark:bg-gray-800">
@@ -80,14 +89,21 @@
         <!-- End Script -->
 
 
+
         
-        <!-- Start Using Own Links -->
+        <!-- Standard Practice: Import Library Files -->
         <!-- jquery js1 -->
-        <!-- <script src="https://code.jquery.com/jquery-3.6.3.min.js" type="text/javascript"></script> -->
         <script src="{{asset('./assets/libs/jquery-3.6.0/jquery-3.6.0.min.js')}}" type="text/javascript"></script>
         
+        <!-- select2 css1 js1 -->
+        <script src="{{ asset('assets/libs/select2/select2.min.js') }}"></script>
+
+        <!-- sweetalert2 js1 -->
+        <script src="{{ asset('assets/libs/sweetalert2/sweetalert2@11.js') }}" type="text/javascript"></script>
+
+        <!-- custom js js1 -->
+        <script src="{{ asset('assets/dist/js/app.js') }}" type="text/javascript"></script>
         @yield("scripts")
 
-        <!-- End Using Own Links -->
     </body>
 </html>
