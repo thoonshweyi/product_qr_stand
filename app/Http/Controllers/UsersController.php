@@ -25,8 +25,16 @@ class UsersController extends Controller
         $categories = Category::where('status_id',3)->orderBy('id','asc')->get();
         $roles = Role::where('status_id',3)->orderBy('id','asc')->get();
 
-        $users = $results->paginate(15);
+        $users = $results->with('branch')
+                ->with('department')
+                ->with('roles')
+                ->paginate(15);
         // dd($users);
+
+        if(request()->ajax()){
+            return $this->sendRespond($users,"Fetch Users Successfully!.");
+        }
+
         return view("users.index",compact(
             "users",
             "statuses",
@@ -90,5 +98,81 @@ class UsersController extends Controller
 
         return $this->sendRespond($user,"New User created successfully");
     }
+
+    public function show($id){
+        $user = User::with('branch')
+                ->with('department')
+                ->with('roles')
+                ->with('branches')
+                ->with('categories')
+                ->findOrFail($id);
+
+        return $this->sendRespond($user,"Fetch Single User Successfully!.");
+    }
+
+    public function update(Request $request, $id){
+        $request->validate([
+            "name"=>"required",
+            "employee_id"=>"required",
+            "status_id"=>"required",
+            "branch_id"=>"required",
+            "department_id"=>"required",
+            // "password"=> "required"
+        ]);
+
+        $user = User::findOrFail($id);
+
+        $updateData = $request->except('password');
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+        $user->update($updateData);
+
+
+        if(!empty($request["branch_ids"])){
+            UserBranch::where('user_id',$user->id)->delete();
+
+            foreach($request["branch_ids"] as $branch){
+                $branchdatas = [
+                    'user_id'=> $user["id"],
+                    'branch_id'=> $branch
+                ];
+                UserBranch::insert($branchdatas);
+            }
+        }
+
+        if(!empty($request["category_ids"])){
+            $old_data = UserCategory::where('user_id', $user->id)->get();
+            foreach ($old_data as $data) {
+                $data->delete();
+            }
+
+            foreach ($request["category_ids"] as $category_id) {
+                $user_category = new UserCategory();
+                $user_category->user_id = $user->id;
+                $user_category->category_id = $category_id;
+                $user_category->save();
+            }
+        }
+
+        $user->roles()->sync($request->role_id ?? []);
+
+        return $this->sendRespond($user,"User Updated successfully");
+
+    }
+
+    public function destroy(string $id){
+        $user = User::findOrFail($id);
+
+        UserBranch::where('user_id', $user->id)->delete();
+
+        UserCategory::where('user_id',$user->id)->delete();
+
+        $user->roles()->detach();
+
+        $user->delete();
+
+        return $this->sendRespond($id,"User Deleted successfully");
+    }   
 
 }

@@ -68,7 +68,7 @@
     <div class="overflow-x-auto">
         <div class="inline-block min-w-full align-middle">
             <div class="overflow-hidden shadow">
-                <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+                <table id="userstable" class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
                     <thead class="bg-gray-100 dark:bg-gray-700">
                         <tr>
                             <th scope="col" class="p-4">
@@ -104,85 +104,14 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                        <!-- {{--< users.inline >--}}
-                        {{--- range (index $.Site.Data "users") --}}
-                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <td class="w-4 p-4">
-                                <div class="flex items-center">
-                                    <input id="checkbox-{{-- .id --}}" aria-describedby="checkbox-1" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
-                                    <label for="checkbox-{{-- .id --}}" class="sr-only">checkbox</label>
-                                </div>
-                            </td>
-                            <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
-                                <img class="w-10 h-10 rounded-full" src="/images/users/{{-- .avatar --}}" alt="{{-- .name --}} avatar">
-                                <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    <div class="text-base font-semibold text-gray-900 dark:text-white">{{-- .name --}}</div>
-                                    <div class="text-sm font-normal text-gray-500 dark:text-gray-400">{{-- .email --}}</div>
-                                </div>
-                            </td>
-                            <td class="max-w-sm p-4 overflow-hidden text-base font-normal text-gray-500 truncate xl:max-w-xs dark:text-gray-400">{{-- .biography --}}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{-- .position --}}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{-- .country --}}</td>
-                            <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                <div class="flex items-center">
-                                    {{-- if eq .status "Active" --}} <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div> {{-- else --}} <div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div> {{-- end --}} {{-- .status --}}
-                                </div>
-                            </td>
-                            <td class="p-4 space-x-2 whitespace-nowrap">
-                                <button type="button" data-modal-target="edit-user-modal" data-modal-toggle="edit-user-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-                                    Edit user
-                                </button>
-                                <button type="button" data-modal-target="delete-user-modal" data-modal-toggle="delete-user-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    Delete user
-                                </button>
-                            </td>
-                        </tr>
-                        {{-- end ---}}
-                        {{--< /users.inline >--}} -->
-
-                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <td class="w-4 p-4">
-                                <div class="flex items-center">
-                                    <input id="checkbox-{{-- .id --}}" aria-describedby="checkbox-1" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
-                                    <label for="checkbox-{{-- .id --}}" class="sr-only">checkbox</label>
-                                </div>
-                            </td>
-                            <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
-                                <img class="w-10 h-10 rounded-full" src="/images/users/{{-- .avatar --}}" alt="{{-- .name --}} avatar">
-                                <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    <div class="text-base font-semibold text-gray-900 dark:text-white">{{-- .name --}}</div>
-                                    <div class="text-sm font-normal text-gray-500 dark:text-gray-400">{{-- .email --}}</div>
-                                </div>
-                            </td>
-                            <td class="max-w-sm p-4 overflow-hidden text-base font-normal text-gray-500 truncate xl:max-w-xs dark:text-gray-400">{{-- .biography --}}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{-- .position --}}</td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{-- .country --}}</td>
-                            <td class="p-4 text-base font-normal text-gray-900 whitespace-nowrap dark:text-white">
-                                <div class="flex items-center">
-                                    {{-- if eq .status "Active" --}} <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div> {{-- else --}} <div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div> {{-- end --}} {{-- .status --}}
-                                </div>
-                            </td>
-                            <td class="p-4 space-x-2 whitespace-nowrap">
-                                <button type="button" data-modal-target="edit-user-modal" data-modal-toggle="edit-user-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-                                    Edit user
-                                </button>
-                                <button type="button" data-modal-target="delete-user-modal" data-modal-toggle="delete-user-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900">
-                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                    Delete user
-                                </button>
-                            </td>
-                        </tr>
-                        
+  
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-<div class="sticky bottom-0 right-0 items-center w-full p-4 bg-white border-t border-gray-200 sm:flex sm:justify-between dark:bg-gray-800 dark:border-gray-700">
+<!-- <div class="sticky bottom-0 right-0 items-center w-full p-4 bg-white border-t border-gray-200 sm:flex sm:justify-between dark:bg-gray-800 dark:border-gray-700">
     <div class="flex items-center mb-4 sm:mb-0">
         <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
@@ -202,7 +131,7 @@
             <svg class="w-5 h-5 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
         </a>
     </div>
-</div>
+</div> -->
 
 <!-- Edit User Modal -->
 <div class="fixed left-0 right-0 z-50 items-center justify-center hidden overflow-x-hidden overflow-y-auto top-4 md:inset-0 h-modal sm:h-full" id="edit-user-modal">
@@ -282,11 +211,11 @@
                     <div class="grid grid-cols-6 gap-6">
                         <div class="col-span-6 sm:col-span-3">
                             <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Full Name <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text name_error"></span></label>
-                            <input type="text" name="name" id="name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <input type="text" name="name" id="name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter Full Name" required>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
                             <label for="employee_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Employee ID <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text employee_id_error"></span></label>
-                            <input type="text" name="employee_id" id="employee_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required>
+                            <input type="text" name="employee_id" id="employee_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Enter Employee Code" required>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
                             <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-700">*</span> <span class="text-red-600 text-sm error-text status_id_error"></span></label>
@@ -342,7 +271,6 @@
                         <div class="col-span-6 sm:col-span-3">
                             <label for="status_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Catetory </label>
                             <select name="category_ids[]" id="category_ids" class="!w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="" required multiple>
-                                <option value="" disabled>Choose a category</option>
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
@@ -357,6 +285,7 @@
                     </div> 
                 </div>
                 <!-- Modal footer -->
+                <input type="hidden" name="userid" id="userid"/>
                 <div class="items-center p-6 border-t border-gray-200 rounded-b dark:border-gray-700">
                     <button id="create-edit-btn" type="button" class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" type="submit">Add user</button>
                 </div>
@@ -418,6 +347,78 @@
         });
 
 
+
+         // Start Passing Header Token
+        // $.ajaxSetup({
+        //     headers:{
+        //             "X-CSRF-TOKEN": $("meta[name='csrf-token']").attr("content")
+        //     }
+        // });
+        // End Passing Header Token
+
+        // Start Fetch All Datas 
+        async function fetchalldatas(query=""){
+            await $.ajax({
+                url:"{{'/users'}}",
+                method:"GET",
+                data:{"query":query},
+                dataType:"json",
+                success:function(response){
+                    console.log(response); // {status: 'scuccess', data: Array(2)}
+                    
+                    // $(".loading").hide();
+                    $("#userstable tbody").empty();
+                    
+                    const datas = response.data.data;
+                    // console.log(datas);
+                    
+                    let html;
+                    datas.forEach(function(data,idx){
+                        // console.log(data);
+                        html += `
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <td class="w-4 p-4">
+                                <div class="flex items-center">
+                                    <input id="checkbox-{{-- .id --}}" aria-describedby="checkbox-1" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="checkbox-{{-- .id --}}" class="sr-only">checkbox</label>
+                                </div>
+                            </td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${++idx}</td>
+                            <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
+                                <!-- <img class="w-10 h-10 rounded-full" src="/images/users/{{-- .avatar --}}" alt="{{-- .name --}} avatar"> -->
+                                <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                    <div class="text-base font-semibold text-gray-900 dark:text-white">${ data.name }</div>
+                                    <div class="text-sm font-normal text-gray-500 dark:text-gray-400">{{-- .email --}}</div>
+                                </div>
+                            </td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${data.employee_id ?? ''}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${data?.branch?.branch_name ?? ''}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${data?.department?.name ?? ''}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${data?.roles?.map((role)=>role.name).join(',') ?? ''}</td>
+                            <td class="p-4 space-x-2 whitespace-nowrap">
+                                <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 edit-btns" data-id="${data.id}">
+                                    <svg class="w-4 h-4 mr-2s" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
+                                </button>
+                                <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900 delete-btns" data-id="${data.id}" data-idx="${idx}"> 
+                                    <svg class="w-4 h-4 mr-2s" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                </button>
+                            </td>
+                        </tr>
+
+                        `;
+
+                    });
+
+                    // // $("#userstable tbody").html(html);
+                    $("#userstable tbody").prepend(html);
+                }
+            });
+        }
+        fetchalldatas();
+        // End Fetch All Datas
+
+
+
         // Start Create-Edit User 
 
         // start create
@@ -425,7 +426,7 @@
             console.log('Create')
 
             // clear form data
-            $("#create-edit-form").trigger("reset");
+            clearFormData();
             
             $("#create-edit-modal .modal-title").text("Create User");
             $("#create-edit-btn").html("Add New User");
@@ -434,10 +435,45 @@
             // $("#create-edit-modal").modal("show"); // toggle() can also used.
             $("#create-edit-modal").removeClass("hidden").addClass("flex");
         });
+        function clearFormData(){
+            $("#create-edit-form").trigger("reset");
+            $("#create-edit-form").find("select").val(null).trigger("change")
+            $("#status_id").val(1);
+        }
+
+        // start edit
+        $(document).on("click",".edit-btns",function(){
+            const getid = $(this).data("id");
+            console.log(getid);
+
+            $.get(`users/${getid}/`,function(response){
+                console.log(response); // {id: 9, name: 'myanmar', slug: 'myanmar', status_id: 3, user_id: 1, …}
+        
+                $("#create-edit-modal .modal-title").text("Edit User");
+                $("#create-edit-btn").text("Update User");
+                $("#create-edit-btn").val("action-edit");
+
+                $("#create-edit-modal").removeClass("hidden").addClass("flex");
+                
+                $("#userid").val(response.data.id);
+                $("#name").val(response.data.name);
+                $("#employee_id").val(response.data.employee_id);
+                $("#status_id").val(response.data.status_id);
+                $("#branch_id").val(response.data.branch_id).trigger("change");
+                $("#department_id").val(response.data.department_id).trigger("change");
+    
+                const branchIds = response.data.branches.map(branch => branch.id);
+                const categoryIds = response.data.categories.map(category => category.id);
+
+                $("#role_id").val(response.data?.roles?.[0]?.id);
+                $("#branch_ids").val(branchIds).trigger("change");
+                $("#category_ids").val(categoryIds).trigger("change");
+            });
+        });
         
 
 
-        function validateForm() {
+        function validateForm(actiontype) {
             const errors = {};
 
             const name = $("#name").val().trim();
@@ -467,8 +503,10 @@
                 errors.department_id = "Department is required.";
             }
 
+            if(actiontype === "action-create"){
             if (!password) {
                 errors.password = "Password is required.";
+            }
             }
 
             $(".error-text").text("");
@@ -482,9 +520,10 @@
 
         $("#create-edit-btn").click(function(e){
             e.preventDefault();
-            if(validateForm()){
-                let actiontype = $("#create-edit-btn").val();
-                console.log(actiontype);
+            let actiontype = $("#create-edit-btn").val();
+            console.log(actiontype);
+
+            if(validateForm(actiontype)){
                 $(this).html("Sending....");
 
                 if(actiontype === "action-create"){
@@ -501,8 +540,7 @@
                                 if(data.success == true){
                                     // console.log(this.data); // name=&price=&duration=&packageid=
 
-                                    // $("#create-edit-form")[0].reset();
-                                    $("#create-edit-form").trigger("reset");
+                                    clearFormData();
 
                                     //    $("#create-edit-modal").modal("hide"); // toggle
                                     $("#create-edit-modal").addClass("hidden").removeClass("flex");
@@ -510,7 +548,7 @@
                                     
                                     $("#create-edit-btn").html("Save Change");
 
-                                //    fetchalldatas();
+                                    fetchalldatas();
 
                                     Swal.fire({
                                         title: "Added!",
@@ -538,36 +576,36 @@
                             }
                         });
                 }else  if(actiontype === "action-edit"){
-                //      const getid = $("#packageid").val();
-                //      $.ajax({
-                //           url:`/packages/${getid}`,
-                //           type:"PUT",
-                //           dataType: "json",
-                //           data:$("#createform").serialize(),
-                //           success:function(response){
-                //                console.log(response);
-                //                // console.log(this.data); // name=&price=&duration=&packageid=
+                    console.log('Edit');
+                     const getid = $("#userid").val();
+                     $.ajax({
+                          url:`/users/${getid}`,
+                          type:"PUT",
+                          dataType: "json",
+                          data:$("#create-edit-form").serialize(),
+                          success:function(response){
+                                console.log(response);
+                                // console.log(this.data); // name=&price=&duration=&packageid=
 
-                //                // $("#createform")[0].reset();
-                //                $("#createform").trigger("reset");
+                                clearFormData();
 
-                //                $("#createmodal").modal("hide"); // toggle
+                                $("#create-edit-modal").addClass("hidden").removeClass("flex");
                                 
-                //                $("#create-btn").html("Save Change");
+                                $("#create-edit-btn").html("Save Change");
 
-                //                fetchalldatas();
+                                fetchalldatas();
 
-                //                Swal.fire({
-                //                     title: "Updated",
-                //                     text: "Update Successfully!",
-                //                     icon: "success"
-                //                });
-                //           },
-                //           error:function(response){
-                //                console.log("Error: ",response);
-                //                $("#create-btn").html("Save Change");
-                //           }
-                //      });
+                                Swal.fire({
+                                        title: "Updated",
+                                        text: "Update Successfully!",
+                                        icon: "success"
+                                });
+                          },
+                          error:function(response){
+                               console.log("Error: ",response);
+                               $("#create-btn").html("Save Change");
+                          }
+                     });
                 }
             }
 
@@ -575,6 +613,55 @@
         
         // End Create-Edit User
 
+
+
+        // Start Single Delete
+            $(document).on("click",".delete-btns",function(){
+                
+                const getid = $(this).data("id");
+                const getidx = $(this).data("idx");
+            
+                // console.log(getid);
+                
+                Swal.fire({
+                        title: "Are you sure?",
+                        text: `You won't be able to revert this id ${getidx}.`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                        if (result.isConfirmed) {
+                            // data remove 
+                            $.ajax({
+                                url:`/users/${getid}`,
+                                type:"DELETE",
+                                dataType:"json",
+                                data:{_token:"{{csrf_token()}}"},
+                                success:function(response){
+                                    console.log(response);   // 1
+                                    
+                                    if(response){
+                                            fetchalldatas();
+                                            
+                                            Swal.fire({
+                                                title: "Deleted!",
+                                                text: "Your file has been deleted.",
+                                                icon: "success"
+                                            });
+                                    }
+                                },
+                                error:function(response){
+                                    console.log("Error: ",response)
+                                }
+                            });
+                            
+                        }
+                });   
+            });
+
+        // End Single Delete
 
         
     </script>

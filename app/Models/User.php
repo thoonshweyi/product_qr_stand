@@ -59,4 +59,27 @@ class User extends Authenticatable
             ->take(2)
             ->implode('');
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id')->withDefault();
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id')->withDefault();
+    }
+
+    public function roles(){
+        // return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class,"role_users");
+    }
+
+    public function branches(){
+        return $this->belongsToMany(Branch::class,"user_branches");
+    }
+
+    public function categories(){
+        return $this->belongsToMany(Category::class,"user_categories");
+    }
 }
