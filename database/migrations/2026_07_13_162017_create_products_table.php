@@ -1,0 +1,44 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('product_code');
+            
+            // Common Attributes // တစ်ခုနဲ့တစ်ခုမတူညီတဲ့ product တွေအတွက် table ခွဲသိမ်းမယ်။
+            $table->string('brand');
+            $table->string('name');
+            $table->string('model');
+            $table->string('country_of_origin');
+            $table->text('website_url');
+            $table->longText('description'); 
+
+            // Standard Columns
+            $table->unsignedBigInteger("status_id")->nullable();
+            $table->unsignedBigInteger("user_id")->nullable()->default(1);
+
+            $table->string('product_name')->nullable();
+            $table->string('unit')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('products');
+    }
+};
