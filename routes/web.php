@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardsController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\StatusesController;
@@ -41,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::resource("statuses",StatusesController::class);
 
     Route::resource("roles",RolesController::class);
+
+    Route::resource("products",ProductController::class);
+
 });
 
 require __DIR__.'/auth.php';
