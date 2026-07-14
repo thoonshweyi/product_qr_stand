@@ -6,7 +6,7 @@
 
 @section('content')
 <div
-    x-data="productCreateForm(@js($sampleCategories))"
+    x-data="productCreateForm(@js($sampleCategories), @js($sampleAttributes))"
     class="min-h-screen"
 >
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
@@ -106,7 +106,7 @@
 
                         <div>
                             <label for="category" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-600">*</span></label>
-                            <select x-model="selectedCategory" @change="changeCategory" name="category" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select x-model="form.category" name="category" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 @foreach ($sampleCategories as $key => $category)
                                     <option value="{{ $key }}">{{ $category['group'] }} / {{ $category['name'] }}</option>
                                 @endforeach
@@ -128,11 +128,8 @@
                 <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-700 sm:px-6">
                         <div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product specifications</h2>
-                                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300" x-text="currentCategory.group + ' / ' + currentCategory.name"></span>
-                            </div>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Specification fields adapt to the selected category.</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product attributes</h2>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose an existing attribute or type a new name to create it instantly.</p>
                         </div>
                         <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">2</span>
                     </div>
@@ -142,29 +139,59 @@
                             <svg class="mr-3 mt-0.5 h-5 w-5 flex-none" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-3a1 1 0 11-2 0 1 1 0 012 0zm-2 3a1 1 0 000 2h.01v2.01a1 1 0 102 0V11a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                             </svg>
-                            Units are stored separately so values remain searchable and comparable.
+                            Enter the unit together with the value, for example <span class="ml-1 font-semibold">370W</span>, <span class="ml-1 font-semibold">35 L/min</span> or <span class="ml-1 font-semibold">7.5 mm</span>.
                         </div>
 
-                        <div class="grid gap-5 sm:grid-cols-2">
-                            <template x-for="(attribute, index) in attributes" :key="selectedCategory + '-' + attribute.key">
-                                <div>
-                                    <label :for="'attribute-' + attribute.key" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white" x-text="attribute.label"></label>
-                                    <div class="flex">
-                                        <template x-if="attribute.type !== 'select'">
-                                            <input x-model="attribute.value" :type="attribute.type" :name="'attributes[' + attribute.key + ']'" :id="'attribute-' + attribute.key" :placeholder="attribute.placeholder || ''" step="any" class="block min-w-0 flex-1 rounded-l-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:z-10 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" :class="attribute.unit ? 'rounded-r-none' : 'rounded-r-lg'">
-                                        </template>
-                                        <template x-if="attribute.type === 'select'">
-                                            <select x-model="attribute.value" :name="'attributes[' + attribute.key + ']'" :id="'attribute-' + attribute.key" class="block min-w-0 flex-1 rounded-l-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:z-10 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" :class="attribute.unit ? 'rounded-r-none' : 'rounded-r-lg'">
-                                                <template x-for="option in attribute.options" :key="option">
-                                                    <option :value="option" x-text="option"></option>
-                                                </template>
-                                            </select>
-                                        </template>
-                                        <span x-show="attribute.unit" class="inline-flex items-center rounded-r-lg border border-l-0 border-gray-300 bg-gray-100 px-3 text-sm font-medium text-gray-600 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-200" x-text="attribute.unit"></span>
+                        <datalist id="available-attributes">
+                            <template x-for="attributeName in availableAttributes" :key="attributeName">
+                                <option :value="attributeName"></option>
+                            </template>
+                        </datalist>
+
+                        <div class="space-y-3">
+                            <div class="hidden grid-cols-12 gap-3 px-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 sm:grid">
+                                <span class="col-span-5">Attribute name</span>
+                                <span class="col-span-6">Value</span>
+                            </div>
+
+                            <template x-for="(attribute, index) in attributeRows" :key="attribute.id">
+                                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30">
+                                    <div class="grid gap-3 sm:grid-cols-12 sm:items-start">
+                                        <div class="sm:col-span-5">
+                                            <label :for="'attribute-name-' + attribute.id" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300 sm:sr-only">Attribute name</label>
+                                            <input x-model="attribute.name" @blur="registerAttribute(attribute)" list="available-attributes" type="text" :name="'attributes[' + index + '][name]'" :id="'attribute-name-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. Power">
+                                            <div class="mt-1.5 min-h-5">
+                                                <span x-show="attribute.name && isExistingAttribute(attribute.name)" class="inline-flex items-center text-xs font-medium text-green-700 dark:text-green-400">
+                                                    <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    Existing attribute
+                                                </span>
+                                                <button x-show="attribute.name && !isExistingAttribute(attribute.name)" type="button" @click="registerAttribute(attribute)" class="inline-flex items-center text-left text-xs font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
+                                                    <svg class="mr-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    Create “<span x-text="attribute.name"></span>”
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="sm:col-span-6">
+                                            <label :for="'attribute-value-' + attribute.id" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300 sm:sr-only">Value</label>
+                                            <input x-model="attribute.value" type="text" :name="'attributes[' + index + '][value]'" :id="'attribute-value-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
+                                            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Include the unit in this value when needed.</p>
+                                        </div>
+
+                                        <div class="flex justify-end sm:col-span-1">
+                                            <button type="button" @click="removeAttribute(attribute.id)" :disabled="attributeRows.length === 1" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove attribute">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </template>
                         </div>
+
+                        <button type="button" @click="addAttribute" class="mt-4 inline-flex items-center rounded-lg border border-primary-300 bg-primary-50 px-4 py-2.5 text-sm font-semibold text-primary-700 hover:bg-primary-100 focus:outline-none focus:ring-4 focus:ring-primary-100 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/40 dark:focus:ring-primary-900">
+                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Add another attribute
+                        </button>
                     </div>
                 </section>
 
@@ -186,21 +213,15 @@
                             <textarea x-model="form.description" name="description" id="description" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Describe benefits, usage and care instructions"></textarea>
                         </div>
 
-                        <div class="grid gap-5 sm:grid-cols-2">
-                            <div>
-                                <label for="batch_no" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Batch number</label>
-                                <input x-model="form.batch" type="text" name="batch_no" id="batch_no" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. B1">
-                            </div>
-                            <div>
-                                <label for="website_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Website / QR link</label>
-                                <div class="relative">
-                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m3-3 2-2a4 4 0 015.656 5.656l-1 1"/>
-                                        </svg>
-                                    </div>
-                                    <input x-model="form.websiteUrl" type="url" name="website_url" id="website_url" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="https://example.com/product/...">
+                        <div>
+                            <label for="website_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Website / QR link</label>
+                            <div class="relative">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m3-3 2-2a4 4 0 015.656 5.656l-1 1"/>
+                                    </svg>
                                 </div>
+                                <input x-model="form.websiteUrl" type="url" name="website_url" id="website_url" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="https://example.com/product/...">
                             </div>
                         </div>
                     </div>
@@ -218,20 +239,40 @@
                     </div>
 
                     <div class="p-5">
-                        <label for="product_image" class="group relative flex aspect-[16/9] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
-                            <img x-show="imagePreview" :src="imagePreview" class="h-full w-full object-cover" alt="Product image preview">
-                            <div x-show="!imagePreview" class="p-5 text-center">
-                                <span class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-400 shadow-sm dark:bg-gray-800">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </span>
-                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Upload product image</p>
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG or JPG · up to 2 MB</p>
+                        <div class="mb-3 flex items-center justify-between gap-3">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product images</h3>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG · up to 2 MB</span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="col-span-2">
+                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image</p>
+                                <label for="main_image" class="group relative flex aspect-[16/10] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
+                                    <img x-show="mainImagePreview" :src="mainImagePreview" class="h-full w-full object-cover" alt="Main product image preview">
+                                    <div x-show="!mainImagePreview" class="p-4 text-center">
+                                        <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-400 shadow-sm dark:bg-gray-800">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        </span>
+                                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Upload main image</p>
+                                    </div>
+                                    <span x-show="mainImagePreview" class="absolute bottom-2 right-2 rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input @change="previewImage($event, 'main')" id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" class="hidden">
+                                </label>
                             </div>
-                            <span x-show="imagePreview" class="absolute bottom-3 right-3 rounded-lg bg-gray-900/75 px-3 py-1.5 text-xs font-medium text-white">Change image</span>
-                            <input @change="previewImage" id="product_image" name="image" type="file" accept="image/png,image/jpeg" class="hidden">
-                        </label>
+
+                            <div>
+                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Thumbnail</p>
+                                <label for="thumbnail_image" class="group relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
+                                    <img x-show="thumbnailImagePreview" :src="thumbnailImagePreview" class="h-full w-full object-cover" alt="Thumbnail image preview">
+                                    <div x-show="!thumbnailImagePreview" class="p-2 text-center">
+                                        <svg class="mx-auto mb-1.5 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+                                        <p class="text-[11px] font-semibold leading-4 text-gray-700 dark:text-gray-200">Add thumbnail</p>
+                                    </div>
+                                    <span x-show="thumbnailImagePreview" class="absolute bottom-2 right-2 rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input @change="previewImage($event, 'thumbnail')" id="thumbnail_image" name="thumbnail_image" type="file" accept="image/png,image/jpeg" class="hidden">
+                                </label>
+                            </div>
+                        </div>
 
                         <div class="mt-5">
                             <p class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400" x-text="currentCategory.group + ' · ' + currentCategory.name"></p>
@@ -244,10 +285,10 @@
                         </div>
 
                         <dl class="mt-5 divide-y divide-gray-100 rounded-lg border border-gray-200 px-4 dark:divide-gray-700 dark:border-gray-700">
-                            <template x-for="attribute in attributes.slice(0, 4)" :key="'preview-' + attribute.key">
+                            <template x-for="attribute in populatedAttributes.slice(0, 4)" :key="'preview-' + attribute.id">
                                 <div class="flex items-center justify-between gap-4 py-2.5 text-sm">
-                                    <dt class="text-gray-500 dark:text-gray-400" x-text="attribute.label"></dt>
-                                    <dd class="text-right font-medium text-gray-900 dark:text-white"><span x-text="attribute.value || '—'"></span><span x-show="attribute.value && attribute.unit" class="ml-1 text-gray-500 dark:text-gray-400" x-text="attribute.unit"></span></dd>
+                                    <dt class="text-gray-500 dark:text-gray-400" x-text="attribute.name"></dt>
+                                    <dd class="text-right font-medium text-gray-900 dark:text-white" x-text="attribute.value || '—'"></dd>
                                 </div>
                             </template>
                         </dl>
@@ -298,12 +339,18 @@
 
 @section('scripts')
 <script>
-    window.productCreateForm = function (categories) {
+    window.productCreateForm = function (categories, sampleAttributes) {
         return {
             categories,
-            selectedCategory: 'water-pump',
-            attributes: [],
-            imagePreview: '',
+            availableAttributes: [...sampleAttributes],
+            attributeRows: [
+                { id: 1, name: 'Power', value: '370W (0.5HP)' },
+                { id: 2, name: 'Maximum Head', value: '45 m' },
+                { id: 3, name: 'Flow Rate', value: '35 L/min' }
+            ],
+            nextAttributeId: 4,
+            mainImagePreview: '',
+            thumbnailImagePreview: '',
             notification: '',
             notificationTimer: null,
             form: {
@@ -313,30 +360,56 @@
                 model: 'ADGP-370B',
                 country: 'China',
                 status: 'Active',
-                batch: 'B1',
+                category: 'water-pump',
                 websiteUrl: 'https://pro1globalhomecenter.com/product/2000000602110',
                 description: 'ရေအားကောင်းစေရန် အသုံးပြုနိုင်ပါသည်။ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းဖြစ်ပြီး အိမ်သုံးရေတင်စနစ်များအတွက် သင့်လျော်ပါသည်။'
             },
             get currentCategory() {
-                return this.categories[this.selectedCategory];
+                return this.categories[this.form.category];
             },
-            init() {
-                this.loadAttributes();
+            get populatedAttributes() {
+                return this.attributeRows.filter((attribute) => attribute.name.trim() || attribute.value.trim());
             },
-            changeCategory() {
-                this.loadAttributes();
+            normalizeAttributeName(name) {
+                return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
             },
-            loadAttributes() {
-                this.attributes = JSON.parse(JSON.stringify(this.currentCategory.attributes));
+            isExistingAttribute(name) {
+                const normalizedName = this.normalizeAttributeName(name);
+                return this.availableAttributes.some((item) => this.normalizeAttributeName(item) === normalizedName);
             },
-            previewImage(event) {
+            registerAttribute(attribute) {
+                const name = attribute.name.trim().replace(/\s+/g, ' ');
+                if (!name) return;
+
+                if (!this.isExistingAttribute(name)) {
+                    this.availableAttributes.push(name);
+                    attribute.name = name;
+                    this.showDemoMessage(`“${name}” was added to the attribute list.`);
+                }
+            },
+            addAttribute() {
+                this.attributeRows.push({ id: this.nextAttributeId++, name: '', value: '' });
+                this.$nextTick(() => {
+                    const inputs = document.querySelectorAll('[id^="attribute-name-"]');
+                    inputs[inputs.length - 1]?.focus();
+                });
+            },
+            removeAttribute(id) {
+                if (this.attributeRows.length === 1) return;
+                this.attributeRows = this.attributeRows.filter((attribute) => attribute.id !== id);
+            },
+            previewImage(event, type) {
                 const file = event.target.files && event.target.files[0];
                 if (!file) {
-                    this.imagePreview = '';
+                    if (type === 'main') this.mainImagePreview = '';
+                    if (type === 'thumbnail') this.thumbnailImagePreview = '';
                     return;
                 }
                 const reader = new FileReader();
-                reader.onload = (loadEvent) => this.imagePreview = loadEvent.target.result;
+                reader.onload = (loadEvent) => {
+                    if (type === 'main') this.mainImagePreview = loadEvent.target.result;
+                    if (type === 'thumbnail') this.thumbnailImagePreview = loadEvent.target.result;
+                };
                 reader.readAsDataURL(file);
             },
             showDemoMessage(message) {
