@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('product_code');
             
-            // Common Attributes // တစ်ခုနဲ့တစ်ခုမတူညီတဲ့ product တွေအတွက် table ခွဲသိမ်းမယ်။
+            // Common Attributes // တစ်ခုနဲ့တစ်ခု properties မတူညီတဲ့ product တွေအတွက် table ခွဲသိမ်းမယ်။
             $table->string('brand');
             $table->string('name');
             $table->string('model');
