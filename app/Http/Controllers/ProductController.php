@@ -69,6 +69,27 @@ class ProductController extends Controller
         $sampleBrands = ['IM Dayuan', 'Cotto', 'DECO', 'Ispa', 'TOTO', 'Zhangshi'];
         $sampleStatuses = ['Draft', 'Active'];
 
+
+        // Start Store Attribute
+        // $normalizedName = Str::slug($attributeName);
+
+        // $attribute = Attribute::firstOrCreate(
+        //     ['normalized_name' => $normalizedName],
+        //     [
+        //         'name' => trim($attributeName),
+        //         'created_by' => auth()->id(),
+        //     ]
+        // );
+
+        // $product->attributeValues()->updateOrCreate(
+        //     ['attribute_id' => $attribute->id],
+        //     [
+        //         'value' => $attributeValue,
+        //         'sort_order' => $index,
+        //     ]
+        // );
+        // End Store Attribute
+
         return view('products.create', compact('sampleCategories', 'sampleBrands', 'sampleStatuses'));
     }
 
