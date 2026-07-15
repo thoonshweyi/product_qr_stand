@@ -200,12 +200,16 @@
                             <template x-for="(attribute, index) in attributeRows" :key="attribute.id">
                                 <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center">
                                     <div class="sm:col-span-5">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="attribute.name"></p>
-                                        <input type="hidden" :name="'attributes[' + index + '][name]'" :value="attribute.name">
+                                        <label :for="'selected-attribute-name-' + attribute.id" class="sr-only">Attribute name</label>
+                                        <select x-model="attribute.name" @change="attributeError = ''" :name="'attributes[' + index + '][name]'" :id="'selected-attribute-name-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <template x-for="attributeName in availableAttributes" :key="'row-' + attribute.id + '-' + attributeName">
+                                                <option :value="attributeName" :disabled="isAttributeSelectedExcept(attributeName, attribute.id)" x-text="attributeName"></option>
+                                            </template>
+                                        </select>
                                     </div>
                                     <div class="sm:col-span-6">
-                                        <p class="text-sm text-gray-700 dark:text-gray-300" x-text="attribute.value || '-'"></p>
-                                        <input type="hidden" :name="'attributes[' + index + '][value]'" :value="attribute.value">
+                                        <label :for="'selected-attribute-value-' + attribute.id" class="sr-only">Attribute value</label>
+                                        <input x-model="attribute.value" type="text" :name="'attributes[' + index + '][value]'" :id="'selected-attribute-value-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
                                     </div>
                                     <div class="flex justify-end sm:col-span-1">
                                         <button type="button" @click="removeAttribute(attribute.id)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove attribute">
@@ -308,7 +312,10 @@
                         </div>
 
                         <dl class="mt-5 divide-y divide-gray-100 rounded-lg border border-gray-200 px-4 dark:divide-gray-700 dark:border-gray-700">
-                            <template x-for="attribute in populatedAttributes.slice(0, 4)" :key="'preview-' + attribute.id">
+                            <div x-show="populatedAttributes.length === 0" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                                Added attributes will appear here.
+                            </div>
+                            <template x-for="attribute in populatedAttributes" :key="'preview-' + attribute.id">
                                 <div class="flex items-center justify-between gap-4 py-2.5 text-sm">
                                     <dt class="text-gray-500 dark:text-gray-400" x-text="attribute.name"></dt>
                                     <dd class="text-right font-medium text-gray-900 dark:text-white" x-text="attribute.value || '—'"></dd>
@@ -408,8 +415,13 @@
                 return (name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
             },
             isAttributeSelected(name) {
+                return this.isAttributeSelectedExcept(name);
+            },
+            isAttributeSelectedExcept(name, currentId = null) {
                 const normalizedName = this.normalizeAttributeName(name);
-                return this.attributeRows.some((attribute) => this.normalizeAttributeName(attribute.name) === normalizedName);
+                return this.attributeRows.some((attribute) => {
+                    return attribute.id !== currentId && this.normalizeAttributeName(attribute.name) === normalizedName;
+                });
             },
             handleAttributePickerChange() {
                 this.attributeError = '';
