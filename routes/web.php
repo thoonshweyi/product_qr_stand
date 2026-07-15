@@ -44,7 +44,21 @@ Route::middleware('auth')->group(function () {
     Route::resource("roles",RolesController::class);
 
     Route::resource("products",ProductController::class);
+    Route::get('/productscreatedemo',function(){
+        // Static sample data for the product form prototype. No database records are used here.
+        $sampleCategories = [
+            'water-pump' => ['name' => 'Water Pump', 'group' => 'Garden'],
+            'bathtub' => ['name' => 'Bathtub', 'group' => 'Sanitary'],
+            'ceiling-board' => ['name' => 'Ceiling Board', 'group' => 'Roofing & Ceiling'],
+        ];
 
+        $sampleAttributes = ['Power', 'Maximum Head', 'Flow Rate', 'Inlet Size', 'Outlet Size', 'Weight', 'Material', 'Color'];
+        $sampleBrands = ['IM Dayuan', 'Cotto', 'DECO', 'Ispa', 'TOTO', 'Zhangshi'];
+        $sampleStatuses = ['Draft', 'Active'];
+
+
+        return view('products.createdemo', compact('sampleCategories', 'sampleAttributes', 'sampleBrands', 'sampleStatuses'));
+    });
 });
 
 require __DIR__.'/auth.php';

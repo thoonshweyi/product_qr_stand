@@ -6,24 +6,7 @@
 
 @section('content')
 <div
-    x-data="productCreateForm(
-        @js($categories),
-        @js($specifications),
-        @js($statuses),
-        @js($brands),
-        @js([
-            'productCode' => old('product_code', ''),
-            'name' => old('name', ''),
-            'brand' => old('brand', ''),
-            'model' => old('model', ''),
-            'country' => old('country_of_origin', ''),
-            'statusId' => old('status_id', $statuses->first()?->id),
-            'categoryId' => old('category_id', $categories->first()?->id),
-            'websiteUrl' => old('website_url', ''),
-            'description' => old('description', ''),
-        ]),
-        @js(old('specifications', []))
-    )"
+    x-data="productCreateForm(@js($sampleCategories), @js($sampleAttributes))"
     class="min-h-screen"
 >
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
@@ -60,8 +43,9 @@
             <div>
                 <div class="mb-2 flex flex-wrap items-center gap-2">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create a new product</h1>
+                    <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Sample data</span>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Add core product details, images and product specifications.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add core product details and category-specific specifications for the QR stand.</p>
             </div>
             <a href="{{ route('products.index') }}" class="inline-flex w-fit items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -72,20 +56,7 @@
         </div>
     </div>
 
-    @if ($errors->any())
-        <div class="mx-auto mt-6 w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
-                <p class="font-semibold">Please check the form and try again.</p>
-                <ul class="mt-2 list-disc space-y-1 pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
-
-    <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" @submit.prevent="showDemoMessage('Product creation is ready for backend integration.')">
         @csrf
         <div class="mx-auto grid w-full max-w-screen-2xl gap-6 p-4 sm:p-6 lg:grid-cols-12 lg:p-8">
             <div class="space-y-6 lg:col-span-8">
@@ -101,16 +72,15 @@
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
                         <div>
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
-                            <input x-model="form.productCode" type="text" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
+                            <input x-model="form.productCode" type="text" name="product_code" id="product_code" value="2000000602110" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
                             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p>
                         </div>
 
                         <div>
                             <label for="status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-600">*</span></label>
-                            <select x-model="form.statusId" name="status_id" id="status" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                <option value="">Choose status</option>
-                                @foreach ($statuses as $status)
-                                    <option value="{{ $status->id }}">{{ $status->name }}</option>
+                            <select x-model="form.status" name="status" id="status" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                @foreach ($sampleStatuses as $status)
+                                    <option value="{{ $status }}">{{ $status }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -122,36 +92,34 @@
 
                         <div>
                             <label for="brand" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Brand <span class="text-red-600">*</span></label>
-                            <input x-model="form.brand" type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name">
-                            <datalist id="brand-options">
-                                @foreach ($brands as $brand)
-                                    <option value="{{ $brand }}"></option>
+                            <select x-model="form.brand" name="brand" id="brand" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                @foreach ($sampleBrands as $brand)
+                                    <option value="{{ $brand }}">{{ $brand }}</option>
                                 @endforeach
-                            </datalist>
+                            </select>
                         </div>
 
                         <div>
                             <label for="model" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Model</label>
-                            <input x-model="form.model" type="text" name="model" id="model" value="{{ old('model') }}" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
+                            <input x-model="form.model" type="text" name="model" id="model" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
                         </div>
 
                         <div>
                             <label for="category" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-600">*</span></label>
-                            <select x-model="form.categoryId" name="category_id" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                <option value="">Choose category</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <select x-model="form.category" name="category" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                @foreach ($sampleCategories as $key => $category)
+                                    <option value="{{ $key }}">{{ $category['group'] }} / {{ $category['name'] }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
                             <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin</label>
-                            <select x-model="form.country" name="country_of_origin" id="country" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                <option value="">Choose country</option>
-                                @foreach (['China', 'Thailand', 'Vietnam', 'Myanmar'] as $country)
-                                    <option value="{{ $country }}">{{ $country }}</option>
-                                @endforeach
+                            <select x-model="form.country" name="country" id="country" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                <option>China</option>
+                                <option>Thailand</option>
+                                <option>Vietnam</option>
+                                <option>Myanmar</option>
                             </select>
                         </div>
                     </div>
@@ -160,8 +128,8 @@
                 <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-700 sm:px-6">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product specifications</h2>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose an existing specification or type a new name to create it instantly.</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product attributes</h2>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose an existing attribute or type a new name to create it instantly.</p>
                         </div>
                         <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">2</span>
                     </div>
@@ -170,76 +138,76 @@
                         <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/30">
                             <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">Add product specification</p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">Add product attribute</p>
                                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Value includes unit, for example 370W, 35 L/min or 7.5 mm.</p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 dark:border-gray-700 dark:bg-gray-800">
-                                        <button type="button" @click="setSpecificationEntryMode('choose')" :class="specificationEntryMode === 'choose' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition">Choose</button>
-                                        <button type="button" @click="setSpecificationEntryMode('new')" :disabled="hasReachedSpecificationLimit" :class="specificationEntryMode === 'new' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-gray-600">New</button>
+                                        <button type="button" @click="setAttributeEntryMode('choose')" :class="attributeEntryMode === 'choose' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition">Choose</button>
+                                        <button type="button" @click="setAttributeEntryMode('new')" :disabled="hasReachedAttributeLimit" :class="attributeEntryMode === 'new' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-gray-600">New</button>
                                     </div>
                                     <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                        <span x-text="specificationRows.length"></span> / <span x-text="maxSpecifications"></span>
+                                        <span x-text="attributeRows.length"></span> / <span x-text="maxAttributes"></span>
                                     </span>
                                 </div>
                             </div>
 
                             <div class="grid gap-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_154px] lg:items-end">
                                 <div>
-                                    <label for="specification_picker" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300" x-text="specificationEntryMode === 'new' ? 'New specification name' : 'Specification'"></label>
-                                    <select x-show="specificationEntryMode === 'choose'" x-model="selectedSpecificationName" id="specification_picker" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
-                                        <option value="">Choose specification</option>
-                                        <template x-for="specificationName in availableSpecifications" :key="specificationName">
-                                            <option :value="specificationName" :disabled="isSpecificationSelected(specificationName)" x-text="specificationName"></option>
+                                    <label for="attribute_picker" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300" x-text="attributeEntryMode === 'new' ? 'New attribute name' : 'Attribute'"></label>
+                                    <select x-show="attributeEntryMode === 'choose'" x-model="selectedAttributeName" id="attribute_picker" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
+                                        <option value="">Choose attribute</option>
+                                        <template x-for="attributeName in availableAttributes" :key="attributeName">
+                                            <option :value="attributeName" :disabled="isAttributeSelected(attributeName)" x-text="attributeName"></option>
                                         </template>
                                     </select>
-                                    <input x-show="specificationEntryMode === 'new'" x-model="newSpecificationName" @keydown.enter.prevent="addSelectedSpecification" type="text" id="new_specification_name" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. Pipe Thickness">
+                                    <input x-show="attributeEntryMode === 'new'" x-model="newAttributeName" @keydown.enter.prevent="addSelectedAttribute" type="text" id="new_attribute_name" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. Pipe Thickness">
                                 </div>
 
                                 <div>
-                                    <label for="specification_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value</label>
-                                    <input x-model="selectedSpecificationValue" @keydown.enter.prevent="addSelectedSpecification" type="text" id="specification_value" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
+                                    <label for="attribute_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value</label>
+                                    <input x-model="selectedAttributeValue" @keydown.enter.prevent="addSelectedAttribute" type="text" id="attribute_value" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
                                 </div>
 
                                 <div>
-                                    <button type="button" @click="addSelectedSpecification" :disabled="!canAddSelectedSpecification" class="inline-flex h-[42px] w-full items-center justify-center rounded-lg bg-primary-700 px-3 text-sm font-semibold text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
+                                    <button type="button" @click="addSelectedAttribute" :disabled="!canAddSelectedAttribute" class="inline-flex h-[42px] w-full items-center justify-center rounded-lg bg-primary-700 px-3 text-sm font-semibold text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        <span x-text="specificationEntryMode === 'new' ? 'Create & add' : 'Add'"></span>
+                                        <span x-text="attributeEntryMode === 'new' ? 'Create & add' : 'Add'"></span>
                                     </button>
                                 </div>
                             </div>
 
-                            <p x-show="specificationError" x-text="specificationError" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400"></p>
-                            <p x-show="hasReachedSpecificationLimit" class="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 specifications can be added.</p>
+                            <p x-show="attributeError" x-text="attributeError" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400"></p>
+                            <p x-show="hasReachedAttributeLimit" class="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 attributes can be added.</p>
                         </div>
 
                         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
                             <div class="hidden grid-cols-12 gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-700/30 dark:text-gray-400 sm:grid">
-                                <span class="col-span-5">Specification</span>
+                                <span class="col-span-5">Attribute</span>
                                 <span class="col-span-6">Value</span>
                                 <span class="col-span-1 text-right">Action</span>
                             </div>
 
-                            <div x-show="specificationRows.length === 0" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No specifications added yet.
+                            <div x-show="attributeRows.length === 0" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No attributes added yet.
                             </div>
 
-                            <template x-for="(specification, index) in specificationRows" :key="specification.id">
+                            <template x-for="(attribute, index) in attributeRows" :key="attribute.id">
                                 <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center">
                                     <div class="sm:col-span-5">
-                                        <label :for="'selected-specification-name-' + specification.id" class="sr-only">Specification name</label>
-                                        <select :value="specification.name" @change="updateRowSpecification(specification, $event.target.value)" :name="'specifications[' + index + '][name]'" :id="'selected-specification-name-' + specification.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                            <template x-for="specificationName in availableSpecifications" :key="'row-' + specification.id + '-' + specificationName">
-                                                <option :value="specificationName" :selected="normalizeSpecificationName(specification.name) === normalizeSpecificationName(specificationName)" :disabled="isSpecificationSelectedExcept(specificationName, specification.id)" x-text="specificationName"></option>
+                                        <label :for="'selected-attribute-name-' + attribute.id" class="sr-only">Attribute name</label>
+                                        <select :value="attribute.name" @change="updateRowAttribute(attribute, $event.target.value)" :name="'attributes[' + index + '][name]'" :id="'selected-attribute-name-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <template x-for="attributeName in availableAttributes" :key="'row-' + attribute.id + '-' + attributeName">
+                                                <option :value="attributeName" :selected="normalizeAttributeName(attribute.name) === normalizeAttributeName(attributeName)" :disabled="isAttributeSelectedExcept(attributeName, attribute.id)" x-text="attributeName"></option>
                                             </template>
                                         </select>
                                     </div>
                                     <div class="sm:col-span-6">
-                                        <label :for="'selected-specification-value-' + specification.id" class="sr-only">Specification value</label>
-                                        <input x-model="specification.value" type="text" :name="'specifications[' + index + '][value]'" :id="'selected-specification-value-' + specification.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
+                                        <label :for="'selected-attribute-value-' + attribute.id" class="sr-only">Attribute value</label>
+                                        <input x-model="attribute.value" type="text" :name="'attributes[' + index + '][value]'" :id="'selected-attribute-value-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
                                     </div>
                                     <div class="flex justify-end sm:col-span-1">
-                                        <button type="button" @click="removeSpecification(specification.id)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
+                                        <button type="button" @click="removeAttribute(attribute.id)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove attribute">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                     </div>
@@ -289,7 +257,7 @@
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product preview</h2>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Customer-facing QR card</p>
                         </div>
-                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="currentStatusName.toLowerCase() === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'" x-text="currentStatusName || 'No status'"></span>
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="form.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'" x-text="form.status"></span>
                     </div>
 
                     <div class="p-5">
@@ -329,7 +297,7 @@
                         </div>
 
                         <div class="mt-5">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400" x-text="currentCategory.name || 'No category selected'"></p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400" x-text="currentCategory.group + ' · ' + currentCategory.name"></p>
                             <h3 class="mt-1.5 line-clamp-2 text-lg font-bold text-gray-900 dark:text-white" x-text="form.name || 'Untitled product'"></h3>
                             <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                                 <span x-text="form.brand"></span>
@@ -339,13 +307,13 @@
                         </div>
 
                         <dl class="mt-5 divide-y divide-gray-100 rounded-lg border border-gray-200 px-4 dark:divide-gray-700 dark:border-gray-700">
-                            <div x-show="populatedSpecifications.length === 0" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400">
-                                Added specifications will appear here.
+                            <div x-show="populatedAttributes.length === 0" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                                Added attributes will appear here.
                             </div>
-                            <template x-for="specification in populatedSpecifications" :key="'preview-' + specification.id">
+                            <template x-for="attribute in populatedAttributes" :key="'preview-' + attribute.id">
                                 <div class="flex items-center justify-between gap-4 py-2.5 text-sm">
-                                    <dt class="text-gray-500 dark:text-gray-400" x-text="specification.name"></dt>
-                                    <dd class="text-right font-medium text-gray-900 dark:text-white" x-text="specification.value || '—'"></dd>
+                                    <dt class="text-gray-500 dark:text-gray-400" x-text="attribute.name"></dt>
+                                    <dd class="text-right font-medium text-gray-900 dark:text-white" x-text="attribute.value || '—'"></dd>
                                 </div>
                             </template>
                         </dl>
@@ -365,7 +333,7 @@
 
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-                            <a href="{{ route('products.index') }}" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Cancel</a>
+                            <button type="button" @click="form.status = 'Draft'; showDemoMessage('Sample draft saved locally for preview.')" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Save draft</button>
                             <button type="submit" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -373,162 +341,156 @@
                                 Create product
                             </button>
                         </div>
-                        <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Product will be saved with its specifications and images.</p>
+                        <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Prototype only — no data will be saved.</p>
                     </div>
                 </section>
             </aside>
         </div>
     </form>
 
+    <div x-cloak x-show="notification" x-transition.opacity.duration.200ms class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg border border-green-200 bg-white p-4 text-sm text-gray-700 shadow-lg dark:border-green-900 dark:bg-gray-800 dark:text-gray-200" role="status">
+        <div class="flex items-start gap-3">
+            <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-300">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">Design prototype</p>
+                <p class="mt-0.5" x-text="notification"></p>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    window.productCreateForm = function (categories, specifications, statuses, brands, initialForm, initialSpecificationRows) {
-        const rows = (initialSpecificationRows || [])
-            .filter((row) => (row.name || '').trim() || (row.value || '').trim())
-            .map((row, index) => ({
-                id: index + 1,
-                name: row.name || '',
-                value: row.value || ''
-            }));
-
-        const availableSpecifications = Array.from(new Set([
-            ...(specifications || []),
-            ...rows.map((row) => row.name).filter(Boolean)
-        ]));
-
+    window.productCreateForm = function (categories, sampleAttributes) {
         return {
             categories,
-            statuses,
-            brands,
-            availableSpecifications,
-            specificationRows: rows,
-            maxSpecifications: 8,
-            nextSpecificationId: rows.length + 1,
-            specificationEntryMode: 'choose',
-            selectedSpecificationName: '',
-            selectedSpecificationValue: '',
-            newSpecificationName: '',
-            specificationError: '',
+            availableAttributes: [...sampleAttributes],
+            attributeRows: [],
+            maxAttributes: 8,
+            nextAttributeId: 1,
+            attributeEntryMode: 'choose',
+            selectedAttributeName: '',
+            selectedAttributeValue: '',
+            newAttributeName: '',
+            attributeError: '',
             mainImagePreview: '',
             thumbnailImagePreview: '',
+            notification: '',
+            notificationTimer: null,
             form: {
-                productCode: initialForm.productCode || '',
-                name: initialForm.name || '',
-                brand: initialForm.brand || '',
-                model: initialForm.model || '',
-                country: initialForm.country || '',
-                statusId: initialForm.statusId ? String(initialForm.statusId) : '',
-                categoryId: initialForm.categoryId ? String(initialForm.categoryId) : '',
-                websiteUrl: initialForm.websiteUrl || '',
-                description: initialForm.description || ''
+                productCode: '2000000602110',
+                name: 'IM Dayuan Auto Pressure Pump ADGP370B 370W (0.5HP)',
+                brand: 'IM Dayuan',
+                model: 'ADGP-370B',
+                country: 'China',
+                status: 'Active',
+                category: 'water-pump',
+                websiteUrl: 'https://pro1globalhomecenter.com/product/2000000602110',
+                description: 'ရေအားကောင်းစေရန် အသုံးပြုနိုင်ပါသည်။ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းဖြစ်ပြီး အိမ်သုံးရေတင်စနစ်များအတွက် သင့်လျော်ပါသည်။'
             },
             get currentCategory() {
-                return this.categories.find((category) => String(category.id) === String(this.form.categoryId)) || { name: '' };
+                return this.categories[this.form.category];
             },
-            get currentStatusName() {
-                const status = this.statuses.find((status) => String(status.id) === String(this.form.statusId));
-                return status ? status.name : '';
+            get populatedAttributes() {
+                return this.attributeRows.filter((attribute) => attribute.name.trim() || attribute.value.trim());
             },
-            get populatedSpecifications() {
-                return this.specificationRows.filter((specification) => specification.name.trim() || specification.value.trim());
+            get hasReachedAttributeLimit() {
+                return this.attributeRows.length >= this.maxAttributes;
             },
-            get hasReachedSpecificationLimit() {
-                return this.specificationRows.length >= this.maxSpecifications;
-            },
-            get canAddSelectedSpecification() {
-                const specificationName = this.currentEntrySpecificationName();
+            get canAddSelectedAttribute() {
+                const attributeName = this.currentEntryAttributeName();
 
-                return !this.hasReachedSpecificationLimit
-                    && specificationName
-                    && !this.isSpecificationSelected(specificationName);
+                return !this.hasReachedAttributeLimit
+                    && attributeName
+                    && !this.isAttributeSelected(attributeName);
             },
-            normalizeSpecificationName(name) {
+            normalizeAttributeName(name) {
                 return (name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
             },
-            isSpecificationSelected(name) {
-                return this.isSpecificationSelectedExcept(name);
+            isAttributeSelected(name) {
+                return this.isAttributeSelectedExcept(name);
             },
-            isSpecificationSelectedExcept(name, currentId = null) {
-                const normalizedName = this.normalizeSpecificationName(name);
-                return this.specificationRows.some((specification) => {
-                    return specification.id !== currentId && this.normalizeSpecificationName(specification.name) === normalizedName;
+            isAttributeSelectedExcept(name, currentId = null) {
+                const normalizedName = this.normalizeAttributeName(name);
+                return this.attributeRows.some((attribute) => {
+                    return attribute.id !== currentId && this.normalizeAttributeName(attribute.name) === normalizedName;
                 });
             },
-            currentEntrySpecificationName() {
-                if (this.specificationEntryMode === 'new') {
-                    return this.newSpecificationName.trim().replace(/\s+/g, ' ');
+            currentEntryAttributeName() {
+                if (this.attributeEntryMode === 'new') {
+                    return this.newAttributeName.trim().replace(/\s+/g, ' ');
                 }
 
-                return this.selectedSpecificationName;
+                return this.selectedAttributeName;
             },
-            setSpecificationEntryMode(mode) {
-                if (this.hasReachedSpecificationLimit) return;
+            setAttributeEntryMode(mode) {
+                if (this.hasReachedAttributeLimit) return;
 
-                this.specificationEntryMode = mode;
-                this.specificationError = '';
+                this.attributeEntryMode = mode;
+                this.attributeError = '';
 
                 if (mode === 'new') {
-                    this.selectedSpecificationName = '';
-                    this.$nextTick(() => document.getElementById('new_specification_name')?.focus());
+                    this.selectedAttributeName = '';
+                    this.$nextTick(() => document.getElementById('new_attribute_name')?.focus());
                 } else {
-                    this.newSpecificationName = '';
-                    this.$nextTick(() => document.getElementById('specification_picker')?.focus());
+                    this.newAttributeName = '';
+                    this.$nextTick(() => document.getElementById('attribute_picker')?.focus());
                 }
             },
-            addSelectedSpecification() {
-                this.specificationError = '';
+            addSelectedAttribute() {
+                this.attributeError = '';
 
-                if (this.hasReachedSpecificationLimit) {
-                    this.specificationError = 'Maximum 8 specifications can be added.';
+                if (this.hasReachedAttributeLimit) {
+                    this.attributeError = 'Maximum 8 attributes can be added.';
                     return;
                 }
 
-                const requestedName = this.currentEntrySpecificationName();
+                const requestedName = this.currentEntryAttributeName();
 
                 if (!requestedName) {
-                    this.specificationError = this.specificationEntryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.';
+                    this.attributeError = this.attributeEntryMode === 'new' ? 'Enter an attribute name.' : 'Choose an attribute first.';
                     return;
                 }
 
-                const existingName = this.availableSpecifications.find((specificationName) => this.normalizeSpecificationName(specificationName) === this.normalizeSpecificationName(requestedName));
-                const specificationName = existingName || requestedName;
+                const existingName = this.availableAttributes.find((attributeName) => this.normalizeAttributeName(attributeName) === this.normalizeAttributeName(requestedName));
+                const attributeName = existingName || requestedName;
 
-                if (this.isSpecificationSelected(specificationName)) {
-                    this.specificationError = 'This specification has already been added to this product.';
+                if (this.isAttributeSelected(attributeName)) {
+                    this.attributeError = 'This attribute has already been added to this product.';
                     return;
                 }
 
                 if (!existingName) {
-                    this.availableSpecifications.push(specificationName);
+                    this.availableAttributes.push(attributeName);
                 }
 
-                this.specificationRows.push({
-                    id: this.nextSpecificationId++,
-                    name: specificationName,
-                    value: this.selectedSpecificationValue.trim()
+                this.attributeRows.push({
+                    id: this.nextAttributeId++,
+                    name: attributeName,
+                    value: this.selectedAttributeValue.trim()
                 });
-                this.selectedSpecificationName = '';
-                this.selectedSpecificationValue = '';
-                this.newSpecificationName = '';
-                this.specificationEntryMode = 'choose';
-                this.$nextTick(() => document.getElementById('specification_picker')?.focus());
+                this.selectedAttributeName = '';
+                this.selectedAttributeValue = '';
+                this.newAttributeName = '';
+                this.attributeEntryMode = 'choose';
+                this.$nextTick(() => document.getElementById('attribute_picker')?.focus());
             },
-            updateRowSpecification(specification, name) {
-                this.specificationError = '';
+            updateRowAttribute(attribute, name) {
+                this.attributeError = '';
 
-                if (this.isSpecificationSelectedExcept(name, specification.id)) {
-                    this.specificationError = 'This specification has already been added to this product.';
+                if (this.isAttributeSelectedExcept(name, attribute.id)) {
+                    this.attributeError = 'This attribute has already been added to this product.';
                     return;
                 }
 
-                specification.name = name;
+                attribute.name = name;
             },
-            removeSpecification(id) {
-                this.specificationRows = this.specificationRows.filter((specification) => specification.id !== id);
-                this.specificationError = '';
+            removeAttribute(id) {
+                this.attributeRows = this.attributeRows.filter((attribute) => attribute.id !== id);
+                this.attributeError = '';
             },
             previewImage(event, type) {
                 const file = event.target.files && event.target.files[0];
@@ -544,6 +506,11 @@
                 };
                 reader.readAsDataURL(file);
             },
+            showDemoMessage(message) {
+                this.notification = message;
+                window.clearTimeout(this.notificationTimer);
+                this.notificationTimer = window.setTimeout(() => this.notification = '', 3500);
+            }
         };
     };
 </script>
