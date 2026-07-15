@@ -136,49 +136,44 @@
 
                     <div class="p-5 sm:p-6">
                         <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/30">
-                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                            <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white">Add product attribute</p>
                                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Value includes unit, for example 370W, 35 L/min or 7.5 mm.</p>
                                 </div>
-                                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                    <span x-text="attributeRows.length"></span> / <span x-text="maxAttributes"></span>
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 dark:border-gray-700 dark:bg-gray-800">
+                                        <button type="button" @click="setAttributeEntryMode('choose')" :class="attributeEntryMode === 'choose' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition">Choose</button>
+                                        <button type="button" @click="setAttributeEntryMode('new')" :disabled="hasReachedAttributeLimit" :class="attributeEntryMode === 'new' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-gray-600">New</button>
+                                    </div>
+                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
+                                        <span x-text="attributeRows.length"></span> / <span x-text="maxAttributes"></span>
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="grid gap-3 lg:grid-cols-12">
-                                <div class="lg:col-span-5">
-                                    <label for="attribute_picker" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Attribute</label>
-                                    <select x-model="selectedAttributeName" @change="handleAttributePickerChange" id="attribute_picker" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
+                            <div class="grid gap-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_154px] lg:items-end">
+                                <div>
+                                    <label for="attribute_picker" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300" x-text="attributeEntryMode === 'new' ? 'New attribute name' : 'Attribute'"></label>
+                                    <select x-show="attributeEntryMode === 'choose'" x-model="selectedAttributeName" id="attribute_picker" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
                                         <option value="">Choose attribute</option>
                                         <template x-for="attributeName in availableAttributes" :key="attributeName">
                                             <option :value="attributeName" :disabled="isAttributeSelected(attributeName)" x-text="attributeName"></option>
                                         </template>
-                                        <option value="__create__">+ Create new attribute</option>
                                     </select>
+                                    <input x-show="attributeEntryMode === 'new'" x-model="newAttributeName" @keydown.enter.prevent="addSelectedAttribute" type="text" id="new_attribute_name" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. Pipe Thickness">
                                 </div>
 
-                                <div class="lg:col-span-5">
+                                <div>
                                     <label for="attribute_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value</label>
                                     <input x-model="selectedAttributeValue" @keydown.enter.prevent="addSelectedAttribute" type="text" id="attribute_value" :disabled="hasReachedAttributeLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
                                 </div>
 
-                                <div class="flex items-end lg:col-span-2">
+                                <div>
                                     <button type="button" @click="addSelectedAttribute" :disabled="!canAddSelectedAttribute" class="inline-flex h-[42px] w-full items-center justify-center rounded-lg bg-primary-700 px-3 text-sm font-semibold text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        Add
+                                        <span x-text="attributeEntryMode === 'new' ? 'Create & add' : 'Add'"></span>
                                     </button>
-                                </div>
-                            </div>
-
-                            <div x-show="creatingAttribute" x-transition class="mt-3 rounded-lg border border-primary-200 bg-white p-3 dark:border-primary-900 dark:bg-gray-800">
-                                <label for="new_attribute_name" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">New attribute name</label>
-                                <div class="flex flex-col gap-2 sm:flex-row">
-                                    <input x-model="newAttributeName" @keydown.enter.prevent="createAttribute" type="text" id="new_attribute_name" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. Pipe Thickness">
-                                    <div class="flex gap-2">
-                                        <button type="button" @click="createAttribute" class="inline-flex items-center justify-center rounded-lg bg-primary-700 px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">Create</button>
-                                        <button type="button" @click="cancelCreateAttribute" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Cancel</button>
-                                    </div>
                                 </div>
                             </div>
 
@@ -201,9 +196,9 @@
                                 <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center">
                                     <div class="sm:col-span-5">
                                         <label :for="'selected-attribute-name-' + attribute.id" class="sr-only">Attribute name</label>
-                                        <select x-model="attribute.name" @change="attributeError = ''" :name="'attributes[' + index + '][name]'" :id="'selected-attribute-name-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                        <select :value="attribute.name" @change="updateRowAttribute(attribute, $event.target.value)" :name="'attributes[' + index + '][name]'" :id="'selected-attribute-name-' + attribute.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                             <template x-for="attributeName in availableAttributes" :key="'row-' + attribute.id + '-' + attributeName">
-                                                <option :value="attributeName" :disabled="isAttributeSelectedExcept(attributeName, attribute.id)" x-text="attributeName"></option>
+                                                <option :value="attributeName" :selected="normalizeAttributeName(attribute.name) === normalizeAttributeName(attributeName)" :disabled="isAttributeSelectedExcept(attributeName, attribute.id)" x-text="attributeName"></option>
                                             </template>
                                         </select>
                                     </div>
@@ -376,9 +371,9 @@
             attributeRows: [],
             maxAttributes: 8,
             nextAttributeId: 1,
+            attributeEntryMode: 'choose',
             selectedAttributeName: '',
             selectedAttributeValue: '',
-            creatingAttribute: false,
             newAttributeName: '',
             attributeError: '',
             mainImagePreview: '',
@@ -406,10 +401,11 @@
                 return this.attributeRows.length >= this.maxAttributes;
             },
             get canAddSelectedAttribute() {
+                const attributeName = this.currentEntryAttributeName();
+
                 return !this.hasReachedAttributeLimit
-                    && this.selectedAttributeName
-                    && this.selectedAttributeName !== '__create__'
-                    && !this.isAttributeSelected(this.selectedAttributeName);
+                    && attributeName
+                    && !this.isAttributeSelected(attributeName);
             },
             normalizeAttributeName(name) {
                 return (name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
@@ -423,29 +419,44 @@
                     return attribute.id !== currentId && this.normalizeAttributeName(attribute.name) === normalizedName;
                 });
             },
-            handleAttributePickerChange() {
+            currentEntryAttributeName() {
+                if (this.attributeEntryMode === 'new') {
+                    return this.newAttributeName.trim().replace(/\s+/g, ' ');
+                }
+
+                return this.selectedAttributeName;
+            },
+            setAttributeEntryMode(mode) {
+                if (this.hasReachedAttributeLimit) return;
+
+                this.attributeEntryMode = mode;
                 this.attributeError = '';
 
-                if (this.selectedAttributeName === '__create__') {
-                    this.creatingAttribute = true;
+                if (mode === 'new') {
                     this.selectedAttributeName = '';
                     this.$nextTick(() => document.getElementById('new_attribute_name')?.focus());
-                    return;
+                } else {
+                    this.newAttributeName = '';
+                    this.$nextTick(() => document.getElementById('attribute_picker')?.focus());
                 }
-
-                this.creatingAttribute = false;
             },
-            createAttribute() {
-                const name = this.newAttributeName.trim().replace(/\s+/g, ' ');
+            addSelectedAttribute() {
                 this.attributeError = '';
 
-                if (!name) {
-                    this.attributeError = 'Enter an attribute name.';
+                if (this.hasReachedAttributeLimit) {
+                    this.attributeError = 'Maximum 8 attributes can be added.';
                     return;
                 }
 
-                const existingName = this.availableAttributes.find((attributeName) => this.normalizeAttributeName(attributeName) === this.normalizeAttributeName(name));
-                const attributeName = existingName || name;
+                const requestedName = this.currentEntryAttributeName();
+
+                if (!requestedName) {
+                    this.attributeError = this.attributeEntryMode === 'new' ? 'Enter an attribute name.' : 'Choose an attribute first.';
+                    return;
+                }
+
+                const existingName = this.availableAttributes.find((attributeName) => this.normalizeAttributeName(attributeName) === this.normalizeAttributeName(requestedName));
+                const attributeName = existingName || requestedName;
 
                 if (this.isAttributeSelected(attributeName)) {
                     this.attributeError = 'This attribute has already been added to this product.';
@@ -456,44 +467,26 @@
                     this.availableAttributes.push(attributeName);
                 }
 
-                this.selectedAttributeName = attributeName;
-                this.newAttributeName = '';
-                this.creatingAttribute = false;
-                this.$nextTick(() => document.getElementById('attribute_value')?.focus());
-                this.showDemoMessage(`"${attributeName}" is ready to add.`);
-            },
-            cancelCreateAttribute() {
-                this.creatingAttribute = false;
-                this.newAttributeName = '';
-                this.attributeError = '';
-            },
-            addSelectedAttribute() {
-                this.attributeError = '';
-
-                if (this.hasReachedAttributeLimit) {
-                    this.attributeError = 'Maximum 8 attributes can be added.';
-                    return;
-                }
-
-                if (!this.selectedAttributeName) {
-                    this.attributeError = 'Choose an attribute first.';
-                    return;
-                }
-
-                if (this.isAttributeSelected(this.selectedAttributeName)) {
-                    this.attributeError = 'This attribute has already been added to this product.';
-                    return;
-                }
-
                 this.attributeRows.push({
                     id: this.nextAttributeId++,
-                    name: this.selectedAttributeName,
+                    name: attributeName,
                     value: this.selectedAttributeValue.trim()
                 });
                 this.selectedAttributeName = '';
                 this.selectedAttributeValue = '';
-                this.creatingAttribute = false;
+                this.newAttributeName = '';
+                this.attributeEntryMode = 'choose';
                 this.$nextTick(() => document.getElementById('attribute_picker')?.focus());
+            },
+            updateRowAttribute(attribute, name) {
+                this.attributeError = '';
+
+                if (this.isAttributeSelectedExcept(name, attribute.id)) {
+                    this.attributeError = 'This attribute has already been added to this product.';
+                    return;
+                }
+
+                attribute.name = name;
             },
             removeAttribute(id) {
                 this.attributeRows = this.attributeRows.filter((attribute) => attribute.id !== id);
