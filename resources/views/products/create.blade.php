@@ -1,31 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('css')
-    <style>[x-cloak] { display: none !important; }</style>
-@endsection
-
 @section('content')
-<div
-    x-data="productCreateForm(
-        @js($categories),
-        @js($specifications),
-        @js($statuses),
-        @js($brands),
-        @js([
-            'productCode' => old('product_code', ''),
-            'name' => old('name', ''),
-            'brand' => old('brand', ''),
-            'model' => old('model', ''),
-            'country' => old('country_of_origin', ''),
-            'statusId' => old('status_id', $statuses->first()?->id),
-            'categoryId' => old('category_id', $categories->first()?->id),
-            'websiteUrl' => old('website_url', ''),
-            'description' => old('description', ''),
-        ]),
-        @js(old('specifications', []))
-    )"
-    class="min-h-screen"
->
+<div id="product-create-page" class="min-h-screen">
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
         <nav class="mb-4 flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
@@ -101,28 +77,28 @@
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
                         <div>
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
-                            <input x-model="form.productCode" type="text" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
+                            <input type="text" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
                             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p>
                         </div>
 
                         <div>
                             <label for="status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-600">*</span></label>
-                            <select x-model="form.statusId" name="status_id" id="status" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select name="status_id" id="status" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose status</option>
                                 @foreach ($statuses as $status)
-                                    <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                    <option value="{{ $status->id }}" @selected((string) old('status_id', $statuses->first()?->id) === (string) $status->id)>{{ $status->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="sm:col-span-2">
                             <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product name <span class="text-red-600">*</span></label>
-                            <input x-model="form.name" type="text" name="name" id="name" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name">
+                            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name">
                         </div>
 
                         <div>
                             <label for="brand" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Brand <span class="text-red-600">*</span></label>
-                            <input x-model="form.brand" type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name">
+                            <input type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name">
                             <datalist id="brand-options">
                                 @foreach ($brands as $brand)
                                     <option value="{{ $brand }}"></option>
@@ -132,25 +108,25 @@
 
                         <div>
                             <label for="model" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Model</label>
-                            <input x-model="form.model" type="text" name="model" id="model" value="{{ old('model') }}" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
+                            <input type="text" name="model" id="model" value="{{ old('model') }}" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
                         </div>
 
                         <div>
                             <label for="category" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-600">*</span></label>
-                            <select x-model="form.categoryId" name="category_id" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select name="category_id" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose category</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}" @selected((string) old('category_id', $categories->first()?->id) === (string) $category->id)>{{ $category->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
                             <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin</label>
-                            <select x-model="form.country" name="country_of_origin" id="country" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select name="country_of_origin" id="country" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose country</option>
                                 @foreach (['China', 'Thailand', 'Vietnam', 'Myanmar'] as $country)
-                                    <option value="{{ $country }}">{{ $country }}</option>
+                                    <option value="{{ $country }}" @selected(old('country_of_origin') === $country)>{{ $country }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -175,42 +151,39 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 dark:border-gray-700 dark:bg-gray-800">
-                                        <button type="button" @click="setSpecificationEntryMode('choose')" :class="specificationEntryMode === 'choose' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition">Choose</button>
-                                        <button type="button" @click="setSpecificationEntryMode('new')" :disabled="hasReachedSpecificationLimit" :class="specificationEntryMode === 'new' ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'" class="rounded-md px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-gray-600">New</button>
+                                        <button type="button" id="choose-specification-mode" class="rounded-md bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition">Choose</button>
+                                        <button type="button" id="new-specification-mode" class="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400 dark:text-gray-300 dark:hover:text-white dark:disabled:text-gray-600">New</button>
                                     </div>
                                     <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                        <span x-text="specificationRows.length"></span> / <span x-text="maxSpecifications"></span>
+                                        <span id="specification-count">0</span> / <span>8</span>
                                     </span>
                                 </div>
                             </div>
 
                             <div class="grid gap-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_154px] lg:items-end">
                                 <div>
-                                    <label for="specification_picker" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300" x-text="specificationEntryMode === 'new' ? 'New specification name' : 'Specification'"></label>
-                                    <select x-show="specificationEntryMode === 'choose'" x-model="selectedSpecificationName" id="specification_picker" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
+                                    <label for="specification_picker" id="specification-name-label" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Specification</label>
+                                    <select id="specification_picker" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800">
                                         <option value="">Choose specification</option>
-                                        <template x-for="specificationName in availableSpecifications" :key="specificationName">
-                                            <option :value="specificationName" :disabled="isSpecificationSelected(specificationName)" x-text="specificationName"></option>
-                                        </template>
                                     </select>
-                                    <input x-show="specificationEntryMode === 'new'" x-model="newSpecificationName" @keydown.enter.prevent="addSelectedSpecification" type="text" id="new_specification_name" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. Pipe Thickness">
+                                    <input type="text" id="new_specification_name" class="hidden w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. Pipe Thickness">
                                 </div>
 
                                 <div>
                                     <label for="specification_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value</label>
-                                    <input x-model="selectedSpecificationValue" @keydown.enter.prevent="addSelectedSpecification" type="text" id="specification_value" :disabled="hasReachedSpecificationLimit" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
+                                    <input type="text" id="specification_value" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
                                 </div>
 
                                 <div>
-                                    <button type="button" @click="addSelectedSpecification" :disabled="!canAddSelectedSpecification" class="inline-flex h-[42px] w-full items-center justify-center rounded-lg bg-primary-700 px-3 text-sm font-semibold text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
+                                    <button type="button" id="add-specification" disabled class="inline-flex h-[42px] w-full items-center justify-center rounded-lg bg-primary-700 px-3 text-sm font-semibold text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        <span x-text="specificationEntryMode === 'new' ? 'Create & add' : 'Add'"></span>
+                                        <span id="add-specification-label">Add</span>
                                     </button>
                                 </div>
                             </div>
 
-                            <p x-show="specificationError" x-text="specificationError" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400"></p>
-                            <p x-show="hasReachedSpecificationLimit" class="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 specifications can be added.</p>
+                            <p id="specification-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400"></p>
+                            <p id="specification-limit" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 specifications can be added.</p>
                         </div>
 
                         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
@@ -220,31 +193,10 @@
                                 <span class="col-span-1 text-right">Action</span>
                             </div>
 
-                            <div x-show="specificationRows.length === 0" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <div id="empty-specifications" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                 No specifications added yet.
                             </div>
-
-                            <template x-for="(specification, index) in specificationRows" :key="specification.id">
-                                <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center">
-                                    <div class="sm:col-span-5">
-                                        <label :for="'selected-specification-name-' + specification.id" class="sr-only">Specification name</label>
-                                        <select :value="specification.name" @change="updateRowSpecification(specification, $event.target.value)" :name="'specifications[' + index + '][name]'" :id="'selected-specification-name-' + specification.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                            <template x-for="specificationName in availableSpecifications" :key="'row-' + specification.id + '-' + specificationName">
-                                                <option :value="specificationName" :selected="normalizeSpecificationName(specification.name) === normalizeSpecificationName(specificationName)" :disabled="isSpecificationSelectedExcept(specificationName, specification.id)" x-text="specificationName"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                    <div class="sm:col-span-6">
-                                        <label :for="'selected-specification-value-' + specification.id" class="sr-only">Specification value</label>
-                                        <input x-model="specification.value" type="text" :name="'specifications[' + index + '][value]'" :id="'selected-specification-value-' + specification.id" class="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
-                                    </div>
-                                    <div class="flex justify-end sm:col-span-1">
-                                        <button type="button" @click="removeSpecification(specification.id)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
+                            <div id="specification-rows"></div>
                         </div>
                     </div>
                 </section>
@@ -262,9 +214,9 @@
                         <div>
                             <div class="mb-2 flex items-center justify-between gap-3">
                                 <label for="description" class="block text-sm font-medium text-gray-900 dark:text-white">Product description</label>
-                                <span class="text-xs text-gray-500 dark:text-gray-400"><span x-text="form.description.length"></span> / 2,000</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400"><span id="description-count">0</span> / 2,000</span>
                             </div>
-                            <textarea x-model="form.description" name="description" id="description" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Describe benefits, usage and care instructions"></textarea>
+                            <textarea name="description" id="description" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Describe benefits, usage and care instructions">{{ old('description') }}</textarea>
                         </div>
 
                         <div>
@@ -275,7 +227,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m3-3 2-2a4 4 0 015.656 5.656l-1 1"/>
                                     </svg>
                                 </div>
-                                <input x-model="form.websiteUrl" type="url" name="website_url" id="website_url" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="https://example.com/product/...">
+                                <input type="url" name="website_url" id="website_url" value="{{ old('website_url') }}" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="https://example.com/product/...">
                             </div>
                         </div>
                     </div>
@@ -289,7 +241,7 @@
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Product preview</h2>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Customer-facing QR card</p>
                         </div>
-                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="currentStatusName.toLowerCase() === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'" x-text="currentStatusName || 'No status'"></span>
+                        <span id="preview-status" class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"></span>
                     </div>
 
                     <div class="p-5">
@@ -302,52 +254,47 @@
                             <div class="col-span-2">
                                 <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image</p>
                                 <label for="main_image" class="group relative flex aspect-[16/10] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
-                                    <img x-show="mainImagePreview" :src="mainImagePreview" class="h-full w-full object-cover" alt="Main product image preview">
-                                    <div x-show="!mainImagePreview" class="p-4 text-center">
+                                    <img id="main-image-preview" class="hidden h-full w-full object-cover" alt="Main product image preview">
+                                    <div id="main-image-placeholder" class="p-4 text-center">
                                         <span class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-400 shadow-sm dark:bg-gray-800">
                                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         </span>
                                         <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Upload main image</p>
                                     </div>
-                                    <span x-show="mainImagePreview" class="absolute bottom-2 right-2 rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
-                                    <input @change="previewImage($event, 'main')" id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" class="hidden">
+                                    <span id="main-image-change" class="absolute bottom-2 right-2 hidden rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" class="hidden">
                                 </label>
                             </div>
 
                             <div>
                                 <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Thumbnail</p>
                                 <label for="thumbnail_image" class="group relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
-                                    <img x-show="thumbnailImagePreview" :src="thumbnailImagePreview" class="h-full w-full object-cover" alt="Thumbnail image preview">
-                                    <div x-show="!thumbnailImagePreview" class="p-2 text-center">
+                                    <img id="thumbnail-image-preview" class="hidden h-full w-full object-cover" alt="Thumbnail image preview">
+                                    <div id="thumbnail-image-placeholder" class="p-2 text-center">
                                         <svg class="mx-auto mb-1.5 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
                                         <p class="text-[11px] font-semibold leading-4 text-gray-700 dark:text-gray-200">Add thumbnail</p>
                                     </div>
-                                    <span x-show="thumbnailImagePreview" class="absolute bottom-2 right-2 rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
-                                    <input @change="previewImage($event, 'thumbnail')" id="thumbnail_image" name="thumbnail_image" type="file" accept="image/png,image/jpeg" class="hidden">
+                                    <span id="thumbnail-image-change" class="absolute bottom-2 right-2 hidden rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input id="thumbnail_image" name="thumbnail_image" type="file" accept="image/png,image/jpeg" class="hidden">
                                 </label>
                             </div>
                         </div>
 
                         <div class="mt-5">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400" x-text="currentCategory.name || 'No category selected'"></p>
-                            <h3 class="mt-1.5 line-clamp-2 text-lg font-bold text-gray-900 dark:text-white" x-text="form.name || 'Untitled product'"></h3>
+                            <p id="preview-category" class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400"></p>
+                            <h3 id="preview-name" class="mt-1.5 line-clamp-2 text-lg font-bold text-gray-900 dark:text-white"></h3>
                             <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
-                                <span x-text="form.brand"></span>
+                                <span id="preview-brand"></span>
                                 <span class="h-1 w-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                                <span x-text="form.model"></span>
+                                <span id="preview-model"></span>
                             </div>
                         </div>
 
                         <dl class="mt-5 divide-y divide-gray-100 rounded-lg border border-gray-200 px-4 dark:divide-gray-700 dark:border-gray-700">
-                            <div x-show="populatedSpecifications.length === 0" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                            <div id="empty-preview-specifications" class="py-4 text-center text-xs text-gray-500 dark:text-gray-400">
                                 Added specifications will appear here.
                             </div>
-                            <template x-for="specification in populatedSpecifications" :key="'preview-' + specification.id">
-                                <div class="flex items-center justify-between gap-4 py-2.5 text-sm">
-                                    <dt class="text-gray-500 dark:text-gray-400" x-text="specification.name"></dt>
-                                    <dd class="text-right font-medium text-gray-900 dark:text-white" x-text="specification.value || '—'"></dd>
-                                </div>
-                            </template>
+                            <div id="preview-specifications"></div>
                         </dl>
 
                         <div class="mt-5 flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
@@ -358,7 +305,7 @@
                             </div>
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">QR destination</p>
-                                <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="form.websiteUrl || 'Link will be generated after creation'"></p>
+                                <p id="preview-website-url" class="truncate text-xs text-gray-500 dark:text-gray-400"></p>
                             </div>
                         </div>
                     </div>
@@ -385,166 +332,186 @@
 
 @section('scripts')
 <script>
-    window.productCreateForm = function (categories, specifications, statuses, brands, initialForm, initialSpecificationRows) {
-        const rows = (initialSpecificationRows || [])
-            .filter((row) => (row.name || '').trim() || (row.value || '').trim())
-            .map((row, index) => ({
-                id: index + 1,
-                name: row.name || '',
-                value: row.value || ''
-            }));
+    $(function () {
+        const maxSpecifications = 8;
+        const categories = @js($categories);
+        const statuses = @js($statuses);
+        let availableSpecifications = [...new Set(@js($specifications))];
+        let nextId = 1;
+        let entryMode = 'choose';
+        let rows = (@js(old('specifications', [])) || [])
+            .filter(row => String(row.name || '').trim() || String(row.value || '').trim())
+            .map(row => ({ id: nextId++, name: row.name || '', value: row.value || '' }));
 
-        const availableSpecifications = Array.from(new Set([
-            ...(specifications || []),
-            ...rows.map((row) => row.name).filter(Boolean)
-        ]));
+        rows.forEach(row => {
+            if (row.name && !availableSpecifications.some(name => normalize(name) === normalize(row.name))) {
+                availableSpecifications.push(row.name);
+            }
+        });
 
-        return {
-            categories,
-            statuses,
-            brands,
-            availableSpecifications,
-            specificationRows: rows,
-            maxSpecifications: 8,
-            nextSpecificationId: rows.length + 1,
-            specificationEntryMode: 'choose',
-            selectedSpecificationName: '',
-            selectedSpecificationValue: '',
-            newSpecificationName: '',
-            specificationError: '',
-            mainImagePreview: '',
-            thumbnailImagePreview: '',
-            form: {
-                productCode: initialForm.productCode || '',
-                name: initialForm.name || '',
-                brand: initialForm.brand || '',
-                model: initialForm.model || '',
-                country: initialForm.country || '',
-                statusId: initialForm.statusId ? String(initialForm.statusId) : '',
-                categoryId: initialForm.categoryId ? String(initialForm.categoryId) : '',
-                websiteUrl: initialForm.websiteUrl || '',
-                description: initialForm.description || ''
-            },
-            get currentCategory() {
-                return this.categories.find((category) => String(category.id) === String(this.form.categoryId)) || { name: '' };
-            },
-            get currentStatusName() {
-                const status = this.statuses.find((status) => String(status.id) === String(this.form.statusId));
-                return status ? status.name : '';
-            },
-            get populatedSpecifications() {
-                return this.specificationRows.filter((specification) => specification.name.trim() || specification.value.trim());
-            },
-            get hasReachedSpecificationLimit() {
-                return this.specificationRows.length >= this.maxSpecifications;
-            },
-            get canAddSelectedSpecification() {
-                const specificationName = this.currentEntrySpecificationName();
+        const activeModeClasses = 'bg-primary-600 text-white shadow-sm';
+        const inactiveModeClasses = 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white';
 
-                return !this.hasReachedSpecificationLimit
-                    && specificationName
-                    && !this.isSpecificationSelected(specificationName);
-            },
-            normalizeSpecificationName(name) {
-                return (name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
-            },
-            isSpecificationSelected(name) {
-                return this.isSpecificationSelectedExcept(name);
-            },
-            isSpecificationSelectedExcept(name, currentId = null) {
-                const normalizedName = this.normalizeSpecificationName(name);
-                return this.specificationRows.some((specification) => {
-                    return specification.id !== currentId && this.normalizeSpecificationName(specification.name) === normalizedName;
-                });
-            },
-            currentEntrySpecificationName() {
-                if (this.specificationEntryMode === 'new') {
-                    return this.newSpecificationName.trim().replace(/\s+/g, ' ');
-                }
+        function normalize(value) {
+            return String(value || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+        }
 
-                return this.selectedSpecificationName;
-            },
-            setSpecificationEntryMode(mode) {
-                if (this.hasReachedSpecificationLimit) return;
+        function escapeHtml(value) {
+            return $('<div>').text(value == null ? '' : String(value)).html()
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-                this.specificationEntryMode = mode;
-                this.specificationError = '';
+        function isSelected(name, exceptId = null) {
+            return rows.some(row => row.id !== exceptId && normalize(row.name) === normalize(name));
+        }
 
-                if (mode === 'new') {
-                    this.selectedSpecificationName = '';
-                    this.$nextTick(() => document.getElementById('new_specification_name')?.focus());
-                } else {
-                    this.newSpecificationName = '';
-                    this.$nextTick(() => document.getElementById('specification_picker')?.focus());
-                }
-            },
-            addSelectedSpecification() {
-                this.specificationError = '';
+        function entryName() {
+            const value = entryMode === 'new' ? $('#new_specification_name').val() : $('#specification_picker').val();
+            return String(value || '').trim().replace(/\s+/g, ' ');
+        }
 
-                if (this.hasReachedSpecificationLimit) {
-                    this.specificationError = 'Maximum 8 specifications can be added.';
-                    return;
-                }
+        function showError(message = '') {
+            $('#specification-error').text(message).toggleClass('hidden', !message);
+        }
 
-                const requestedName = this.currentEntrySpecificationName();
+        function renderPicker() {
+            const selected = $('#specification_picker').val() || '';
+            const options = ['<option value="">Choose specification</option>'];
+            availableSpecifications.forEach(name => {
+                options.push(`<option value="${escapeHtml(name)}" ${isSelected(name) ? 'disabled' : ''}>${escapeHtml(name)}</option>`);
+            });
+            $('#specification_picker').html(options.join('')).val(selected);
+        }
 
-                if (!requestedName) {
-                    this.specificationError = this.specificationEntryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.';
-                    return;
-                }
+        function renderRows() {
+            const optionsFor = row => availableSpecifications.map(name =>
+                `<option value="${escapeHtml(name)}" ${normalize(row.name) === normalize(name) ? 'selected' : ''} ${isSelected(name, row.id) ? 'disabled' : ''}>${escapeHtml(name)}</option>`
+            ).join('');
 
-                const existingName = this.availableSpecifications.find((specificationName) => this.normalizeSpecificationName(specificationName) === this.normalizeSpecificationName(requestedName));
-                const specificationName = existingName || requestedName;
+            $('#specification-rows').html(rows.map((row, index) => `
+                <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center" data-row-id="${row.id}">
+                    <div class="sm:col-span-5">
+                        <label for="selected-specification-name-${row.id}" class="sr-only">Specification name</label>
+                        <select name="specifications[${index}][name]" id="selected-specification-name-${row.id}" class="specification-row-name block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm font-semibold text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">${optionsFor(row)}</select>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label for="selected-specification-value-${row.id}" class="sr-only">Specification value</label>
+                        <input value="${escapeHtml(row.value)}" name="specifications[${index}][value]" id="selected-specification-value-${row.id}" class="specification-row-value block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
+                    </div>
+                    <div class="flex justify-end sm:col-span-1">
+                        <button type="button" class="remove-specification inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>`).join(''));
 
-                if (this.isSpecificationSelected(specificationName)) {
-                    this.specificationError = 'This specification has already been added to this product.';
-                    return;
-                }
+            const limitReached = rows.length >= maxSpecifications;
+            $('#specification-count').text(rows.length);
+            $('#empty-specifications').toggleClass('hidden', rows.length > 0);
+            $('#specification-limit').toggleClass('hidden', !limitReached);
+            $('#new-specification-mode, #specification_picker, #new_specification_name, #specification_value').prop('disabled', limitReached);
+            renderPicker();
+            renderPreviewSpecifications();
+            updateAddButton();
+        }
 
-                if (!existingName) {
-                    this.availableSpecifications.push(specificationName);
-                }
+        function renderPreviewSpecifications() {
+            const populated = rows.filter(row => normalize(row.name) || String(row.value || '').trim());
+            $('#empty-preview-specifications').toggleClass('hidden', populated.length > 0);
+            $('#preview-specifications').html(populated.map(row => `
+                <div class="flex items-center justify-between gap-4 py-2.5 text-sm">
+                    <dt class="text-gray-500 dark:text-gray-400">${escapeHtml(row.name)}</dt>
+                    <dd class="text-right font-medium text-gray-900 dark:text-white">${escapeHtml(row.value || '—')}</dd>
+                </div>`).join(''));
+        }
 
-                this.specificationRows.push({
-                    id: this.nextSpecificationId++,
-                    name: specificationName,
-                    value: this.selectedSpecificationValue.trim()
-                });
-                this.selectedSpecificationName = '';
-                this.selectedSpecificationValue = '';
-                this.newSpecificationName = '';
-                this.specificationEntryMode = 'choose';
-                this.$nextTick(() => document.getElementById('specification_picker')?.focus());
-            },
-            updateRowSpecification(specification, name) {
-                this.specificationError = '';
+        function setEntryMode(mode) {
+            if (mode === 'new' && rows.length >= maxSpecifications) return;
+            entryMode = mode;
+            showError();
+            const isNew = mode === 'new';
+            $('#specification_picker').toggleClass('hidden', isNew);
+            $('#new_specification_name').toggleClass('hidden', !isNew).toggleClass('block', isNew);
+            $('#specification-name-label').text(isNew ? 'New specification name' : 'Specification');
+            $('#add-specification-label').text(isNew ? 'Create & add' : 'Add');
+            $('#choose-specification-mode').toggleClass(activeModeClasses, !isNew).toggleClass(inactiveModeClasses, isNew);
+            $('#new-specification-mode').toggleClass(activeModeClasses, isNew).toggleClass(inactiveModeClasses, !isNew);
+            if (isNew) $('#specification_picker').val(''); else $('#new_specification_name').val('');
+            (isNew ? $('#new_specification_name') : $('#specification_picker')).trigger('focus');
+            updateAddButton();
+        }
 
-                if (this.isSpecificationSelectedExcept(name, specification.id)) {
-                    this.specificationError = 'This specification has already been added to this product.';
-                    return;
-                }
+        function updateAddButton() {
+            const name = entryName();
+            $('#add-specification').prop('disabled', rows.length >= maxSpecifications || !name || isSelected(name));
+        }
 
-                specification.name = name;
-            },
-            removeSpecification(id) {
-                this.specificationRows = this.specificationRows.filter((specification) => specification.id !== id);
-                this.specificationError = '';
-            },
-            previewImage(event, type) {
-                const file = event.target.files && event.target.files[0];
-                if (!file) {
-                    if (type === 'main') this.mainImagePreview = '';
-                    if (type === 'thumbnail') this.thumbnailImagePreview = '';
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = (loadEvent) => {
-                    if (type === 'main') this.mainImagePreview = loadEvent.target.result;
-                    if (type === 'thumbnail') this.thumbnailImagePreview = loadEvent.target.result;
-                };
-                reader.readAsDataURL(file);
-            },
-        };
-    };
+        function addSpecification() {
+            showError();
+            if (rows.length >= maxSpecifications) return showError('Maximum 8 specifications can be added.');
+            const requestedName = entryName();
+            if (!requestedName) return showError(entryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.');
+            const existingName = availableSpecifications.find(name => normalize(name) === normalize(requestedName));
+            const name = existingName || requestedName;
+            if (isSelected(name)) return showError('This specification has already been added to this product.');
+            if (!existingName) availableSpecifications.push(name);
+            rows.push({ id: nextId++, name, value: String($('#specification_value').val() || '').trim() });
+            $('#specification_picker, #new_specification_name, #specification_value').val('');
+            setEntryMode('choose');
+            renderRows();
+        }
+
+        function updateProductPreview() {
+            const category = categories.find(item => String(item.id) === String($('#category').val()));
+            const status = statuses.find(item => String(item.id) === String($('#status').val()));
+            const statusName = status ? status.name : '';
+            $('#preview-category').text(category ? category.name : 'No category selected');
+            $('#preview-name').text($('#name').val() || 'Untitled product');
+            $('#preview-brand').text($('#brand').val());
+            $('#preview-model').text($('#model').val());
+            $('#preview-website-url').text($('#website_url').val() || 'Link will be generated after creation');
+            $('#description-count').text($('#description').val().length);
+            $('#preview-status').text(statusName || 'No status')
+                .toggleClass('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', statusName.toLowerCase() === 'active')
+                .toggleClass('bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300', statusName.toLowerCase() !== 'active');
+        }
+
+        function previewImage(input, type) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => {
+                $(`#${type}-image-preview`).attr('src', event.target.result).removeClass('hidden');
+                $(`#${type}-image-placeholder`).addClass('hidden');
+                $(`#${type}-image-change`).removeClass('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        $('#choose-specification-mode').on('click', () => setEntryMode('choose'));
+        $('#new-specification-mode').on('click', () => setEntryMode('new'));
+        $('#add-specification').on('click', addSpecification);
+        $('#specification_picker, #new_specification_name, #specification_value').on('input change', updateAddButton).on('keydown', event => {
+            if (event.key === 'Enter') { event.preventDefault(); addSpecification(); }
+        });
+        $('#specification-rows').on('input', '.specification-row-value', function () {
+            rows.find(row => row.id === Number($(this).closest('[data-row-id]').data('row-id'))).value = $(this).val();
+            renderPreviewSpecifications();
+        }).on('change', '.specification-row-name', function () {
+            const row = rows.find(item => item.id === Number($(this).closest('[data-row-id]').data('row-id')));
+            if (isSelected($(this).val(), row.id)) return showError('This specification has already been added to this product.');
+            row.name = $(this).val(); showError(); renderRows();
+        }).on('click', '.remove-specification', function () {
+            const id = Number($(this).closest('[data-row-id]').data('row-id'));
+            rows = rows.filter(row => row.id !== id); showError(); renderRows();
+        });
+        $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
+        $('#main_image').on('change', function () { previewImage(this, 'main'); });
+        $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
+
+        renderRows();
+        updateProductPreview();
+    });
 </script>
 @endsection

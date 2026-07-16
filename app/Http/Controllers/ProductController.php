@@ -38,7 +38,7 @@ class ProductController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $statuses = Status::whereIn('id', [3, 4])
+        $statuses = Status::whereIn('id', [1, 2])
             ->orderBy('id')
             ->get(['id', 'name']);
 
