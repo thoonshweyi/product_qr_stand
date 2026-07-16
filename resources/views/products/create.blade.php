@@ -61,14 +61,9 @@
         </div>
     @endif
 
-    <form id="product-create-form" action="{{ route('products.api.store') }}" method="POST" enctype="multipart/form-data" novalidate>
+    <form id="product-create-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf
-        <div id="api-validation-errors" class="mx-auto mt-6 hidden w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8" role="alert">
-            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
-                <p class="font-semibold">Please check the form and try again.</p>
-                <ul id="api-validation-error-list" class="mt-2 list-disc space-y-1 pl-5"></ul>
-            </div>
-        </div>
+
         <div class="mx-auto grid w-full max-w-screen-2xl gap-6 p-4 sm:p-6 lg:grid-cols-12 lg:p-8">
             <div class="space-y-6 lg:col-span-8">
                 <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -83,7 +78,7 @@
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
                         <div>
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
-                            <input type="text" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
+                            <input type="search" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
                             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p>
                         </div>
 
@@ -99,12 +94,12 @@
 
                         <div class="sm:col-span-2">
                             <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product name <span class="text-red-600">*</span></label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name">
+                            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name" readonly>
                         </div>
 
                         <div>
                             <label for="brand" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Brand <span class="text-red-600">*</span></label>
-                            <input type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name">
+                            <input type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name" readonly>
                             <datalist id="brand-options">
                                 @foreach ($brands as $brand)
                                     <option value="{{ $brand }}"></option>
@@ -119,7 +114,7 @@
 
                         <div>
                             <label for="category" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-600">*</span></label>
-                            <select name="category_id" id="category" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select name="category_id" id="category" required class="w-full block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white readonly">
                                 <option value="">Choose category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}" @selected((string) old('category_id', $categories->first()?->id) === (string) $category->id)>{{ $category->name }}</option>
@@ -129,10 +124,10 @@
 
                         <div>
                             <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin <span class="text-red-600">*</span></label>
-                            <select name="country_of_origin" id="country" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <select name="country_of_origin" id="country" required class="w-full block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose country</option>
-                                @foreach (['China', 'Thailand', 'Vietnam', 'Myanmar'] as $country)
-                                    <option value="{{ $country }}" @selected(old('country_of_origin') === $country)>{{ $country }}</option>
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country->id }}" @selected((string) old('country_of_origin', $country->first()?->id) === (string) $country->id)>{{ $country->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -327,9 +322,20 @@
                             </button>
                         </div>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Product will be saved with its specifications and images.</p>
+
+                        <div id="api-validation-errors" class="mx-auto mt-6 hidden w-full max-w-screen-2xl px-4s sm:px-6s lg:px-8s" role="alert">
+                            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+                                <p class="font-semibold">Please check the form and try again.</p>
+                                <ul id="api-validation-error-list" class="mt-2 list-disc space-y-1 pl-5"></ul>
+                            </div>
+                        </div>
                     </div>
                 </section>
+
+                 
             </aside>
+
+        
         </div>
     </form>
 
@@ -338,6 +344,7 @@
 
 @section('scripts')
 <script>
+    // Using jQuery DOM same as weather forecast json
     $(function () {
         const maxSpecifications = 8;
         const categories = @js($categories);
@@ -528,7 +535,7 @@
             } else {
                 rows.forEach((row, index) => {
                     if (!String(row.name || '').trim()) errors[`specifications.${index}.name`] = [`Specification ${index + 1} name is required.`];
-                    if (!String(row.value || '').trim()) errors[`specifications.${index}.value`] = [`Specification ${index + 1} value is required.`];
+                    if (!String(row.value || '').trim()) errors[`specifications.${index}.value`] = [`Specification '${row.name}' value is required.`];
                 });
             }
 
@@ -588,6 +595,57 @@
 
         renderRows();
         updateProductPreview();
+    });
+
+
+
+    $('#category').select2({
+        placeholder: 'Choose a Category',
+    });
+    $('#category').on('select2:opening', function (event) {
+        event.preventDefault();
+    });
+
+    $('#country').select2({
+        placeholder: 'Choose a Category',
+    });
+    
+
+    $('#product_code').on('blur', async () => {
+        console.log("hay");
+        var product_code = $('#product_code').val();
+
+        await $.ajax({
+            url:"{{url('/productsearch')}}",
+            method:"GET",
+            data:{"product_code":product_code},
+            beforeSend:function(){
+                $(".loader").addClass("show");
+            },
+            success:function(response){
+                console.log(response); // {status: 'scuccess', data: Array(2)}
+
+                var data = response.data;
+
+                // console.log(data);
+
+                $("#name").val(data.product_name).trigger('input');
+                $("#brand").val(data.brand).trigger('input');
+                
+                $("#category option").filter(function () {
+                    return $(this).text().trim() === data.maincategory;
+                }).prop("selected", true);
+                $("#category").trigger('change');
+
+            },
+            // error:function(response){
+            //      console.log(response);
+            // },
+            complete:function(){
+                console.log("complete:");
+                $(".loader").removeClass("show");
+            }
+        });
     });
 </script>
 @endsection

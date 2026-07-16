@@ -42,9 +42,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('roles', RolesController::class);
 
-    Route::post('/api/products', [ProductController::class, 'store'])
-        ->name('products.api.store');
+
     Route::resource('products', ProductController::class);
+    Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/productscreatedemo', function () {
         // Static sample data for the product form prototype. No database records are used here.
         $sampleCategories = [
