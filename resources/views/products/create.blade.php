@@ -61,8 +61,14 @@
         </div>
     @endif
 
-    <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+    <form id="product-create-form" action="{{ route('products.api.store') }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf
+        <div id="api-validation-errors" class="mx-auto mt-6 hidden w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8" role="alert">
+            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+                <p class="font-semibold">Please check the form and try again.</p>
+                <ul id="api-validation-error-list" class="mt-2 list-disc space-y-1 pl-5"></ul>
+            </div>
+        </div>
         <div class="mx-auto grid w-full max-w-screen-2xl gap-6 p-4 sm:p-6 lg:grid-cols-12 lg:p-8">
             <div class="space-y-6 lg:col-span-8">
                 <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -107,8 +113,8 @@
                         </div>
 
                         <div>
-                            <label for="model" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Model</label>
-                            <input type="text" name="model" id="model" value="{{ old('model') }}" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
+                            <label for="model" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Model <span class="text-red-600">*</span></label>
+                            <input type="text" name="model" id="model" value="{{ old('model') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
                         </div>
 
                         <div>
@@ -122,8 +128,8 @@
                         </div>
 
                         <div>
-                            <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin</label>
-                            <select name="country_of_origin" id="country" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                            <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin <span class="text-red-600">*</span></label>
+                            <select name="country_of_origin" id="country" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose country</option>
                                 @foreach (['China', 'Thailand', 'Vietnam', 'Myanmar'] as $country)
                                     <option value="{{ $country }}" @selected(old('country_of_origin') === $country)>{{ $country }}</option>
@@ -170,7 +176,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="specification_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value</label>
+                                    <label for="specification_value" class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-300">Value <span class="text-red-600">*</span></label>
                                     <input type="text" id="specification_value" class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-800" placeholder="e.g. 370W (0.5HP)">
                                 </div>
 
@@ -252,7 +258,7 @@
 
                         <div class="grid grid-cols-3 gap-3">
                             <div class="col-span-2">
-                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image</p>
+                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image <span class="text-red-600">*</span></p>
                                 <label for="main_image" class="group relative flex aspect-[16/10] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
                                     <img id="main-image-preview" class="hidden h-full w-full object-cover" alt="Main product image preview">
                                     <div id="main-image-placeholder" class="p-4 text-center">
@@ -262,7 +268,7 @@
                                         <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Upload main image</p>
                                     </div>
                                     <span id="main-image-change" class="absolute bottom-2 right-2 hidden rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
-                                    <input id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" class="hidden">
+                                    <input id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" required class="hidden">
                                 </label>
                             </div>
 
@@ -313,11 +319,11 @@
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                             <a href="{{ route('products.index') }}" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Cancel</a>
-                            <button type="submit" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                            <button type="submit" id="create-product-button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Create product
+                                <span id="create-product-button-label">Create product</span>
                             </button>
                         </div>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Product will be saved with its specifications and images.</p>
@@ -397,7 +403,7 @@
                     </div>
                     <div class="sm:col-span-6">
                         <label for="selected-specification-value-${row.id}" class="sr-only">Specification value</label>
-                        <input value="${escapeHtml(row.value)}" name="specifications[${index}][value]" id="selected-specification-value-${row.id}" class="specification-row-value block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
+                        <input value="${escapeHtml(row.value)}" name="specifications[${index}][value]" id="selected-specification-value-${row.id}" required class="specification-row-value block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
                     </div>
                     <div class="flex justify-end sm:col-span-1">
                         <button type="button" class="remove-specification inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
@@ -489,6 +495,46 @@
             reader.readAsDataURL(file);
         }
 
+        function displayValidationErrors(errors) {
+            const messages = Object.values(errors).flat();
+            $('#api-validation-error-list').html(messages.map(message => `<li>${escapeHtml(message)}</li>`).join(''));
+            $('#api-validation-errors').toggleClass('hidden', messages.length === 0);
+            if (messages.length) {
+                document.getElementById('api-validation-errors').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function clientValidationErrors() {
+            const errors = {};
+            const requiredFields = {
+                product_code: 'Product code is required.',
+                status: 'Status is required.',
+                name: 'Product name is required.',
+                brand: 'Brand is required.',
+                model: 'Model is required.',
+                category: 'Category is required.',
+                country: 'Country of origin is required.'
+            };
+
+            Object.entries(requiredFields).forEach(([id, message]) => {
+                if (!String($(`#${id}`).val() || '').trim()) errors[id] = [message];
+            });
+
+            const mainImage = document.getElementById('main_image').files[0];
+            if (!mainImage) errors.main_image = ['Main image is required.'];
+
+            if (!rows.length) {
+                errors.specifications = ['At least one product specification is required.'];
+            } else {
+                rows.forEach((row, index) => {
+                    if (!String(row.name || '').trim()) errors[`specifications.${index}.name`] = [`Specification ${index + 1} name is required.`];
+                    if (!String(row.value || '').trim()) errors[`specifications.${index}.value`] = [`Specification ${index + 1} value is required.`];
+                });
+            }
+
+            return errors;
+        }
+
         $('#choose-specification-mode').on('click', () => setEntryMode('choose'));
         $('#new-specification-mode').on('click', () => setEntryMode('new'));
         $('#add-specification').on('click', addSpecification);
@@ -509,6 +555,36 @@
         $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
+        $('#product-create-form').on('submit', function (event) {
+            event.preventDefault();
+            showError();
+
+            const errors = clientValidationErrors();
+            if (Object.keys(errors).length) {
+                displayValidationErrors(errors);
+                return;
+            }
+
+            displayValidationErrors({});
+            const $button = $('#create-product-button').prop('disabled', true);
+            $('#create-product-button-label').text('Saving...');
+
+            $.ajax({
+                url: this.action,
+                method: 'POST',
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                headers: { 'Accept': 'application/json' }
+            }).done(response => {
+                window.location.href = response.redirect;
+            }).fail(xhr => {
+                const response = xhr.responseJSON || {};
+                displayValidationErrors(response.errors || { request: [response.message || 'Unable to save the product. Please try again.'] });
+                $button.prop('disabled', false);
+                $('#create-product-button-label').text('Create product');
+            });
+        });
 
         renderRows();
         updateProductPreview();

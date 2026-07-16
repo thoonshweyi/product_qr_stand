@@ -21,9 +21,8 @@ class ProductController extends Controller
     {
         // $results = Product::query();
 
-
         // $products = $results->paginate(15);
-        return view("products.index",compact(
+        return view('products.index', compact(
             // "products",
             []
         ));
@@ -72,15 +71,15 @@ class ProductController extends Controller
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:255'],
-            'model' => ['nullable', 'string', 'max:255'],
-            'country_of_origin' => ['nullable', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255'],
+            'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'specifications' => ['nullable', 'array', 'max:8'],
-            'specifications.*.name' => ['required_with:specifications.*.value', 'nullable', 'string', 'max:255'],
-            'specifications.*.value' => ['nullable', 'string', 'max:255'],
+            'specifications' => ['required', 'array', 'min:1', 'max:8'],
+            'specifications.*.name' => ['required', 'string', 'max:255'],
+            'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);
 
         $specificationRows = collect($request->input('specifications', []))
@@ -99,9 +98,10 @@ class ProductController extends Controller
             ->isNotEmpty();
 
         if ($duplicateSpecification) {
-            return back()
-                ->withErrors(['specifications' => 'The same specification cannot be added twice.'])
-                ->withInput();
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => ['specifications' => ['The same specification cannot be added twice.']],
+            ], 422);
         }
 
         DB::transaction(function () use ($request, $validated, $specificationRows) {
@@ -139,7 +139,7 @@ class ProductController extends Controller
             }
 
             foreach (['main_image' => 'main', 'thumbnail_image' => 'thumbnail'] as $inputName => $type) {
-                if (!$request->hasFile($inputName)) {
+                if (! $request->hasFile($inputName)) {
                     continue;
                 }
 
@@ -151,9 +151,10 @@ class ProductController extends Controller
             }
         });
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product created successfully.');
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'redirect' => route('products.index'),
+        ], 201);
     }
 
     /**

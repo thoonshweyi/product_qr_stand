@@ -34,17 +34,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/dashboards', [DashboardsController::class, 'index'])->name('dashboards.index');
 
-    Route::get("/dashboards",[DashboardsController::class,'index'])->name("dashboards.index");
+    Route::resource('users', UsersController::class);
+    Route::resource('branches', BranchesController::class);
+    Route::resource('statuses', StatusesController::class);
 
-    Route::resource("users",UsersController::class);
-    Route::resource("branches",BranchesController::class);
-    Route::resource("statuses",StatusesController::class);
+    Route::resource('roles', RolesController::class);
 
-    Route::resource("roles",RolesController::class);
-
-    Route::resource("products",ProductController::class);
-    Route::get('/productscreatedemo',function(){
+    Route::post('/api/products', [ProductController::class, 'store'])
+        ->name('products.api.store');
+    Route::resource('products', ProductController::class);
+    Route::get('/productscreatedemo', function () {
         // Static sample data for the product form prototype. No database records are used here.
         $sampleCategories = [
             'water-pump' => ['name' => 'Water Pump', 'group' => 'Garden'],
@@ -55,7 +56,6 @@ Route::middleware('auth')->group(function () {
         $sampleAttributes = ['Power', 'Maximum Head', 'Flow Rate', 'Inlet Size', 'Outlet Size', 'Weight', 'Material', 'Color'];
         $sampleBrands = ['IM Dayuan', 'Cotto', 'DECO', 'Ispa', 'TOTO', 'Zhangshi'];
         $sampleStatuses = ['Draft', 'Active'];
-
 
         return view('products.createdemo', compact('sampleCategories', 'sampleAttributes', 'sampleBrands', 'sampleStatuses'));
     });
