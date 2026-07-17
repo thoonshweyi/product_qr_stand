@@ -666,9 +666,6 @@
                 // }
 
                 displayValidationErrors({});
-                const $button = $('#create-product-button').prop('disabled', true);
-                $('#create-product-button-label').text('Saving...');
-
                 // $.ajax({
                 //     url: this.action,
                 //     method: 'POST',
@@ -696,7 +693,9 @@
                         isSubmitting = true;                            
                         $(".fullloader").removeClass("hidden");
                         // Swal.disableButtons();
+
                         $('#create-product-button').prop('disabled', true);
+                        $('#create-product-button-label').text('Saving...');
 
                         console.log('submit');
                         const form = document.getElementById('product-create-form');
@@ -707,6 +706,8 @@
                             type:"POST",
                             dataType: "json",
                             data:formData,
+                            processData: false,
+                            contentType: false,
                             success:async function(response){
                                 console.log(response);
 
@@ -719,12 +720,10 @@
                                         text: data.message,
                                     });
                                     
-                                    
-                                    // window.open(`/receive_goods/rg_documents/${receive_good_document.id}/print-pdf`, '_blank');
 
-                                    // setTimeout(() => {                                            
-                                    //     window.location.href="{{ route('products.index') }}";
-                                    // }, 3000);
+                                    setTimeout(() => {                                            
+                                        window.location.href="{{ route('products.index') }}";
+                                    }, 3000);
 
                                 }else{
                                     Swal.fire({
@@ -768,3 +767,63 @@
 
 </script>
 @endsection
+
+
+
+<!-- Note -->
+<!-- ဒီနှစ်ခုက jQuery AJAX ကို FormData ပို့တဲ့အခါ မဖြစ်မနေထည့်ရတဲ့ configuration ပါ။
+processData: false,
+contentType: false,
+processData: false
+jQuery က ပုံမှန်အားဖြင့် ပို့မယ့် data ကို query string ပြောင်းပါတယ်။
+ဥပမာ:
+data: {
+    name: 'COTTO',
+    model: 'ABC'
+}
+ကို:
+name=COTTO&model=ABC
+အဖြစ် ပြောင်းပါတယ်။
+ဒါပေမဲ့ FormData ထဲမှာ image/file တွေပါနိုင်လို့ query string အဖြစ်ပြောင်းလို့မရပါဘူး။
+processData: false
+ဆိုတာ:
+FormData ကို query string မပြောင်းဘဲ မူလအတိုင်းပို့ပါ။
+
+လို့ jQuery ကိုပြောတာပါ။
+မထည့်ရင် ဒီ error ဖြစ်ပါတယ်:
+TypeError: Illegal invocation
+contentType: false
+File upload request မှာ browser က ဒီလို header တည်ဆောက်ရပါတယ်:
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...
+boundary က text data နဲ့ file data ကို ခွဲဖို့ browser က အလိုအလျောက်ထည့်ပေးတဲ့ value ပါ။
+contentType: false
+ဆိုတာ:
+Content-Type ကို jQuery က ကိုယ်တိုင်မသတ်မှတ်ဘဲ browser ကို သတ်မှတ်ခိုင်းပါ။
+
+လို့ဆိုလိုပါတယ်။
+multipart/form-data ကို ကိုယ်တိုင်ရေးတာလည်း မမှန်ပါ:
+// မသုံးရ
+contentType: 'multipart/form-data'
+ဒီလိုရေးရင် လိုအပ်တဲ့ boundary မပါနိုင်လို့ server က file ကို ဖတ်မရနိုင်ပါဘူး။
+အပြည့်အစုံ
+const form = document.getElementById('product-create-form');
+const formData = new FormData(form);
+
+$.ajax({
+    url: form.action,
+    type: 'POST',
+    data: formData,
+
+    processData: false, // FormData ကို query string မပြောင်းရန်
+    contentType: false, // Browser ကို multipart header သတ်မှတ်ခိုင်းရန်
+
+    success: function (response) {
+        console.log(response);
+    }
+});
+အတိုချုပ်:
+processData: false
+→ FormData ကို မပြောင်းနဲ့
+
+contentType: false
+→ File upload header ကို browser က သတ်မှတ်ပါစေ -->

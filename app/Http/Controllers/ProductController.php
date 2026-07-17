@@ -12,9 +12,13 @@ use App\Models\Specification;
 use App\Models\Status;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProductController extends Controller
 {
@@ -23,12 +27,12 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // $results = Product::query();
+        $results = Product::query();
 
-        // $products = $results->paginate(15);
+        $products = $results->paginate(15);
+        // dd($products);
         return view('products.index', compact(
-            // "products",
-            []
+            "products",
         ));
     }
 
@@ -89,7 +93,9 @@ class ProductController extends Controller
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);
-        dd($request);
+
+        $user = Auth::user();
+        $user_id = $user->id;
 
         $specificationRows = collect($request->input('specifications', []))
         ->map(function ($row) {
@@ -176,10 +182,6 @@ class ProductController extends Controller
             //         'type' => $type,
             //     ]);
             // }
-
-
-
-            dd('hay');
 
             DB::commit();
 
@@ -275,4 +277,56 @@ class ProductController extends Controller
         }
     }
 
+
+    // => Method 1
+    //      composer require endroid/qr-code:^5.0
+    // public function generateQR(string $id){
+    //     $product = Product::findOrFail($id);   
+
+    //     $qrUrl = route('products.show', $product->id);
+    //     $qrCode = new QrCode(
+    //         data: $qrUrl,
+    //         size: 300,
+    //         margin: 10
+    //     );
+
+    //     $writer = new PngWriter();
+    //     $result = $writer->write($qrCode);
+
+    //     $qrPath = "products/qr/product-{$product->id}.png";
+
+    //     Storage::disk('public')->put(
+    //         $qrPath,
+    //         $result->getString()
+    //     );
+    // }
+
+
+    // => Method 2
+    //  composer require simplesoftwareio/simple-qrcode
+    public function generateQR(string $id): string
+    {
+        $product = Product::findOrFail($id);
+
+        $uniqueId = Str::uuid();
+        $qrUrl = route('products.show', $product->id);
+
+        $directory = public_path('assets/img/product-qrcodes');
+        $fileName = "{$uniqueId}.png";
+        $absolutePath = "{$directory}/{$fileName}";
+        $relativePath = "assets/img/product-qrcodes/{$fileName}";
+
+        File::ensureDirectoryExists($directory, 0755, true);
+
+        $qrCode = QrCode::format('png')
+            ->size(300)
+            ->margin(2)
+            ->generate($qrUrl);
+
+        File::put($absolutePath, $qrCode);
+
+        return $relativePath;
+    }
+
+    
 }

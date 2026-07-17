@@ -45,6 +45,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('products', ProductController::class);
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
+    Route::get('/products/{id}/generateqr', [ProductController::class, 'generateQR'])->name('products.generateqr');
+
+
     Route::get('/productscreatedemo', function () {
         // Static sample data for the product form prototype. No database records are used here.
         $sampleCategories = [
@@ -59,6 +62,7 @@ Route::middleware('auth')->group(function () {
 
         return view('products.createdemo', compact('sampleCategories', 'sampleAttributes', 'sampleBrands', 'sampleStatuses'));
     });
+
 });
 
 require __DIR__.'/auth.php';
