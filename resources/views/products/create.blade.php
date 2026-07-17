@@ -76,6 +76,7 @@
                     </div>
 
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
+
                         <div>
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
                             <input type="search" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
@@ -93,7 +94,7 @@
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product name <span class="text-red-600">*</span></label>
+                            <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product Full Name <span class="text-red-600">*</span></label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name" readonly>
                         </div>
 
@@ -345,7 +346,8 @@
 @section('scripts')
 <script>
     // Using jQuery DOM same as weather forecast json
-    $(function () {
+    $(document).ready(function() {
+
         const maxSpecifications = 8;
         const categories = @js($categories);
         const statuses = @js($statuses);
@@ -397,6 +399,28 @@
             $('#specification_picker').html(options.join('')).val(selected);
         }
 
+        function initializeSpecificationSelect2() {
+            const $picker = $('#specification_picker');
+
+            if (!$picker.hasClass('select2-hidden-accessible')) {
+                $picker.select2({
+                    placeholder: 'Choose specification',
+                });
+            } else {
+                $picker.trigger('change.select2');
+            }
+
+            $('.specification-row-name').each(function () {
+                const $select = $(this);
+
+                if (!$select.hasClass('select2-hidden-accessible')) {
+                    $select.select2({
+                        placeholder: 'Choose specification',
+                    });
+                }
+            });
+        }
+
         function renderRows() {
             const optionsFor = row => availableSpecifications.map(name =>
                 `<option value="${escapeHtml(name)}" ${normalize(row.name) === normalize(name) ? 'selected' : ''} ${isSelected(name, row.id) ? 'disabled' : ''}>${escapeHtml(name)}</option>`
@@ -425,6 +449,7 @@
             $('#specification-limit').toggleClass('hidden', !limitReached);
             $('#new-specification-mode, #specification_picker, #new_specification_name, #specification_value').prop('disabled', limitReached);
             renderPicker();
+            initializeSpecificationSelect2();
             renderPreviewSpecifications();
             updateAddButton();
         }
@@ -445,13 +470,18 @@
             showError();
             const isNew = mode === 'new';
             $('#specification_picker').toggleClass('hidden', isNew);
+            $('#specification_picker').next('.select2-container').toggle(!isNew);
             $('#new_specification_name').toggleClass('hidden', !isNew).toggleClass('block', isNew);
             $('#specification-name-label').text(isNew ? 'New specification name' : 'Specification');
             $('#add-specification-label').text(isNew ? 'Create & add' : 'Add');
             $('#choose-specification-mode').toggleClass(activeModeClasses, !isNew).toggleClass(inactiveModeClasses, isNew);
             $('#new-specification-mode').toggleClass(activeModeClasses, isNew).toggleClass(inactiveModeClasses, !isNew);
             if (isNew) $('#specification_picker').val(''); else $('#new_specification_name').val('');
-            (isNew ? $('#new_specification_name') : $('#specification_picker')).trigger('focus');
+            if (isNew) {
+                $('#new_specification_name').trigger('focus');
+            } else {
+                $('#specification_picker').next('.select2-container').find('.select2-selection').trigger('focus');
+            }
             updateAddButton();
         }
 
@@ -562,90 +592,170 @@
         $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
-        $('#product-create-form').on('submit', function (event) {
-            event.preventDefault();
-            showError();
-
-            const errors = clientValidationErrors();
-            if (Object.keys(errors).length) {
-                displayValidationErrors(errors);
-                return;
-            }
-
-            displayValidationErrors({});
-            const $button = $('#create-product-button').prop('disabled', true);
-            $('#create-product-button-label').text('Saving...');
-
-            $.ajax({
-                url: this.action,
-                method: 'POST',
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                headers: { 'Accept': 'application/json' }
-            }).done(response => {
-                window.location.href = response.redirect;
-            }).fail(xhr => {
-                const response = xhr.responseJSON || {};
-                displayValidationErrors(response.errors || { request: [response.message || 'Unable to save the product. Please try again.'] });
-                $button.prop('disabled', false);
-                $('#create-product-button-label').text('Create product');
-            });
-        });
 
         renderRows();
         updateProductPreview();
-    });
 
 
 
-    $('#category').select2({
-        placeholder: 'Choose a Category',
-    });
-    $('#category').on('select2:opening', function (event) {
-        event.preventDefault();
-    });
-
-    $('#country').select2({
-        placeholder: 'Choose a Category',
-    });
-    
-
-    $('#product_code').on('blur', async () => {
-        console.log("hay");
-        var product_code = $('#product_code').val();
-
-        await $.ajax({
-            url:"{{url('/productsearch')}}",
-            method:"GET",
-            data:{"product_code":product_code},
-            beforeSend:function(){
-                $(".loader").addClass("show");
-            },
-            success:function(response){
-                console.log(response); // {status: 'scuccess', data: Array(2)}
-
-                var data = response.data;
-
-                // console.log(data);
-
-                $("#name").val(data.product_name).trigger('input');
-                $("#brand").val(data.brand).trigger('input');
-                
-                $("#category option").filter(function () {
-                    return $(this).text().trim() === data.maincategory;
-                }).prop("selected", true);
-                $("#category").trigger('change');
-
-            },
-            // error:function(response){
-            //      console.log(response);
-            // },
-            complete:function(){
-                console.log("complete:");
-                $(".loader").removeClass("show");
-            }
+        $('#category').select2({
+            placeholder: 'Choose a Category',
         });
+        $('#category').on('select2:opening', function (event) {
+            event.preventDefault();
+        });
+        $('#country').select2({
+            placeholder: 'Choose a Category',
+        });
+        
+        $('#product_code').on('blur', async () => {
+            console.log("hay");
+            var product_code = $('#product_code').val();
+
+            await $.ajax({
+                url:"{{url('/productsearch')}}",
+                method:"GET",
+                data:{"product_code":product_code},
+                beforeSend:function(){
+                    $(".loader").addClass("show");
+                },
+                success:function(response){
+                    console.log(response); // {status: 'scuccess', data: Array(2)}
+
+                    var data = response.data;
+
+                    // console.log(data);
+
+                    $("#name").val(data.product_name).trigger('input');
+                    $("#brand").val(data.brand).trigger('input');
+                    
+                    $("#category option").filter(function () {
+                        return $(this).text().trim() === data.maincategory;
+                    }).prop("selected", true);
+                    $("#category").trigger('change');
+
+                },
+                // error:function(response){
+                //      console.log(response);
+                // },
+                complete:function(){
+                    console.log("complete:");
+                    $(".loader").removeClass("show");
+                }
+            });
+        });
+
+
+
+        // Start Product Save
+            let isSubmitting = false;
+            $('#product-create-form').on('submit', function (event) {
+                event.preventDefault();
+                showError();
+
+                const errors = clientValidationErrors();
+                if (Object.keys(errors).length) {
+                    displayValidationErrors(errors);
+                    return;
+                }
+
+                displayValidationErrors({});
+                const $button = $('#create-product-button').prop('disabled', true);
+                $('#create-product-button-label').text('Saving...');
+
+                // $.ajax({
+                //     url: this.action,
+                //     method: 'POST',
+                //     data: new FormData(this),
+                //     processData: false,
+                //     contentType: false,
+                //     headers: { 'Accept': 'application/json' }
+                // }).done(response => {
+                //     window.location.href = response.redirect;
+                // }).fail(xhr => {
+                //     const response = xhr.responseJSON || {};
+                //     displayValidationErrors(response.errors || { request: [response.message || 'Unable to save the product. Please try again.'] });
+                //     $button.prop('disabled', false);
+                //     $('#create-product-button-label').text('Create product');
+                // });
+
+                Swal.fire({
+                    icon: "question",
+                    title: "Are you sure to save product?",
+                    // text: ``,
+                    showCancelButton: true,
+                }).then((result) => {
+                    if(result.isConfirmed)
+                    {
+                        isSubmitting = true;                            
+                        $(".fullloader").removeClass("hidden");
+                        // Swal.disableButtons();
+                        $('#create-product-button').prop('disabled', true);
+
+                        console.log('submit');
+                        $.ajax({
+                            url: this.action,
+                            type:"POST",
+                            dataType: "json",
+                            data:$(this).serialize(),
+                            success:async function(response){
+                                console.log(response);
+
+                                const data = response;
+
+                                if(data.success){
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "RG saved successfully!",
+                                        text: data.message,
+                                    });
+                                    
+                                    
+                                    // window.open(`/receive_goods/rg_documents/${receive_good_document.id}/print-pdf`, '_blank');
+
+                                    // setTimeout(() => {                                            
+                                    //     window.location.href="{{ route('products.index') }}";
+                                    // }, 3000);
+
+                                }else{
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Product Save Error!!",
+                                        text: `${data.message}`,
+                                    });
+
+                                    isSubmitting = false;
+                                    $(".fullloader").addClass("hidden");
+                                    $('#create-product-button').prop('disabled', false);
+                                    $('#create-product-button-label').text('Create product');
+
+                                }
+                            },
+                            error:function(response){
+                                console.log("Error: ",response);
+
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Product Save Error!!",
+                                    text: "Something went wrong while saving product.",
+                                });
+
+                                isSubmitting = false;
+                                $(".fullloader").addClass("hidden");
+                                $('#create-product-button').prop('disabled', false);
+                                $('#create-product-button-label').text('Create product');
+
+                            },
+                        
+                        });
+
+                    }
+                })
+            });
+
+        // End Product Save
+
     });
+
 </script>
 @endsection

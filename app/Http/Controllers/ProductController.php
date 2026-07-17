@@ -10,6 +10,7 @@ use App\Models\ProductImage;
 use App\Models\ProductSpecificationValue;
 use App\Models\Specification;
 use App\Models\Status;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -72,7 +73,6 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        dd("hay");
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
             'status_id' => ['required', 'exists:statuses,id'],
@@ -90,39 +90,20 @@ class ProductController extends Controller
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);
 
-        $specificationRows = collect($request->input('specifications', []))
-            ->map(function ($row) {
-                return [
-                    'name' => trim($row['name'] ?? ''),
-                    'value' => trim($row['value'] ?? ''),
-                ];
-            })
-            ->filter(fn ($row) => $row['name'] !== '')
-            ->values();
 
-        $duplicateSpecification = $specificationRows
-            ->map(fn ($row) => Str::of($row['name'])->squish()->lower()->toString())
-            ->duplicates()
-            ->isNotEmpty();
+        DB::beginTransaction();
+        try {
 
-        if ($duplicateSpecification) {
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => ['specifications' => ['The same specification cannot be added twice.']],
-            ], 422);
-        }
-
-        DB::transaction(function () use ($request, $validated, $specificationRows) {
             $product = Product::create([
-                'product_code' => $validated['product_code'],
-                'brand' => $validated['brand'],
-                'name' => $validated['name'],
-                'model' => $validated['model'] ?? '',
-                'country_of_origin' => $validated['country_of_origin'] ?? '',
-                'website_url' => $validated['website_url'] ?? '',
-                'description' => $validated['description'] ?? '',
-                'status_id' => $validated['status_id'] ?? null,
-                'category_id' => $validated['category_id'] ?? null,
+                'product_code' => $request['product_code'],
+                'brand' => $request['brand'],
+                'name' => $request['name'],
+                'model' => $request['model'] ?? '',
+                'country_of_origin' => $request['country_of_origin'] ?? '',
+                'website_url' => $request['website_url'] ?? '',
+                'description' => $request['description'] ?? '',
+                'status_id' => $request['status_id'] ?? null,
+                'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
             ]);
 
@@ -157,12 +138,23 @@ class ProductController extends Controller
                     'type' => $type,
                 ]);
             }
-        });
 
-        return response()->json([
-            'message' => 'Product created successfully.',
-            'redirect' => route('products.index'),
-        ], 201);
+            DB::commit();
+
+            return $this->sendRespond($product,"New Product created successfully");
+
+        }catch (Exception $e) {
+            DB::rollBack();
+
+            Log::info($e);
+            Log::info($e->getMessage());
+
+            return response()->json([
+                'success'=>false,
+                'message'=> 'There is an error in saving product.'
+            ]);
+        }
+     
     }
 
     /**
