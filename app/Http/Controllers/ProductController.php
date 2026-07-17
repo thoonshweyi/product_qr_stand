@@ -83,13 +83,25 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            // 'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);
+        dd($request);
 
+        $specificationRows = collect($request->input('specifications', []))
+        ->map(function ($row) {
+            return [
+                'name' => trim($row['name'] ?? ''),
+                'value' => trim($row['value'] ?? ''),
+            ];
+        })
+        ->filter(fn ($row) => $row['name'] !== '')
+        ->values();
+
+        // dd($request, $specificationRows);
 
         DB::beginTransaction();
         try {
@@ -105,6 +117,7 @@ class ProductController extends Controller
                 'status_id' => $request['status_id'] ?? null,
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
+                'product_name' => $request['product_name'],
             ]);
 
             foreach ($specificationRows as $row) {
@@ -117,6 +130,7 @@ class ProductController extends Controller
                         'name' => $specificationName,
                         'status_id' => 3,
                         'user_id' => $request->user()?->id,
+                        'category_id' => $request['category_id'] ?? '',
                     ]
                 );
 
@@ -127,17 +141,45 @@ class ProductController extends Controller
                 ]);
             }
 
-            foreach (['main_image' => 'main', 'thumbnail_image' => 'thumbnail'] as $inputName => $type) {
-                if (! $request->hasFile($inputName)) {
-                    continue;
-                }
+            // Start Single Image Upload
+            if(file_exists($request["main_image"])){
+                $file = $request["main_image"];
+                $fname = $file->getClientOriginalName();
+                $imagenewname = uniqid($user_id).$product['id'].$fname;
+                $file->move(public_path("assets/img/products"),$imagenewname);
+                
+                $filepath = "assets/img/products/".$imagenewname;
+                $product->image = $filepath;
+            }    
+            $product->save();
 
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image' => $request->file($inputName)->store('products', 'public'),
-                    'type' => $type,
-                ]);
-            }
+            if(file_exists($request["thumbnail_image"])){
+                $file = $request["thumbnail_image"];
+                $fname = $file->getClientOriginalName();
+                $imagenewname = uniqid($user_id).$product['id'].$fname;
+                $file->move(public_path("assets/img/products"),$imagenewname);
+                
+                $filepath = "assets/img/products/".$imagenewname;
+                $product->thumbnail = $filepath;
+            }    
+            $product->save();
+            // End Single Image Upload
+
+            // foreach (['main_image' => 'main', 'thumbnail_image' => 'thumbnail'] as $inputName => $type) {
+            //     if (! $request->hasFile($inputName)) {
+            //         continue;
+            //     }
+
+            //     ProductImage::create([
+            //         'product_id' => $product->id,
+            //         'image' => $request->file($inputName)->store('products', 'public'),
+            //         'type' => $type,
+            //     ]);
+            // }
+
+
+
+            dd('hay');
 
             DB::commit();
 

@@ -75,15 +75,15 @@
                         <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">1</span>
                     </div>
 
-                    <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
+                    <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-6">
 
-                        <div>
+                        <div class="lg:col-span-2">
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
                             <input type="search" name="product_code" id="product_code" value="{{ old('product_code') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
-                            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p>
+                            <!-- <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p> -->
                         </div>
 
-                        <div>
+                        <div class="lg:col-span-2">
                             <label for="status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Status <span class="text-red-600">*</span></label>
                             <select name="status_id" id="status" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose status</option>
@@ -93,12 +93,17 @@
                             </select>
                         </div>
 
-                        <div class="sm:col-span-2">
-                            <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product Full Name <span class="text-red-600">*</span></label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name" readonly>
+                        <div class="lg:col-span-2">
+                            <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Name <span class="text-red-600">*</span></label>
+                            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter product display name">
                         </div>
 
-                        <div>
+                        <div class="sm:col-span-2 lg:col-span-6">
+                            <label for="product_name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product Full Name <span class="text-red-600">*</span></label>
+                            <input type="text" name="product_name" id="product_name" value="{{ old('product_name') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter a clear product name" readonly>
+                        </div>
+
+                        <div class="lg:col-span-3">
                             <label for="brand" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Brand <span class="text-red-600">*</span></label>
                             <input type="text" name="brand" id="brand" list="brand-options" value="{{ old('brand') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Enter brand name" readonly>
                             <datalist id="brand-options">
@@ -108,12 +113,12 @@
                             </datalist>
                         </div>
 
-                        <div>
+                        <div class="lg:col-span-3">
                             <label for="model" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Model <span class="text-red-600">*</span></label>
                             <input type="text" name="model" id="model" value="{{ old('model') }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. ADGP-370B">
                         </div>
 
-                        <div>
+                        <div class="lg:col-span-3">
                             <label for="category" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Category <span class="text-red-600">*</span></label>
                             <select name="category_id" id="category" required class="w-full block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white readonly">
                                 <option value="">Choose category</option>
@@ -123,7 +128,7 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="lg:col-span-3">
                             <label for="country" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Country of origin <span class="text-red-600">*</span></label>
                             <select name="country_of_origin" id="country" required class="w-full block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                 <option value="">Choose country</option>
@@ -546,7 +551,8 @@
             const requiredFields = {
                 product_code: 'Product code is required.',
                 status: 'Status is required.',
-                name: 'Product name is required.',
+                name: 'Name is required.',
+                product_name: 'Product full name is required.',
                 brand: 'Brand is required.',
                 model: 'Model is required.',
                 category: 'Category is required.',
@@ -626,7 +632,7 @@
 
                     // console.log(data);
 
-                    $("#name").val(data.product_name).trigger('input');
+                    $("#product_name").val(data.product_name).trigger('input');
                     $("#brand").val(data.brand).trigger('input');
                     
                     $("#category option").filter(function () {
@@ -654,10 +660,10 @@
                 showError();
 
                 const errors = clientValidationErrors();
-                if (Object.keys(errors).length) {
-                    displayValidationErrors(errors);
-                    return;
-                }
+                // if (Object.keys(errors).length) {
+                //     displayValidationErrors(errors);
+                //     return;
+                // }
 
                 displayValidationErrors({});
                 const $button = $('#create-product-button').prop('disabled', true);
@@ -693,11 +699,14 @@
                         $('#create-product-button').prop('disabled', true);
 
                         console.log('submit');
+                        const form = document.getElementById('product-create-form');
+                        const formData = new FormData(form);
+
                         $.ajax({
-                            url: this.action,
+                            url: form.action,
                             type:"POST",
                             dataType: "json",
-                            data:$(this).serialize(),
+                            data:formData,
                             success:async function(response){
                                 console.log(response);
 
@@ -706,7 +715,7 @@
                                 if(data.success){
                                     Swal.fire({
                                         icon: "success",
-                                        title: "RG saved successfully!",
+                                        title: "Product saved successfully!",
                                         text: data.message,
                                     });
                                     

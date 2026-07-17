@@ -18,9 +18,9 @@ class Product extends Model
         'website_url',
         'description',
         'status_id',
-        'category_id',
         'user_id',
         'product_name',
+        'category_id',
         'unit',
     ];
 

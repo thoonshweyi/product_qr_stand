@@ -14,6 +14,7 @@ class Specification extends Model
         'slug',
         'status_id',
         'user_id',
+        'category_id'
     ];
 
     public function productValues()

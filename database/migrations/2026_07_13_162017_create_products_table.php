@@ -30,6 +30,8 @@ return new class extends Migration
             $table->string('product_name')->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
             $table->string('unit')->nullable();
+            $table->string("image")->nullable();
+            $table->string("thumbnail")->nullable();
 
             $table->timestamps();
         });
