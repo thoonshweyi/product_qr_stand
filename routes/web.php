@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('products', ProductController::class);
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
-    Route::get('/products/{id}/generateqr', [ProductController::class, 'generateQR'])->name('products.generateqr');
+    Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateQR'])->name('products.generateqr');
 
 
     Route::get('/productscreatedemo', function () {

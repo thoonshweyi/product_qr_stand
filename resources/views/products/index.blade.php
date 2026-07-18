@@ -147,7 +147,7 @@
                             <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $product->user->name }}</td>
                             <td class="p-4 space-x-2 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
-                                    <a type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                                    <a href="{{ route('products.show',$product->id) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                                         <i class="fas fa-eye w-4 h-4 mr-2s"></i>
                                     </a>
                                     <button type="button" data-modal-target="edit-statuse-modal" data-modal-toggle="edit-statuse-modal" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">

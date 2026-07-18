@@ -183,6 +183,16 @@ class ProductController extends Controller
             //     ]);
             // }
 
+            // Start Generate QR
+            $response = $this->generateQR($product->product_code, 'png');
+            $data = $response->getData();
+            // dd($data);
+
+            $product->qr = $data->data->path;
+            $product->save();
+            // End Generate QR
+
+    
             DB::commit();
 
             return $this->sendRespond($product,"New Product created successfully");
@@ -206,7 +216,11 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+
+        return view('products.show', compact(
+            "product",
+        ));
     }
 
     /**
@@ -277,55 +291,32 @@ class ProductController extends Controller
         }
     }
 
-
-    // => Method 1
-    //      composer require endroid/qr-code:^5.0
-    // public function generateQR(string $id){
-    //     $product = Product::findOrFail($id);   
-
-    //     $qrUrl = route('products.show', $product->id);
-    //     $qrCode = new QrCode(
-    //         data: $qrUrl,
-    //         size: 300,
-    //         margin: 10
-    //     );
-
-    //     $writer = new PngWriter();
-    //     $result = $writer->write($qrCode);
-
-    //     $qrPath = "products/qr/product-{$product->id}.png";
-
-    //     Storage::disk('public')->put(
-    //         $qrPath,
-    //         $result->getString()
-    //     );
-    // }
-
-
-    // => Method 2
     //  composer require simplesoftwareio/simple-qrcode
-    public function generateQR(string $id): string
+    public function generateQR(string $text, string $format='png')
     {
-        $product = Product::findOrFail($id);
+        $uniqueId = (string) Str::uuid().$text;
+        $uniqueId = $text;
 
-        $uniqueId = Str::uuid();
-        $qrUrl = route('products.show', $product->id);
+        $qrCode = QrCode::format($format)->size(100)->generate($text);
+        $qr_file_name = "$uniqueId.$format";
+        $qr_file_path = public_path("assets/img/products/qrs/$qr_file_name");
+        $filepath = "assets/img/products/qrs/$qr_file_name";
 
-        $directory = public_path('assets/img/product-qrcodes');
-        $fileName = "{$uniqueId}.png";
-        $absolutePath = "{$directory}/{$fileName}";
-        $relativePath = "assets/img/product-qrcodes/{$fileName}";
+        // Ensure the directory exists
+        if (!file_exists(dirname($qr_file_path))) {
+            mkdir(dirname($qr_file_path), 0755, true);
+        }
+        file_put_contents($qr_file_path, $qrCode);
 
-        File::ensureDirectoryExists($directory, 0755, true);
-
-        $qrCode = QrCode::format('png')
-            ->size(300)
-            ->margin(2)
-            ->generate($qrUrl);
-
-        File::put($absolutePath, $qrCode);
-
-        return $relativePath;
+        return response()->json([
+            'success' => true,
+            'message' => 'QR code generated successfully.',
+            'data' => [
+                'format' => $format,
+                'path' => $filepath,
+                'url' => asset($qr_file_path),
+            ],
+        ]);
     }
 
     
