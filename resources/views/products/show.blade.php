@@ -1,186 +1,136 @@
 @extends('layouts.main')
 
-@section('css')
-<style>
-    :root { color-scheme: light; }
-
-    body, main { margin: 0; background: white !important; }
-
-    .product-show-page {
-        --blue: #073d78;
-        width: 100%;
-        padding: .8vw;
-        font-family: Arial, "Noto Sans Myanmar", sans-serif;
-        background: var(--blue);
-    }
-
-    /* All measurements below are tied to the poster width (cqw). This keeps the
-       composition identical on a phone, desktop and print instead of reflowing. */
-    .product-poster {
-        container-type: inline-size;
-        position: relative;
-        width: min(100%, 1490px);
-        margin: 0 auto;
-        overflow: hidden;
-        background: #fff;
-        color: #050505;
-        box-shadow: 0 1.2cqw 3cqw rgb(0 0 0 / .2);
-    }
-
-    .poster-header { display: grid; grid-template-columns: 55% 45%; height: 9.5cqw; }
-    .poster-logo { display: flex; align-items: center; padding: 1.35cqw 3cqw; }
-    .poster-logo img { display: block; width: 25cqw; height: 6.8cqw; object-fit: contain; }
-    .poster-title {
-        display: flex; align-items: center; justify-content: center;
-        border-bottom-left-radius: 5.2cqw; background: var(--blue); color: #fff;
-        font-size: 3.65cqw; font-weight: 900; letter-spacing: -.12cqw; white-space: nowrap;
-    }
-
-    .poster-body { padding: 1.2cqw 3cqw 2.2cqw; }
-    .visuals {
-        display: grid; grid-template-columns: 18.2cqw 45cqw;
-        justify-content: center; gap: 2.6cqw; height: 36.9cqw;
-    }
-    .visual-left { display: grid; grid-template-rows: 19.2cqw 16cqw; gap: 1.7cqw; min-width: 0; }
-    .qr-panel { display: flex; flex-direction: column; align-items: center; min-height: 0; }
-    .qr-panel img { display: block; width: 14.8cqw; height: 14.8cqw; object-fit: contain; image-rendering: pixelated; }
-    .scan-label {
-        width: 14.2cqw; margin-top: .45cqw; padding: .22cqw 0 .32cqw;
-        border-radius: .42cqw; background: var(--blue); color: #fff;
-        text-align: center; font-size: 1.72cqw; font-weight: 900; line-height: 1;
-    }
-    .size-horizontal { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .8cqw; font-size: .95cqw; }
-    .size-horizontal i { height: .13cqw; background: #222; }
-    .tile-row { display: grid; grid-template-columns: 1.5cqw 1fr; height: 14.65cqw; margin-top: .25cqw; }
-    .size-vertical { position: relative; border-left: .13cqw solid #222; }
-    .size-vertical span {
-        position: absolute; top: 50%; left: -.3cqw; transform: translate(-50%, -50%) rotate(-90deg);
-        font-size: .92cqw; white-space: nowrap; background: #fff; padding: .25cqw;
-    }
-    .tile-frame, .main-frame { overflow: hidden; background: #f3f3f3; }
-    .tile-frame img, .main-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-    .main-frame { width: 45cqw; height: 36.9cqw; }
-
-    .divider { height: .22cqw; margin: 4.5cqw 0 2.2cqw; background: var(--blue); }
-    .description { position: relative; min-height: 47cqw; overflow: hidden; }
-    .watermark {
-        position: absolute; z-index: 0; left: 50%; top: 51%; width: 63cqw; height: 23cqw;
-        transform: translate(-50%, -50%); object-fit: contain; opacity: .055; pointer-events: none;
-    }
-    .description-content { position: relative; z-index: 1; }
-    .description h2 { margin: 0 0 .7cqw; font-size: 2.65cqw; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
-    .description h2 span { text-transform: none; }
-    .details { width: 67cqw; margin: 0; font-size: 1.82cqw; font-weight: 700; line-height: 1.23; }
-    .detail-row { display: grid; grid-template-columns: 27cqw 1.5cqw 1fr; align-items: baseline; }
-    .detail-row dt, .detail-row dd { margin: 0; }
-    .detail-row dt::before { content: "•"; display: inline-block; width: 2cqw; }
-    .copy { margin-top: 1.15cqw; font-size: 1.58cqw; font-weight: 500; line-height: 1.7; text-align: justify; }
-    .copy p { margin: 0 0 .2cqw; }
-
-    .poster-footer {
-        display: flex; align-items: center; justify-content: center; gap: 1cqw;
-        height: 5.4cqw; background: var(--blue); color: #fff;
-    }
-    .website { font-size: 1.3cqw; font-weight: 900; text-transform: uppercase; }
-    .socials { display: flex; gap: .5cqw; }
-    .socials span {
-        display: flex; align-items: center; justify-content: center; width: 2cqw; height: 2cqw;
-        border-radius: 50%; color: #fff; font-size: 1.05cqw;
-    }
-
-    @media print {
-        @page { margin: 0; }
-        .product-show-page { padding: 0; }
-        .product-poster { width: 100%; box-shadow: none; }
-    }
-</style>
-@endsection
-
 @section('content')
 @php
-    // Static values intentionally used while this screen is a design prototype.
-    $details = [
-        'Brand' => 'Cotto',
-        'Name' => 'Ceramic Tile',
-        'Model' => 'Ft Willy Flax',
-        'Code' => '2000000082547',
-        'Country of origin' => 'Thailand',
-        'Type' => 'Floor Tile',
-        'Grade' => 'A Grade',
-        'Color' => 'Light Beige',
-        'Size' => '(300mm × 300mm) / (1ft × 1ft)',
-        '1 SUD (Kyin)' => '100 Pcs',
-        '1 Package' => '11 Pcs',
-        'Weight' => '16.6 Kg',
-        'Usage Location' => 'Indoor',
+    // Static content for the design demo. These values can be replaced with $product later.
+    $demo = [
+        'brand' => 'IM Dayuan',
+        'name' => 'Automatic Pressure Pump',
+        'model' => 'ID-750A',
+        'code' => '2000000602110',
+        'country' => 'China',
+        'type' => 'Water Pump',
+        'grade' => 'A Grade',
+        'color' => 'Blue / Black',
+        'size' => '447mm × 447mm',
+        'unit' => '1 Unit',
+        'package' => '1 Pc',
+        'weight' => '12.5 Kg',
+        'usage' => 'Indoor / Outdoor',
+    ];
+
+    $specifications = [
+        'Brand' => $demo['brand'],
+        'Name' => $demo['name'],
+        'Model' => $demo['model'],
+        'Code' => $demo['code'],
+        'Country of origin' => $demo['country'],
+        'Type' => $demo['type'],
+        'Grade' => $demo['grade'],
+        'Color' => $demo['color'],
+        'Size' => $demo['size'],
+        'Sales unit' => $demo['unit'],
+        '1 Package' => $demo['package'],
+        'Weight' => $demo['weight'],
+        'Usage Location' => $demo['usage'],
     ];
 @endphp
 
-<div class="product-show-page">
-    <article class="product-poster bg-white">
-        <header class="poster-header">
-            <div class="poster-logo">
-                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}" alt="PRO1 Global Home Center">
+<div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
+    <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
+        <header class="relative flex h-20 items-center bg-[#073b78] sm:h-28">
+            <div class="flex h-full w-[48%] items-center rounded-br-[52px] bg-white px-4 sm:w-[55%] sm:rounded-br-[72px] sm:px-8">
+                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
+                     alt="PRO 1 Global Home Center"
+                     class="h-auto w-full max-w-[270px] object-contain sm:max-w-[340px]">
             </div>
-            <div class="poster-title">Product Description</div>
+            <h1 class="flex-1 px-2 text-center text-lg font-extrabold uppercase tracking-wide text-white sm:px-8 sm:text-4xl lg:text-5xl">
+                Product Description
+            </h1>
         </header>
 
-        <main class="poster-body">
-            <section class="visuals" aria-label="Product images and QR code">
-                <div class="visual-left">
-                    <div class="qr-panel">
-                        <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}" alt="Product QR Code">
-                        <div class="scan-label">Scan Here</div>
+        <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
+            <section class="grid grid-cols-1 gap-6 sm:grid-cols-[260px_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10">
+                <aside class="grid grid-cols-2 gap-4 sm:grid-cols-1 sm:gap-5">
+                    <div class="flex min-h-0 flex-col items-center justify-center">
+                        <div class="aspect-square w-full max-w-[190px] bg-white p-2 sm:max-w-[210px]">
+                            <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
+                                 alt="Product QR code"
+                                 class="h-full w-full object-contain [image-rendering:pixelated]">
+                        </div>
+                        <div class="mt-1 w-full max-w-[210px] rounded-md bg-[#073b78] py-1 text-center text-sm font-bold text-white sm:text-xl">
+                            Scan Here
+                        </div>
                     </div>
 
-                    <div class="tile-size">
-                        <div class="size-horizontal"><i></i><span>300mm</span><i></i></div>
-                        <div class="tile-row">
-                            <div class="size-vertical"><span>300mm</span></div>
-                            <div class="tile-frame">
-                                <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}" alt="Ceramic tile sample">
+                    <div class="flex min-h-0 flex-col justify-end">
+                        <div class="flex items-center text-xs text-slate-700 sm:text-sm">
+                            <span class="h-px flex-1 bg-slate-900"></span>
+                            <span class="px-3">447mm</span>
+                            <span class="h-px flex-1 bg-slate-900"></span>
+                        </div>
+                        <div class="mt-1 flex aspect-square w-full items-center">
+                            <span class="mr-1 text-[10px] text-slate-700 [writing-mode:vertical-rl] sm:text-sm">447mm</span>
+                            <div class="h-full flex-1 border-l border-slate-900 bg-slate-100 p-2">
+                                <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
+                                     alt="{{ $demo['name'] }} thumbnail"
+                                     class="h-full w-full object-contain">
                             </div>
                         </div>
                     </div>
-                </div>
+                </aside>
 
-                <div class="main-frame">
-                    <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}" alt="Ceramic tile used in a kitchen">
-                </div>
-            </section>
-
-            <div class="divider"></div>
-
-            <section class="description">
-                <img class="watermark" src="{{ asset('assets/img/icon/pro1globalicon.png') }}" alt="" aria-hidden="true">
-                <div class="description-content">
-                    <h2>Product Description <span>(ကုန်ပစ္စည်းအကြောင်း)</span></h2>
-                    <dl class="details">
-                        @foreach ($details as $label => $value)
-                            <div class="detail-row">
-                                <dt>{{ $label }}</dt><span>:</span><dd>{{ $value }}</dd>
-                            </div>
-                        @endforeach
-                    </dl>
-
-                    <div class="copy">
-                        <p>အရည်အသွေးကောင်းမွန်သော <strong>Grade A</strong> အဆင့်ရှိ ကြွေပြားများကို အသုံးပြု၍ ပြုလုပ်ထားသောကြောင့် ရေရှည်ခံပြီး အကြမ်းခံခြင်း၊ အရောင်ငြိမ်ခြင်း၊ သန့်ရှင်းရလွယ်ကူခြင်းနှင့် လှပခန့်ညားမှုများကို ပေးစွမ်းနိုင်ပါသည်။</p>
-                        <p><strong>PRO 1 Global Home Center</strong> မှ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းများကိုသာ ရွေးချယ်ပေးထားပြီး သင့်အိမ်အတွက် ယုံကြည်စိတ်ချစွာ ဝယ်ယူနိုင်ပါသည်။</p>
+                <div class="flex min-h-0 items-center justify-center bg-slate-50">
+                    <div class="aspect-[4/3] w-full overflow-hidden">
+                        <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
+                             alt="{{ $demo['name'] }}"
+                             class="h-full w-full object-contain">
                     </div>
                 </div>
             </section>
-        </main>
 
-        <footer class="poster-footer">
-            <span class="website">www.pro1globalhomecenter.com</span>
-            <div class="socials" aria-label="Social media">
-                @foreach ([
-                    ['fab fa-facebook-f', '#1877f2'], ['fab fa-viber', '#7356a8'],
-                    ['fab fa-instagram', '#e1306c'], ['fab fa-tiktok', '#050505'],
-                    ['fab fa-youtube', '#ff0000'], ['fab fa-telegram-plane', '#229ed9'],
-                ] as [$icon, $color])
-                    <span style="background: {{ $color }}"><i class="{{ $icon }}"></i></span>
-                @endforeach
+            <div class="my-7 h-1 bg-[#0a4b91] sm:my-9"></div>
+
+            <section class="relative overflow-hidden pb-4">
+                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
+                     alt=""
+                     aria-hidden="true"
+                     class="pointer-events-none absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 opacity-[0.055] grayscale">
+
+                <div class="relative">
+                    <h2 class="mb-4 text-xl font-extrabold uppercase sm:text-3xl">
+                        Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
+                    </h2>
+
+                    <dl class="grid grid-cols-[minmax(120px,1fr)_12px_minmax(0,2fr)] gap-y-1 text-sm font-semibold sm:grid-cols-[270px_20px_minmax(0,1fr)] sm:text-xl">
+                        @foreach ($specifications as $label => $value)
+                            <dt class="before:mr-2 before:content-['•']">{{ $label }}</dt>
+                            <dd class="text-center">:</dd>
+                            <dd>{{ $value }}</dd>
+                        @endforeach
+                    </dl>
+
+                    <p class="mt-6 text-justify text-sm leading-7 sm:text-lg sm:leading-9">
+                        အရည်အသွေးကောင်းမွန်သော <strong>Grade A</strong> အဆင့်ရှိ ကုန်ပစ္စည်းများကို အသုံးပြု၍
+                        လူနေအိမ်နှင့် လုပ်ငန်းသုံးနေရာများတွင် ယုံကြည်စိတ်ချစွာ အသုံးပြုနိုင်ပါသည်။
+                        တာရှည်ခံပြီး ထိန်းသိမ်းရလွယ်ကူသောကြောင့် နေ့စဉ်အသုံးပြုမှုအတွက် သင့်တော်ပါသည်။
+                    </p>
+                    <p class="mt-1 text-justify text-sm leading-7 sm:text-lg sm:leading-9">
+                        <strong>PRO 1 Global Home Center</strong> မှ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းများကို
+                        စိတ်ချယုံကြည်စွာ ရွေးချယ်ဝယ်ယူနိုင်ပါသည်။
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <footer class="flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-4 text-center text-xs font-bold text-white sm:flex-row sm:gap-5 sm:text-base">
+            <span>WWW.PRO1GLOBALHOMECENTER.COM</span>
+            <div class="flex items-center gap-2" aria-label="PRO 1 social media channels">
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">f</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500">v</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-pink-500">◎</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-black">♪</span>
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-red-600">▶</span>
             </div>
         </footer>
     </article>
