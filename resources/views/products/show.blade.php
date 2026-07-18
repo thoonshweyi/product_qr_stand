@@ -38,8 +38,8 @@
 
 <div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
     <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
-        <header class="relative flex h-20 items-center bg-[#073b78] sm:h-28">
-            <div class="flex h-full w-[48%] items-center rounded-br-[52px] bg-white px-4 sm:w-[55%] sm:rounded-br-[72px] sm:px-8">
+        <header class="flex h-20 items-center bg-[#073b78] sm:h-28">
+            <div class="flex h-full w-1/2 items-center rounded-br-full bg-white px-4 sm:px-8">
                 <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
                      alt="PRO 1 Global Home Center"
                      class="h-auto w-full max-w-[270px] object-contain sm:max-w-[340px]">
@@ -50,7 +50,7 @@
         </header>
 
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-            <section class="grid grid-cols-1 gap-6 sm:grid-cols-[260px_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10">
+            <section class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                 <aside class="grid grid-cols-2 gap-4 sm:grid-cols-1 sm:gap-5">
                     <div class="flex min-h-0 flex-col items-center justify-center">
                         <div class="aspect-square w-full max-w-[190px] bg-white p-2 sm:max-w-[210px]">
@@ -63,28 +63,30 @@
                         </div>
                     </div>
 
-                    <div class="flex min-h-0 flex-col justify-end">
-                        <div class="flex items-center text-xs text-slate-700 sm:text-sm">
+                    <div class="flex flex-col justify-end">
+                        <div class="ml-8 flex items-center text-xs text-slate-700 sm:text-sm">
                             <span class="h-px flex-1 bg-slate-900"></span>
                             <span class="px-3">447mm</span>
                             <span class="h-px flex-1 bg-slate-900"></span>
                         </div>
-                        <div class="mt-1 flex aspect-square w-full items-center">
-                            <span class="mr-1 text-[10px] text-slate-700 [writing-mode:vertical-rl] sm:text-sm">447mm</span>
-                            <div class="h-full flex-1 border-l border-slate-900 bg-slate-100 p-2">
+                        <div class="mt-2 flex w-full">
+                            <div class="relative w-8 shrink-0 border-r border-slate-900">
+                                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-xs text-slate-700 sm:text-sm">447mm</span>
+                            </div>
+                            <div class="aspect-square flex-1 overflow-hidden bg-slate-100">
                                 <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
                                      alt="{{ $demo['name'] }} thumbnail"
-                                     class="h-full w-full object-contain">
+                                     class="h-full w-full object-cover">
                             </div>
                         </div>
                     </div>
                 </aside>
 
-                <div class="flex min-h-0 items-center justify-center bg-slate-50">
-                    <div class="aspect-[4/3] w-full overflow-hidden">
+                <div class="overflow-hidden sm:col-span-2">
+                    <div class="aspect-[4/3] h-full w-full">
                         <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
                              alt="{{ $demo['name'] }}"
-                             class="h-full w-full object-contain">
+                             class="h-full w-full object-cover">
                     </div>
                 </div>
             </section>
