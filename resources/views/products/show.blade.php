@@ -2,26 +2,103 @@
 
 @section('css')
 <style>
-    .product-poster {
-        --poster-blue: #073d78;
+    :root { color-scheme: light; }
+
+    body, main { margin: 0; background: white !important; }
+
+    .product-show-page {
+        --blue: #073d78;
+        width: 100%;
+        padding: .8vw;
         font-family: Arial, "Noto Sans Myanmar", sans-serif;
+        background: var(--blue);
     }
 
-    .product-watermark {
-        opacity: .055;
-        filter: saturate(.7);
+    /* All measurements below are tied to the poster width (cqw). This keeps the
+       composition identical on a phone, desktop and print instead of reflowing. */
+    .product-poster {
+        container-type: inline-size;
+        position: relative;
+        width: min(100%, 1490px);
+        margin: 0 auto;
+        overflow: hidden;
+        background: #fff;
+        color: #050505;
+        box-shadow: 0 1.2cqw 3cqw rgb(0 0 0 / .2);
+    }
+
+    .poster-header { display: grid; grid-template-columns: 55% 45%; height: 9.5cqw; }
+    .poster-logo { display: flex; align-items: center; padding: 1.35cqw 3cqw; }
+    .poster-logo img { display: block; width: 25cqw; height: 6.8cqw; object-fit: contain; }
+    .poster-title {
+        display: flex; align-items: center; justify-content: center;
+        border-bottom-left-radius: 5.2cqw; background: var(--blue); color: #fff;
+        font-size: 3.65cqw; font-weight: 900; letter-spacing: -.12cqw; white-space: nowrap;
+    }
+
+    .poster-body { padding: 1.2cqw 3cqw 2.2cqw; }
+    .visuals {
+        display: grid; grid-template-columns: 18.2cqw 45cqw;
+        justify-content: center; gap: 2.6cqw; height: 36.9cqw;
+    }
+    .visual-left { display: grid; grid-template-rows: 19.2cqw 16cqw; gap: 1.7cqw; min-width: 0; }
+    .qr-panel { display: flex; flex-direction: column; align-items: center; min-height: 0; }
+    .qr-panel img { display: block; width: 14.8cqw; height: 14.8cqw; object-fit: contain; image-rendering: pixelated; }
+    .scan-label {
+        width: 14.2cqw; margin-top: .45cqw; padding: .22cqw 0 .32cqw;
+        border-radius: .42cqw; background: var(--blue); color: #fff;
+        text-align: center; font-size: 1.72cqw; font-weight: 900; line-height: 1;
+    }
+    .size-horizontal { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .8cqw; font-size: .95cqw; }
+    .size-horizontal i { height: .13cqw; background: #222; }
+    .tile-row { display: grid; grid-template-columns: 1.5cqw 1fr; height: 14.65cqw; margin-top: .25cqw; }
+    .size-vertical { position: relative; border-left: .13cqw solid #222; }
+    .size-vertical span {
+        position: absolute; top: 50%; left: -.3cqw; transform: translate(-50%, -50%) rotate(-90deg);
+        font-size: .92cqw; white-space: nowrap; background: #fff; padding: .25cqw;
+    }
+    .tile-frame, .main-frame { overflow: hidden; background: #f3f3f3; }
+    .tile-frame img, .main-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .main-frame { width: 45cqw; height: 36.9cqw; }
+
+    .divider { height: .22cqw; margin: 4.5cqw 0 2.2cqw; background: var(--blue); }
+    .description { position: relative; min-height: 47cqw; overflow: hidden; }
+    .watermark {
+        position: absolute; z-index: 0; left: 50%; top: 51%; width: 63cqw; height: 23cqw;
+        transform: translate(-50%, -50%); object-fit: contain; opacity: .055; pointer-events: none;
+    }
+    .description-content { position: relative; z-index: 1; }
+    .description h2 { margin: 0 0 .7cqw; font-size: 2.65cqw; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+    .description h2 span { text-transform: none; }
+    .details { width: 67cqw; margin: 0; font-size: 1.82cqw; font-weight: 700; line-height: 1.23; }
+    .detail-row { display: grid; grid-template-columns: 27cqw 1.5cqw 1fr; align-items: baseline; }
+    .detail-row dt, .detail-row dd { margin: 0; }
+    .detail-row dt::before { content: "•"; display: inline-block; width: 2cqw; }
+    .copy { margin-top: 1.15cqw; font-size: 1.58cqw; font-weight: 500; line-height: 1.7; text-align: justify; }
+    .copy p { margin: 0 0 .2cqw; }
+
+    .poster-footer {
+        display: flex; align-items: center; justify-content: center; gap: 1cqw;
+        height: 5.4cqw; background: var(--blue); color: #fff;
+    }
+    .website { font-size: 1.3cqw; font-weight: 900; text-transform: uppercase; }
+    .socials { display: flex; gap: .5cqw; }
+    .socials span {
+        display: flex; align-items: center; justify-content: center; width: 2cqw; height: 2cqw;
+        border-radius: 50%; color: #fff; font-size: 1.05cqw;
     }
 
     @media print {
-        body { background: white !important; }
-        .product-poster { padding: 0 !important; }
-        .product-poster > article { box-shadow: none !important; }
+        @page { margin: 0; }
+        .product-show-page { padding: 0; }
+        .product-poster { width: 100%; box-shadow: none; }
     }
 </style>
 @endsection
 
 @section('content')
 @php
+    // Static values intentionally used while this screen is a design prototype.
     $details = [
         'Brand' => 'Cotto',
         'Name' => 'Ceramic Tile',
@@ -39,118 +116,70 @@
     ];
 @endphp
 
-<div class="product-poster min-h-screen bg-[#073d78] p-2 sm:p-3 lg:p-4">
-    <article class="mx-auto max-w-[1540px] overflow-hidden bg-white shadow-2xl">
-        {{-- Header --}}
-        <header class="grid min-h-[130px] grid-cols-[46%_54%] sm:min-h-[155px]">
-            <div class="flex items-center px-4 py-5 sm:px-8 lg:px-10">
-                <img
-                    src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
-                    alt="PRO1 Global Home Center"
-                    class="w-full max-w-[410px] object-contain"
-                >
+<div class="product-show-page">
+    <article class="product-poster bg-white">
+        <header class="poster-header">
+            <div class="poster-logo">
+                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}" alt="PRO1 Global Home Center">
             </div>
-            <div class="flex items-center justify-center rounded-bl-[58px] bg-[#073d78] px-3 text-center text-white sm:rounded-bl-[90px] lg:rounded-bl-[110px]">
-                <h1 class="text-xl font-black tracking-tight sm:text-4xl lg:text-6xl xl:text-7xl">Product Description</h1>
-            </div>
+            <div class="poster-title">Product Description</div>
         </header>
 
-        <main class="px-5 pb-7 pt-5 sm:px-8 sm:pb-10 lg:px-10 lg:pt-7">
-            {{-- QR, thumbnail and main image --}}
-            <section class="mx-auto grid max-w-[1050px] gap-5 sm:grid-cols-[230px_minmax(0,1fr)] lg:grid-cols-[270px_minmax(0,1fr)] lg:gap-10">
-                <div>
-                    <div class="mx-auto w-full max-w-[230px] lg:max-w-[270px]">
-                        <img
-                            src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
-                            alt="Product QR Code"
-                            class="mx-auto aspect-square w-[78%] object-contain [image-rendering:pixelated]"
-                        >
-                        <div class="mx-auto mt-2 w-[78%] rounded-md bg-[#073d78] py-1.5 text-center text-lg font-black text-white sm:text-2xl">Scan Here</div>
+        <main class="poster-body">
+            <section class="visuals" aria-label="Product images and QR code">
+                <div class="visual-left">
+                    <div class="qr-panel">
+                        <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}" alt="Product QR Code">
+                        <div class="scan-label">Scan Here</div>
                     </div>
 
-                    <div class="mt-5">
-                        <div class="flex items-center text-sm text-slate-800">
-                            <span class="h-[2px] flex-1 bg-slate-800"></span>
-                            <span class="px-3">300mm</span>
-                            <span class="h-[2px] flex-1 bg-slate-800"></span>
-                        </div>
-                        <div class="relative mt-1 flex">
-                            <div class="flex w-5 flex-col items-center justify-center">
-                                <span class="h-full w-[2px] bg-slate-800"></span>
-                                <span class="absolute -rotate-90 whitespace-nowrap text-sm">300mm</span>
+                    <div class="tile-size">
+                        <div class="size-horizontal"><i></i><span>300mm</span><i></i></div>
+                        <div class="tile-row">
+                            <div class="size-vertical"><span>300mm</span></div>
+                            <div class="tile-frame">
+                                <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}" alt="Ceramic tile sample">
                             </div>
-                            <img
-                                src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
-                                alt="Product tile thumbnail"
-                                class="aspect-square min-w-0 flex-1 object-cover"
-                            >
                         </div>
                     </div>
                 </div>
 
-                <img
-                    src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
-                    alt="Product usage preview"
-                    class="h-full min-h-[330px] w-full object-cover sm:min-h-[520px]"
-                >
+                <div class="main-frame">
+                    <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}" alt="Ceramic tile used in a kitchen">
+                </div>
             </section>
 
-            <div class="my-8 h-[3px] w-full bg-[#073d78] sm:my-10"></div>
+            <div class="divider"></div>
 
-            {{-- Description --}}
-            <section class="relative overflow-hidden px-1 pb-1 sm:px-2">
-                <img
-                    src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
-                    alt=""
-                    aria-hidden="true"
-                    class="product-watermark pointer-events-none absolute left-1/2 top-[48%] w-[75%] max-w-[850px] -translate-x-1/2 -translate-y-1/2"
-                >
-
-                <div class="relative z-10">
-                    <h2 class="mb-4 text-2xl font-black uppercase leading-tight text-black sm:text-4xl lg:text-5xl">
-                        Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
-                    </h2>
-
-                    <dl class="max-w-[940px] text-base font-bold leading-tight text-black sm:text-xl lg:text-2xl">
+            <section class="description">
+                <img class="watermark" src="{{ asset('assets/img/icon/pro1globalicon.png') }}" alt="" aria-hidden="true">
+                <div class="description-content">
+                    <h2>Product Description <span>(ကုန်ပစ္စည်းအကြောင်း)</span></h2>
+                    <dl class="details">
                         @foreach ($details as $label => $value)
-                            <div class="grid grid-cols-[minmax(135px,300px)_14px_minmax(0,1fr)] items-baseline py-1 sm:grid-cols-[minmax(210px,390px)_18px_minmax(0,1fr)]">
-                                <dt class="flex items-baseline gap-3">
-                                    <span class="text-base sm:text-xl">•</span>
-                                    <span>{{ $label }}</span>
-                                </dt>
-                                <span>:</span>
-                                <dd class="pl-2">{{ $value }}</dd>
+                            <div class="detail-row">
+                                <dt>{{ $label }}</dt><span>:</span><dd>{{ $value }}</dd>
                             </div>
                         @endforeach
                     </dl>
 
-                    <div class="mt-5 space-y-2 text-justify text-base font-medium leading-8 text-black sm:text-xl sm:leading-10 lg:text-2xl lg:leading-[1.9]">
-                        <p>
-                            အရည်အသွေးကောင်းမွန်သော <strong>Grade A</strong> အဆင့်ရှိ ကြွေပြားများကို အသုံးပြု၍ ပြုလုပ်ထားသောကြောင့် ရေရှည်ခံပြီး အကြမ်းခံခြင်း၊ အရောင်ငြိမ်ခြင်း၊ သန့်ရှင်းရလွယ်ကူခြင်းနှင့် လှပခန့်ညားမှုများကို ပေးစွမ်းနိုင်ပါသည်။
-                        </p>
-                        <p>
-                            <strong>PRO 1 Global Home Center</strong> မှ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းများကိုသာ ရွေးချယ်ပေးထားပြီး သင့်အိမ်အတွက် ယုံကြည်စိတ်ချစွာ ဝယ်ယူနိုင်ပါသည်။
-                        </p>
+                    <div class="copy">
+                        <p>အရည်အသွေးကောင်းမွန်သော <strong>Grade A</strong> အဆင့်ရှိ ကြွေပြားများကို အသုံးပြု၍ ပြုလုပ်ထားသောကြောင့် ရေရှည်ခံပြီး အကြမ်းခံခြင်း၊ အရောင်ငြိမ်ခြင်း၊ သန့်ရှင်းရလွယ်ကူခြင်းနှင့် လှပခန့်ညားမှုများကို ပေးစွမ်းနိုင်ပါသည်။</p>
+                        <p><strong>PRO 1 Global Home Center</strong> မှ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းများကိုသာ ရွေးချယ်ပေးထားပြီး သင့်အိမ်အတွက် ယုံကြည်စိတ်ချစွာ ဝယ်ယူနိုင်ပါသည်။</p>
                     </div>
                 </div>
             </section>
         </main>
 
-        {{-- Footer --}}
-        <footer class="flex flex-col items-center justify-center gap-3 bg-[#073d78] px-5 py-5 text-white sm:flex-row">
-            <p class="text-center text-sm font-black uppercase tracking-wide sm:text-lg">www.pro1globalhomecenter.com</p>
-            <div class="flex items-center gap-2">
+        <footer class="poster-footer">
+            <span class="website">www.pro1globalhomecenter.com</span>
+            <div class="socials" aria-label="Social media">
                 @foreach ([
-                    ['fab fa-facebook-f', '#1877f2'],
-                    ['fab fa-viber', '#7356a8'],
-                    ['fab fa-instagram', '#e1306c'],
-                    ['fab fa-tiktok', '#050505'],
-                    ['fab fa-youtube', '#ff0000'],
-                    ['fab fa-telegram-plane', '#229ed9'],
+                    ['fab fa-facebook-f', '#1877f2'], ['fab fa-viber', '#7356a8'],
+                    ['fab fa-instagram', '#e1306c'], ['fab fa-tiktok', '#050505'],
+                    ['fab fa-youtube', '#ff0000'], ['fab fa-telegram-plane', '#229ed9'],
                 ] as [$icon, $color])
-                    <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs text-white sm:h-8 sm:w-8 sm:text-sm" style="background-color: {{ $color }}">
-                        <i class="{{ $icon }}"></i>
-                    </span>
+                    <span style="background: {{ $color }}"><i class="{{ $icon }}"></i></span>
                 @endforeach
             </div>
         </footer>
