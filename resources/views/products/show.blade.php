@@ -38,13 +38,13 @@
 
 <div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
     <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
-        <header class="flex h-20 items-center bg-[#073b78] sm:h-28">
-            <div class="flex h-full w-1/2 items-center rounded-br-full bg-white px-4 sm:px-8">
+        <header class="flex h-20 items-center bg-white sm:h-28">
+            <div class="flex h-full w-1/2 items-center bg-white px-4 sm:px-8">
                 <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
                      alt="PRO 1 Global Home Center"
                      class="h-auto w-full max-w-[270px] object-contain sm:max-w-[340px]">
             </div>
-            <h1 class="flex-1 px-2 text-center text-lg font-extrabold uppercase tracking-wide text-white sm:px-8 sm:text-4xl lg:text-5xl">
+            <h1 class="flex h-full flex-1 items-center justify-center rounded-bl-[7rem] bg-[#073b78] px-2 text-center text-lg font-extrabold uppercase tracking-wide text-white sm:px-8 sm:text-4xl lg:text-5xl">
                 Product Description
             </h1>
         </header>
@@ -63,14 +63,14 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col justify-end">
-                        <div class="ml-8 flex items-center text-xs text-slate-700 sm:text-sm">
+                    <div class="mx-auto flex w-4/5 flex-col justify-end">
+                        <div class="mb-4 ml-8 flex items-center text-xs text-slate-700 sm:text-sm">
                             <span class="h-px flex-1 bg-slate-900"></span>
                             <span class="px-3">447mm</span>
                             <span class="h-px flex-1 bg-slate-900"></span>
                         </div>
-                        <div class="mt-2 flex w-full">
-                            <div class="relative w-8 shrink-0 border-r border-slate-900">
+                        <div class="flex w-full">
+                            <div class="relative mr-4 w-8 shrink-0 border-r border-slate-900">
                                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-xs text-slate-700 sm:text-sm">447mm</span>
                             </div>
                             <div class="aspect-square flex-1 overflow-hidden bg-slate-100">
@@ -82,8 +82,8 @@
                     </div>
                 </aside>
 
-                <div class="overflow-hidden sm:col-span-2">
-                    <div class="aspect-[4/3] h-full w-full">
+                <div class="self-end overflow-hidden sm:col-span-2">
+                    <div class="aspect-video w-full">
                         <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
                              alt="{{ $demo['name'] }}"
                              class="h-full w-full object-cover">
