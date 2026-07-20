@@ -50,41 +50,13 @@
         </header>
 
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-            <section class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <aside class="grid grid-cols-2 gap-4 sm:grid-cols-1 sm:gap-5">
-                    <div class="flex min-h-0 flex-col items-center justify-center">
-                        <div class="aspect-square w-full max-w-[190px] bg-white p-2 sm:max-w-[210px]">
-                            <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
-                                 alt="Product QR code"
-                                 class="h-full w-full object-contain [image-rendering:pixelated]">
-                        </div>
-                        <div class="mt-1 w-full max-w-[210px] rounded-md bg-[#073b78] py-1 text-center text-sm font-bold text-white sm:text-xl">
-                            Scan Here
-                        </div>
-                    </div>
-
-                    <div class="mx-auto flex w-4/5 flex-col justify-end">
-                        <div class="mb-4 ml-8 flex items-center text-xs text-slate-700 sm:text-sm">
-                            <span class="h-px flex-1 bg-slate-900"></span>
-                            <span class="px-3">447mm</span>
-                            <span class="h-px flex-1 bg-slate-900"></span>
-                        </div>
-                        <div class="flex w-full">
-                            <div class="relative mr-4 w-8 shrink-0 border-r border-slate-900">
-                                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90 whitespace-nowrap text-xs text-slate-700 sm:text-sm">447mm</span>
-                            </div>
-                            <div class="aspect-square flex-1 overflow-hidden bg-slate-100">
-                                <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
-                                     alt="{{ $demo['name'] }} thumbnail"
-                                     class="h-full w-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-                </aside>
-
-                <div class="self-end overflow-hidden sm:col-span-2">
-                    <div class="aspect-video w-full">
-                        <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
+            <section class="sm:w-[70%] mx-auto grid grid-cols-1 gap-6s sm:grid-cols-4">
+                <div class="p-6 bg-blue-200">
+                    
+                </div>
+                <div class="self-end overflow-hidden sm:col-span-3">
+                    <div class="aspect-4/2 w-full">
+                        <img src="{{ asset('assets/img/products/16a5b0382ebada5autopressurepump.jpeg') }}"
                              alt="{{ $demo['name'] }}"
                              class="h-full w-full object-cover">
                     </div>
