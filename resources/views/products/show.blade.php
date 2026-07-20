@@ -52,11 +52,14 @@
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
             <section class="mx-auto grid w-full grid-cols-1 gap-6 sm:aspect-[2/1] sm:w-[70%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
-                <aside class="grid min-h-0 w-full grid-cols-2 gap-4 overflow-hidden pb-4 sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-8 sm:pb-0">
-                    <div class="min-h-0 overflow-hidden bg-white p-2">
+                <aside class="grid min-h-0 w-full grid-cols-2 gap-4 overflow-hiddens pb-4 sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16 sm:pb-0">
+                    <div class="relative min-h-0 bg-white p-2">
                         <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
                             alt="Product QR code"
                             class="h-full w-full object-contain [image-rendering:pixelated]">
+                        <button type="button" class="absolute left-2 right-2 top-full mt-1 rounded bg-[#073b78] py-1 text-sm font-bold text-white">
+                            Scan Here
+                        </button>
                     </div>
 
                     <div class="min-h-0 overflow-hidden bg-slate-100">
@@ -67,7 +70,7 @@
                 </aside>
 
                 <!-- Main image -->
-                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-10">
+                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12">
                     <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
                         alt="{{ $demo['name'] }}"
                         class="h-full w-full object-cover">
