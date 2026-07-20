@@ -50,31 +50,29 @@
         </header>
 
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-            <section class="w-full sm:w-[70%] aspect-[4/2] mx-auto grid grid-cols-1 gap-6s sm:grid-cols-4">
-                <!-- Start QR And Thumbnail -->
-                <aside class="grid grid-cols-2 sm:grid-cols-1 sm:gap-8 w-full h-full bg-blue-600s pb-4 sm:pb-0 pt-4s gap-4">
-                    <div class="w-full bg-white p-2">
+            <section class="mx-auto grid w-full grid-cols-1 gap-6 sm:aspect-[2/1] sm:w-[70%] sm:grid-cols-4 sm:grid-rows-1">
+                <!-- QR and thumbnail -->
+                <aside class="grid min-h-0 w-full grid-cols-2 gap-4 overflow-hidden pb-4 sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-8 sm:pb-0">
+                    <div class="min-h-0 overflow-hidden bg-white p-2">
                         <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
-                                alt="Product QR code"
-                                class="h-full w-full object-contain [image-rendering:pixelated]"/>
+                            alt="Product QR code"
+                            class="h-full w-full object-contain [image-rendering:pixelated]">
                     </div>
-                    <div class="w-full bg-slate-100">
+
+                    <div class="min-h-0 overflow-hidden bg-slate-100">
                         <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
-                                alt="{{ $demo['name'] }} thumbnail"
-                                class="h-full w-full object-cover">
+                            alt="{{ $demo['name'] }} thumbnail"
+                            class="h-full w-full object-cover">
                     </div>
                 </aside>
-                <!-- End QR And Thumbnail -->
 
-                <!-- Start Main Image -->
-                <div class="sm:col-span-3 w-full h-full sm:ps-10">
+                <!-- Main image -->
+                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-10">
                     <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
-                            alt="{{ $demo['name'] }}"
-                            class="h-full w-full object-cover">
+                        alt="{{ $demo['name'] }}"
+                        class="h-full w-full object-cover">
                 </div>
-                <!-- End Main Image -->
             </section>
-
             <div class="my-7 h-1 bg-[#0a4b91] sm:my-9"></div>
 
             <section class="relative overflow-hidden pb-5">
