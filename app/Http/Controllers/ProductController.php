@@ -30,9 +30,10 @@ class ProductController extends Controller
         $results = Product::query();
 
         $products = $results->paginate(15);
+
         // dd($products);
         return view('products.index', compact(
-            "products",
+            'products',
         ));
     }
 
@@ -82,12 +83,13 @@ class ProductController extends Controller
             'status_id' => ['required', 'exists:statuses,id'],
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
+            'product_name' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:255'],
             'model' => ['required', 'string', 'max:255'],
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            // 'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
@@ -98,14 +100,14 @@ class ProductController extends Controller
         $user_id = $user->id;
 
         $specificationRows = collect($request->input('specifications', []))
-        ->map(function ($row) {
-            return [
-                'name' => trim($row['name'] ?? ''),
-                'value' => trim($row['value'] ?? ''),
-            ];
-        })
-        ->filter(fn ($row) => $row['name'] !== '')
-        ->values();
+            ->map(function ($row) {
+                return [
+                    'name' => trim($row['name'] ?? ''),
+                    'value' => trim($row['value'] ?? ''),
+                ];
+            })
+            ->filter(fn ($row) => $row['name'] !== '')
+            ->values();
 
         // dd($request, $specificationRows);
 
@@ -148,26 +150,26 @@ class ProductController extends Controller
             }
 
             // Start Single Image Upload
-            if(file_exists($request["main_image"])){
-                $file = $request["main_image"];
+            if (file_exists($request['main_image'])) {
+                $file = $request['main_image'];
                 $fname = $file->getClientOriginalName();
                 $imagenewname = uniqid($user_id).$product['id'].$fname;
-                $file->move(public_path("assets/img/products"),$imagenewname);
-                
-                $filepath = "assets/img/products/".$imagenewname;
+                $file->move(public_path('assets/img/products'), $imagenewname);
+
+                $filepath = 'assets/img/products/'.$imagenewname;
                 $product->image = $filepath;
-            }    
+            }
             $product->save();
 
-            if(file_exists($request["thumbnail_image"])){
-                $file = $request["thumbnail_image"];
+            if (file_exists($request['thumbnail_image'])) {
+                $file = $request['thumbnail_image'];
                 $fname = $file->getClientOriginalName();
                 $imagenewname = uniqid($user_id).$product['id'].$fname;
-                $file->move(public_path("assets/img/products"),$imagenewname);
-                
-                $filepath = "assets/img/products/".$imagenewname;
+                $file->move(public_path('assets/img/products'), $imagenewname);
+
+                $filepath = 'assets/img/products/'.$imagenewname;
                 $product->thumbnail = $filepath;
-            }    
+            }
             $product->save();
             // End Single Image Upload
 
@@ -192,23 +194,22 @@ class ProductController extends Controller
             $product->save();
             // End Generate QR
 
-    
             DB::commit();
 
-            return $this->sendRespond($product,"New Product created successfully");
+            return $this->sendRespond($product, 'New Product created successfully');
 
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             Log::info($e);
             Log::info($e->getMessage());
 
             return response()->json([
-                'success'=>false,
-                'message'=> 'There is an error in saving product.'
+                'success' => false,
+                'message' => 'There is an error in saving product.',
             ]);
         }
-     
+
     }
 
     /**
@@ -219,7 +220,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         return view('products.show', compact(
-            "product",
+            'product',
         ));
     }
 
@@ -228,7 +229,53 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::with('specificationValues.specification')->findOrFail($id);
+
+        $categories = Category::where('status_id', 3)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $statuses = Status::whereIn('id', [1, 2])
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        $countries = Country::where('status_id', 3)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        if ($statuses->isEmpty()) {
+            $statuses = Status::orderBy('id')->get(['id', 'name']);
+        }
+
+        $specifications = Specification::orderBy('name')
+            ->pluck('name')
+            ->values();
+
+        $brands = Product::query()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->orderBy('brand')
+            ->pluck('brand')
+            ->values();
+
+        $initialSpecifications = $product->specificationValues
+            ->map(fn ($item) => [
+                'name' => $item->specification?->name ?? '',
+                'value' => $item->value,
+            ])
+            ->values()
+            ->all();
+
+        return view('products.edit', compact(
+            'product',
+            'categories',
+            'statuses',
+            'countries',
+            'specifications',
+            'brands',
+            'initialSpecifications',
+        ));
     }
 
     /**
@@ -236,7 +283,111 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+
+        $request->validate([
+            'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code,'.$product->id],
+            'status_id' => ['required', 'exists:statuses,id'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'product_name' => ['required', 'string', 'max:255'],
+            'brand' => ['required', 'string', 'max:255'],
+            'model' => ['required', 'string', 'max:255'],
+            'country_of_origin' => ['required', 'string', 'max:255'],
+            'website_url' => ['nullable', 'url', 'max:2000'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'specifications' => ['required', 'array', 'min:1', 'max:8'],
+            'specifications.*.name' => ['required', 'string', 'max:255'],
+            'specifications.*.value' => ['required', 'string', 'max:255'],
+        ]);
+
+        $specificationRows = collect($request->input('specifications', []))
+            ->map(fn ($row) => [
+                'name' => trim($row['name'] ?? ''),
+                'value' => trim($row['value'] ?? ''),
+            ])
+            ->filter(fn ($row) => $row['name'] !== '')
+            ->values();
+
+        DB::beginTransaction();
+
+        try {
+            $oldProductCode = $product->product_code;
+
+            $product->update([
+                'product_code' => $request->product_code,
+                'name' => $request->name,
+                'product_name' => $request->product_name,
+                'brand' => $request->brand,
+                'model' => $request->model,
+                'country_of_origin' => $request->country_of_origin,
+                'website_url' => $request->website_url ?? '',
+                'description' => $request->description ?? '',
+                'status_id' => $request->status_id,
+                'category_id' => $request->category_id,
+                'user_id' => $request->user()?->id,
+            ]);
+
+            $product->specificationValues()->delete();
+
+            foreach ($specificationRows as $row) {
+                $specificationName = Str::of($row['name'])->squish()->toString();
+                $specification = Specification::firstOrCreate(
+                    ['slug' => Str::slug($specificationName)],
+                    [
+                        'name' => $specificationName,
+                        'status_id' => 3,
+                        'user_id' => $request->user()?->id,
+                        'category_id' => $request->category_id,
+                    ]
+                );
+
+                ProductSpecificationValue::create([
+                    'product_id' => $product->id,
+                    'specification_id' => $specification->id,
+                    'value' => $row['value'],
+                ]);
+            }
+
+            foreach (['main_image' => 'image', 'thumbnail_image' => 'thumbnail'] as $input => $column) {
+                if (! $request->hasFile($input)) {
+                    continue;
+                }
+
+                if ($product->{$column}) {
+                    File::delete(public_path($product->{$column}));
+                }
+
+                $file = $request->file($input);
+                $fileName = uniqid((string) $request->user()?->id).$product->id.$file->getClientOriginalName();
+                $file->move(public_path('assets/img/products'), $fileName);
+                $product->{$column} = 'assets/img/products/'.$fileName;
+            }
+
+            if ($oldProductCode !== $product->product_code || ! $product->qr) {
+                if ($product->qr) {
+                    File::delete(public_path($product->qr));
+                }
+
+                $qrResponse = $this->generateQR($product->product_code, 'png');
+                $product->qr = $qrResponse->getData()->data->path;
+            }
+
+            $product->save();
+            DB::commit();
+
+            return $this->sendRespond($product, 'Product updated successfully');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'There is an error in updating product.',
+            ], 500);
+        }
     }
 
     /**
@@ -281,18 +432,18 @@ class ProductController extends Controller
         ");
         // dd($products);
 
-        $product = ($products) ? $products[0]: null;
+        $product = ($products) ? $products[0] : null;
         if ($product) {
             return response()->json([
-                'data'=>$product
+                'data' => $product,
             ]);
         } else {
-            return response()->json(["error"=>"Product code doesn't exist."]);
+            return response()->json(['error' => "Product code doesn't exist."]);
         }
     }
 
     //  composer require simplesoftwareio/simple-qrcode
-    public function generateQR(string $text, string $format='png')
+    public function generateQR(string $text, string $format = 'png')
     {
         $uniqueId = (string) Str::uuid().$text;
         $uniqueId = $text;
@@ -303,7 +454,7 @@ class ProductController extends Controller
         $filepath = "assets/img/products/qrs/$qr_file_name";
 
         // Ensure the directory exists
-        if (!file_exists(dirname($qr_file_path))) {
+        if (! file_exists(dirname($qr_file_path))) {
             mkdir(dirname($qr_file_path), 0755, true);
         }
         file_put_contents($qr_file_path, $qrCode);
@@ -318,6 +469,4 @@ class ProductController extends Controller
             ],
         ]);
     }
-
-    
 }
