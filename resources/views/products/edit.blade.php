@@ -288,6 +288,32 @@
                             </div>
                         </div>
 
+                        <div class="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/40">
+                            <div class="flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product QR Code</h3>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Scan to open this product.</p>
+                                </div>
+                                <img id="product-qr-image"
+                                    @if ($product->qr) src="{{ asset($product->qr) }}" @endif
+                                    class="{{ $product->qr ? '' : 'hidden' }} h-28 w-28 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600"
+                                    alt="Product QR code">
+                            </div>
+
+                            <div id="product-qr-placeholder" class="{{ $product->qr ? 'hidden' : '' }} mt-4 rounded-lg border border-dashed border-gray-300 px-4 py-5 text-center dark:border-gray-600">
+                                <svg class="mx-auto h-8 w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/>
+                                </svg>
+                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">This product does not have a QR code yet.</p>
+                            </div>
+
+                            <button type="button" id="generate-qr-button"
+                                class="{{ $product->qr ? 'hidden' : 'inline-flex' }} mt-3 w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                                <span id="generate-qr-button-label">Generate QR Code</span>
+                            </button>
+                            <p id="qr-generation-message" class="mt-2 hidden text-xs" role="status"></p>
+                        </div>
+
                         <div class="mt-5">
                             <p id="preview-category" class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400"></p>
                             <h3 id="preview-name" class="mt-1.5 line-clamp-2 text-lg font-bold text-gray-900 dark:text-white"></h3>
@@ -601,6 +627,45 @@
         $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
+
+        $('#generate-qr-button').on('click', function () {
+            const $button = $(this);
+            const $message = $('#qr-generation-message');
+            const generateUrl = @js(url('/products-generate-qr')).replace(/\/$/, '');
+
+            $button.prop('disabled', true);
+            $('#generate-qr-button-label').text('Generating...');
+            $message.addClass('hidden').removeClass('text-green-600 text-red-600 dark:text-green-400 dark:text-red-400').text('');
+
+            $.ajax({
+                url: `${generateUrl}/${encodeURIComponent(initialProductCode)}/png`,
+                method: 'GET',
+                dataType: 'json',
+                headers: { Accept: 'application/json' }
+            }).done(response => {
+                if (!response.success || !response.data?.url) {
+                    $message.text(response.message || 'Unable to generate the QR code.')
+                        .removeClass('hidden')
+                        .addClass('text-red-600 dark:text-red-400');
+                    $button.prop('disabled', false);
+                    $('#generate-qr-button-label').text('Generate QR Code');
+                    return;
+                }
+
+                $('#product-qr-image')
+                    .attr('src', `${response.data.url}?v=${Date.now()}`)
+                    .removeClass('hidden');
+                $('#product-qr-placeholder, #generate-qr-button').addClass('hidden');
+                $message.text(response.message || 'QR code generated successfully.')
+                    .removeClass('hidden')
+                    .addClass('text-green-600 dark:text-green-400');
+            }).fail(xhr => {
+                const message = xhr.responseJSON?.message || 'Unable to generate the QR code. Please try again.';
+                $message.text(message).removeClass('hidden').addClass('text-red-600 dark:text-red-400');
+                $button.prop('disabled', false);
+                $('#generate-qr-button-label').text('Generate QR Code');
+            });
+        });
 
         renderRows();
         updateProductPreview();

@@ -445,11 +445,10 @@ class ProductController extends Controller
     //  composer require simplesoftwareio/simple-qrcode
     public function generateQR(string $text, string $format = 'png')
     {
-        $uniqueId = (string) Str::uuid().$text;
-        $uniqueId = $text;
+        abort_unless(in_array($format, ['png', 'svg'], true), 404);
 
         $qrCode = QrCode::format($format)->size(100)->generate($text);
-        $qr_file_name = "$uniqueId.$format";
+        $qr_file_name = "$text.$format";
         $qr_file_path = public_path("assets/img/products/qrs/$qr_file_name");
         $filepath = "assets/img/products/qrs/$qr_file_name";
 
@@ -459,13 +458,17 @@ class ProductController extends Controller
         }
         file_put_contents($qr_file_path, $qrCode);
 
+        Product::where('product_code', $text)->update([
+            'qr' => $filepath,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'QR code generated successfully.',
             'data' => [
                 'format' => $format,
                 'path' => $filepath,
-                'url' => asset($qr_file_path),
+                'url' => asset($filepath),
             ],
         ]);
     }
