@@ -24,8 +24,8 @@ class Product extends Model
         'unit',
         'image',
         'thumbnail',
-        'brand_icon',
         'qr',
+        'brand_icon',
         'qr_destination',
     ];
 

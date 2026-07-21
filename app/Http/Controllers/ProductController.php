@@ -29,7 +29,7 @@ class ProductController extends Controller
     {
         $results = Product::query();
 
-        $products = $results->paginate(15);
+        $products = $results->orderBy('id','desc')->paginate(15);
 
         // dd($products);
         return view('products.index', compact(
@@ -112,7 +112,7 @@ class ProductController extends Controller
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
             'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
@@ -143,7 +143,7 @@ class ProductController extends Controller
                 'name' => $request['name'],
                 'model' => $request['model'] ?? '',
                 'country_of_origin' => $request['country_of_origin'] ?? '',
-                'website_url' => $request['website_url'] ?? '',
+                // 'website_url' => $request['website_url'] ?? '',
                 'description' => $request['description'] ?? '',
                 'status_id' => $request['status_id'] ?? null,
                 'category_id' => $request['category_id'] ?? null,
@@ -337,7 +337,7 @@ class ProductController extends Controller
             'brand' => ['required', 'string', 'max:255'],
             'model' => ['required', 'string', 'max:255'],
             'country_of_origin' => ['required', 'string', 'max:255'],
-            'website_url' => ['nullable', 'url', 'max:2000'],
+            // 'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
             'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],

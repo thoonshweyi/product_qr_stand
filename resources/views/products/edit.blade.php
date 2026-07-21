@@ -80,7 +80,7 @@
 
                         <div class="lg:col-span-2">
                             <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
-                            <input type="search" name="product_code" id="product_code" value="{{ old('product_code', $product->product_code) }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110">
+                            <input type="search" name="product_code" id="product_code" value="{{ old('product_code', $product->product_code) }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110" readonly>
                             <!-- <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p> -->
                         </div>
 
@@ -825,10 +825,9 @@
                                         text: data.message,
                                     });
                                     
-
-                                    setTimeout(() => {                                            
-                                        window.location.href="{{ route('products.index') }}";
-                                    }, 3000);
+                                    // setTimeout(() => {                                            
+                                    //     window.location.href="{{ route('products.index') }}";
+                                    // }, 3000);
 
                                 }else{
                                     Swal.fire({

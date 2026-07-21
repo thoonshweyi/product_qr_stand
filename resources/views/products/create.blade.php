@@ -691,10 +691,10 @@
                 showError();
 
                 const errors = clientValidationErrors();
-                // if (Object.keys(errors).length) {
-                //     displayValidationErrors(errors);
-                //     return;
-                // }
+                if (Object.keys(errors).length) {
+                    displayValidationErrors(errors);
+                    return;  
+                }
 
                 displayValidationErrors({});
                 // $.ajax({
