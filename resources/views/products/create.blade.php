@@ -304,15 +304,30 @@
                             <div id="preview-specifications"></div>
                         </dl>
 
-                        <div class="mt-5 flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                            <div class="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-white text-gray-800 shadow-sm dark:bg-gray-800 dark:text-white">
-                                <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/>
-                                </svg>
+                        <div class="mt-6 border-t border-gray-200 pt-5 dark:border-gray-700">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product QR Code</h3>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">The QR code will be generated automatically after saving.</p>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">QR destination</p>
-                                <p id="preview-website-url" class="truncate text-xs text-gray-500 dark:text-gray-400"></p>
+
+                            <div class="mt-4 grid gap-5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+                                <div class="flex aspect-square w-36 items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-800">
+                                    <div class="flex h-full w-full flex-col items-center justify-center text-center">
+                                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
+                                            <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/></svg>
+                                        </span>
+                                        <p class="mt-2 text-xs font-medium text-gray-500 dark:text-gray-400">Generated on save</p>
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                                        <svg class="h-4 w-4 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m3-3l2-2a4 4 0 015.656 5.656l-1 1"/></svg>
+                                        <p class="text-xs font-semibold uppercase tracking-wide">Destination</p>
+                                    </div>
+                                    <p class="mt-1.5 text-sm font-medium leading-5 text-gray-700 dark:text-gray-300">Product page URL will be assigned after the product is saved.</p>
+                                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">The exact encoded URL will be stored with the product.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -534,7 +549,6 @@
             $('#preview-name').text($('#name').val() || 'Untitled product');
             $('#preview-brand').text($('#brand').val());
             $('#preview-model').text($('#model').val());
-            $('#preview-website-url').text($('#website_url').val() || 'Link will be generated after creation');
             $('#description-count').text($('#description').val().length);
             $('#preview-status').text(statusName || 'No status')
                 .toggleClass('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', statusName.toLowerCase() === 'active')

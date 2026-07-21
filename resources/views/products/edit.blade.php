@@ -289,32 +289,6 @@
 
                         </div>
 
-                        <div class="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/40">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product QR Code</h3>
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Scan to open this product.</p>
-                                </div>
-                                <img id="product-qr-image"
-                                    @if ($product->qr) src="{{ asset($product->qr) }}" @endif
-                                    class="{{ $product->qr ? '' : 'hidden' }} h-28 w-28 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600"
-                                    alt="Product QR code">
-                            </div>
-
-                            <div id="product-qr-placeholder" class="{{ $product->qr ? 'hidden' : '' }} mt-4 rounded-lg border border-dashed border-gray-300 px-4 py-5 text-center dark:border-gray-600">
-                                <svg class="mx-auto h-8 w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/>
-                                </svg>
-                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">This product does not have a QR code yet.</p>
-                            </div>
-
-                            <button type="button" id="generate-qr-button"
-                                class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                <span id="generate-qr-button-label">{{ $product->qr ? 'Regenerate QR Code' : 'Generate QR Code' }}</span>
-                            </button>
-                            <p id="qr-generation-message" class="mt-2 hidden text-xs" role="status"></p>
-                        </div>
-
                         <div class="mt-5">
                             <p id="preview-category" class="text-xs font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-400"></p>
                             <h3 id="preview-name" class="mt-1.5 line-clamp-2 text-lg font-bold text-gray-900 dark:text-white"></h3>
@@ -332,15 +306,44 @@
                             <div id="preview-specifications"></div>
                         </dl>
 
-                        <div class="mt-5 flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                            <div class="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-white text-gray-800 shadow-sm dark:bg-gray-800 dark:text-white">
-                                <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/>
-                                </svg>
+                        <div class="mt-6 border-t border-gray-200 pt-5 dark:border-gray-700">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Product QR Code</h3>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Scan this code to open the product page.</p>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">QR destination</p>
-                                <p id="preview-website-url" class="truncate text-xs text-gray-500 dark:text-gray-400"></p>
+
+                            <div class="mt-4 grid gap-5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+                                <div class="flex aspect-square w-36 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-800">
+                                    <img id="product-qr-image"
+                                        @if ($product->qr) src="{{ asset($product->qr) }}" @endif
+                                        class="{{ $product->qr ? '' : 'hidden' }} h-full w-full object-contain"
+                                        alt="Product QR code">
+                                    <div id="product-qr-placeholder" class="{{ $product->qr ? 'hidden' : '' }} flex h-full w-full flex-col items-center justify-center text-center">
+                                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
+                                            <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm9-2h3v3h-3v-3zm4 0h3v7h-3v-3h-2v3h-2v-3h3v-2h1v-2z"/>
+                                            </svg>
+                                        </span>
+                                        <p class="mt-2 text-xs font-medium text-gray-500 dark:text-gray-400">No QR code yet</p>
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                                        <svg class="h-4 w-4 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 010 5.656l-2 2a4 4 0 01-5.656-5.656l1-1m3-3l2-2a4 4 0 015.656 5.656l-1 1"/></svg>
+                                        <p class="text-xs font-semibold uppercase tracking-wide">Destination</p>
+                                    </div>
+                                    <a id="qr-destination-url" href="{{ $product->qr_destination ?: '#' }}" target="_blank" rel="noopener"
+                                        class="mt-1.5 block break-all text-sm font-medium leading-5 {{ $product->qr_destination ? 'text-primary-700 hover:underline dark:text-primary-400' : 'pointer-events-none text-red-600 dark:text-red-400' }}">
+                                        {{ $product->qr_destination ?: 'QR code error: Destination link is missing. Please regenerate.' }}
+                                    </a>
+                                    <button type="button" id="generate-qr-button"
+                                        class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 sm:w-auto">
+                                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span id="generate-qr-button-label">{{ $product->qr ? 'Regenerate QR Code' : 'Generate QR Code' }}</span>
+                                    </button>
+                                    <p id="qr-generation-message" class="mt-2 hidden text-xs" role="status"></p>
+                                </div>
                             </div>
                         </div>
 
@@ -567,7 +570,6 @@
             $('#preview-name').text($('#name').val() || 'Untitled product');
             $('#preview-brand').text($('#brand').val());
             $('#preview-model').text($('#model').val());
-            $('#preview-website-url').text($('#website_url').val() || 'Link will be generated after creation');
             $('#description-count').text($('#description').val().length);
             $('#preview-status').text(statusName || 'No status')
                 .toggleClass('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', statusName.toLowerCase() === 'active')
@@ -677,6 +679,13 @@
                     .attr('src', `${response.data.url}?v=${Date.now()}`)
                     .removeClass('hidden');
                 $('#product-qr-placeholder').addClass('hidden');
+                if (response.data.destination_url) {
+                    $('#qr-destination-url')
+                        .attr('href', response.data.destination_url)
+                        .text(response.data.destination_url)
+                        .removeClass('pointer-events-none text-amber-600 dark:text-amber-400')
+                        .addClass('text-primary-700 hover:underline dark:text-primary-400');
+                }
                 $button.prop('disabled', false);
                 qrButtonLabel = 'Regenerate QR Code';
                 $('#generate-qr-button-label').text(qrButtonLabel);

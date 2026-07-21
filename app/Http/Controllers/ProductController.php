@@ -195,11 +195,11 @@ class ProductController extends Controller
             // }
 
             // Start Generate QR
-            $response = $this->generateQR($product->product_code, 'png');
-            $data = $response->getData();
-            // dd($data);
+            $destinationUrl = route('products.show', $product->id);
+            $qrData = $this->generateQR($destinationUrl, $product->product_code, 'png');
 
-            $product->qr = $data->data->path;
+            $product->qr = $qrData['path'];
+            $product->qr_destination = $destinationUrl;
             $product->save();
             // End Generate QR
 
@@ -381,8 +381,10 @@ class ProductController extends Controller
                     File::delete(public_path($product->qr));
                 }
 
-                $qrResponse = $this->generateQR($product->product_code, 'png');
-                $product->qr = $qrResponse->getData()->data->path;
+                $destinationUrl = route('products.show', $product->id);
+                $qrData = $this->generateQR($destinationUrl, $product->product_code, 'png');
+                $product->qr = $qrData['path'];
+                $product->qr_destination = $destinationUrl;
             }
 
             $product->save();
@@ -452,34 +454,50 @@ class ProductController extends Controller
         }
     }
 
-    //  composer require simplesoftwareio/simple-qrcode
-    public function generateQR(string $text, string $format = 'png')
+    public function generateProductQR(string $text, string $format = 'png')
     {
         abort_unless(in_array($format, ['png', 'svg'], true), 404);
 
-        $qrCode = QrCode::format($format)->size(100)->generate($text);
-        $qr_file_name = "$text.$format";
-        $qr_file_path = public_path("assets/img/products/qrs/$qr_file_name");
-        $filepath = "assets/img/products/qrs/$qr_file_name";
+        $product = Product::where('product_code', $text)->firstOrFail();
+        $destinationUrl = route('products.show', $product->id);
+        $qrData = $this->generateQR($destinationUrl, $product->product_code, $format);
 
-        // Ensure the directory exists
-        if (! file_exists(dirname($qr_file_path))) {
-            mkdir(dirname($qr_file_path), 0755, true);
-        }
-        file_put_contents($qr_file_path, $qrCode);
-
-        Product::where('product_code', $text)->update([
-            'qr' => $filepath,
+        $product->update([
+            'qr' => $qrData['path'],
+            'qr_destination' => $destinationUrl,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'QR code generated successfully.',
             'data' => [
-                'format' => $format,
-                'path' => $filepath,
-                'url' => asset($filepath),
+                ...$qrData,
+                'destination_url' => $destinationUrl,
             ],
         ]);
+    }
+
+    // composer require simplesoftwareio/simple-qrcode
+    public function generateQR(string $text, string $fileName, string $format = 'png'): array
+    {
+        if (! in_array($format, ['png', 'svg'], true)) {
+            throw new \InvalidArgumentException('Unsupported QR code format.');
+        }
+
+        $qrCode = QrCode::format($format)->size(100)->generate($text);
+        $safeFileName = basename($fileName).'.'.$format;
+        $relativePath = 'assets/img/products/qrs/'.$safeFileName;
+        $absolutePath = public_path($relativePath);
+
+        if (! file_exists(dirname($absolutePath))) {
+            mkdir(dirname($absolutePath), 0755, true);
+        }
+        file_put_contents($absolutePath, $qrCode);
+
+        return [
+            'format' => $format,
+            'path' => $relativePath,
+            'url' => asset($relativePath),
+        ];
     }
 }

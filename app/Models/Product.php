@@ -25,6 +25,8 @@ class Product extends Model
         'image',
         'thumbnail',
         'brand_icon',
+        'qr',
+        'qr_destination',
     ];
 
     public function specificationValues()

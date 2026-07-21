@@ -42,11 +42,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('roles', RolesController::class);
 
-
     Route::resource('products', ProductController::class);
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
-    Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateQR'])->name('products.generateqr');
-
+    Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
 
     Route::get('/productscreatedemo', function () {
         // Static sample data for the product form prototype. No database records are used here.
