@@ -407,7 +407,38 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::with('images')->findOrFail($id);
+        $files = collect([
+            $product->image,
+            $product->thumbnail,
+            $product->brand_icon,
+            $product->qr,
+        ])->merge($product->images->pluck('image'))
+            ->filter()
+            ->unique()
+            ->values();
+
+        DB::beginTransaction();
+
+        try {
+            $product->specificationValues()->delete();
+            $product->images()->delete();
+            $product->delete();
+
+            DB::commit();
+
+            $files->each(fn (string $path) => File::delete(public_path($path)));
+
+            return $this->sendRespond($id, 'Product deleted successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'There is an error in deleting the product.',
+            ], 500);
+        }
     }
 
     public function search_product(Request $request)
