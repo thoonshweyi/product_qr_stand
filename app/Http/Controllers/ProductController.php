@@ -29,7 +29,7 @@ class ProductController extends Controller
     {
         $results = Product::query();
 
-        $products = $results->orderBy('id','desc')->paginate(15);
+        $products = $results->orderBy('id', 'desc')->paginate(15);
 
         // dd($products);
         return view('products.index', compact(
@@ -111,9 +111,9 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
@@ -248,7 +248,11 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with([
+            'category',
+            'country',
+            'specificationValues.specification',
+        ])->findOrFail($id);
 
         if (! auth()->check() && $product->status_id !== 1) {
             abort(404);
@@ -339,9 +343,9 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             // 'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],

@@ -2,38 +2,27 @@
 
 @section('content')
 @php
-    // Static content for the design demo. These values can be replaced with $product later.
-    $demo = [
-        'brand' => 'IM Dayuan',
-        'name' => 'Automatic Pressure Pump',
-        'model' => 'ID-750A',
-        'code' => '2000000602110',
-        'country' => 'China',
-        'type' => 'Water Pump',
-        'grade' => 'A Grade',
-        'color' => 'Blue / Black',
-        'size' => '447mm × 447mm',
-        'unit' => '1 Unit',
-        'package' => '1 Pc',
-        'weight' => '12.5 Kg',
-        'usage' => 'Indoor / Outdoor',
-    ];
+    $specifications = collect([
+        'Brand' => $product->brand,
+        'Name' => $product->name,
+        //'Product Name' => $product->product_name,
+        'Model' => $product->model,
+        'Code' => $product->product_code,
+        'Country of origin' => $product->country?->name,
+        //'Category' => $product->category?->name,
+        'Sales unit' => $product->unit,
+    ])->filter(fn ($value) => filled($value));
 
-    $specifications = [
-        'Brand' => $demo['brand'],
-        'Name' => $demo['name'],
-        'Model' => $demo['model'],
-        'Code' => $demo['code'],
-        'Country of origin' => $demo['country'],
-        'Type' => $demo['type'],
-        'Grade' => $demo['grade'],
-        'Color' => $demo['color'],
-        'Size' => $demo['size'],
-        'Sales unit' => $demo['unit'],
-        '1 Package' => $demo['package'],
-        'Weight' => $demo['weight'],
-        'Usage Location' => $demo['usage'],
-    ];
+    foreach ($product->specificationValues as $specificationValue) {
+        if ($specificationValue->specification && filled($specificationValue->value)) {
+            $specifications->put($specificationValue->specification->name, $specificationValue->value);
+        }
+    }
+
+    $fallbackImage = 'assets/img/icon/pro1globalicon.png';
+    $mainImage = $product->image ?: $fallbackImage;
+    $thumbnailImage = $product->thumbnail ?: $mainImage;
+    $brandImage = $product->brand_icon ?: $fallbackImage;
 @endphp
 
 <div class="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
@@ -94,40 +83,51 @@
                 <!-- QR and thumbnail -->
                 <aside class="grid min-h-0 w-full grid-cols-2 gap-4 overflow-hiddens pb-4 sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16 sm:pb-0">
                     <div class="relative min-h-0 bg-white p-2">
-                        <img src="{{ asset('assets/img/products/qrs/2000000602110.png') }}"
-                            alt="Product QR code"
-                            class="h-full w-full object-contain [image-rendering:pixelated]">
-                        <button type="button" class="absolute left-2 right-2 top-full mt-1 rounded bg-[#073b78] py-1 text-sm font-bold text-white">
-                            Scan Here
-                        </button>
+                        @if (filled($product->qr))
+                            <img src="{{ asset($product->qr) }}"
+                                alt="{{ $product->name }} QR code"
+                                class="h-full w-full object-contain [image-rendering:pixelated]">
+                        @else
+                            <div class="flex h-full min-h-28 items-center justify-center border-2 border-dashed border-slate-300 text-center text-xs font-semibold text-slate-400">QR code unavailable</div>
+                        @endif
+                        @if (filled($product->qr))
+                            <div class="absolute left-2 right-2 top-full mt-1 rounded bg-[#073b78] py-1 text-center text-sm font-bold text-white">
+                                Scan Here
+                            </div>
+                        @endif
                     </div>
 
                     <div class="min-h-0 overflow-hidden bg-slate-100">
-                        <img src="{{ asset('assets/img/products/16a59d57f0b9244thumbnail.jpeg') }}"
-                            alt="{{ $demo['name'] }} thumbnail"
+                        <img src="{{ asset($thumbnailImage) }}"
+                            alt="{{ $product->name }} thumbnail"
                             class="h-full w-full object-cover">
                     </div>
                 </aside>
 
                 <!-- Main image -->
                 <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12">
-                    <img src="{{ asset('assets/img/products/16a59d57f082b64main.jpeg') }}"
-                        alt="{{ $demo['name'] }}"
+                    <img src="{{ asset($mainImage) }}"
+                        alt="{{ $product->name }}"
                         class="h-full w-full object-cover">
                 </div>
             </section>
             <div class="my-7 h-1 bg-[#0a4b91] sm:my-9"></div>
 
             <section class="relative overflow-hidden pb-5">
-                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
+                <img src="{{ asset($brandImage) }}"
                      alt=""
                      aria-hidden="true"
                      class="pointer-events-none absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 opacity-[0.055] grayscale">
 
                 <div class="relative">
-                    <h2 class="mb-4 text-xl font-extrabold uppercase sm:text-3xl">
-                        Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
-                    </h2>
+                    <div class="mb-4 flex items-center justify-between gap-5">
+                        <h2 class="text-xl font-extrabold uppercase sm:text-3xl">
+                            Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
+                        </h2>
+                        @if (filled($product->brand_icon))
+                            <img src="{{ asset($product->brand_icon) }}" alt="{{ $product->brand }} logo" class="h-12 w-auto max-w-32 object-contain sm:h-16">
+                        @endif
+                    </div>
 
                     <dl class="grid grid-cols-[minmax(120px,1fr)_12px_minmax(0,2fr)] gap-y-1 text-sm font-semibold sm:grid-cols-[270px_20px_minmax(0,1fr)] sm:text-xl">
                         @foreach ($specifications as $label => $value)
@@ -137,15 +137,7 @@
                         @endforeach
                     </dl>
 
-                    <p class="mt-6 text-justify text-sm leading-7 sm:text-lg sm:leading-9">
-                        အရည်အသွေးကောင်းမွန်သော <strong>Grade A</strong> အဆင့်ရှိ ကုန်ပစ္စည်းများကို အသုံးပြု၍
-                        လူနေအိမ်နှင့် လုပ်ငန်းသုံးနေရာများတွင် ယုံကြည်စိတ်ချစွာ အသုံးပြုနိုင်ပါသည်။
-                        တာရှည်ခံပြီး ထိန်းသိမ်းရလွယ်ကူသောကြောင့် နေ့စဉ်အသုံးပြုမှုအတွက် သင့်တော်ပါသည်။
-                    </p>
-                    <p class="mt-1 text-justify text-sm leading-7 sm:text-lg sm:leading-9">
-                        <strong>PRO 1 Global Home Center</strong> မှ အရည်အသွေးကောင်းမွန်သော ပစ္စည်းများကို
-                        စိတ်ချယုံကြည်စွာ ရွေးချယ်ဝယ်ယူနိုင်ပါသည်။
-                    </p>
+                    <div class="mt-6 whitespace-pre-line text-justify text-sm leading-7 sm:text-lg sm:leading-9">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
                 </div>
             </section>
         </div>
@@ -153,11 +145,12 @@
         <footer class="flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-4 text-center text-xs font-bold text-white sm:flex-row sm:gap-5 sm:text-base">
             <span>WWW.PRO1GLOBALHOMECENTER.COM</span>
             <div class="flex items-center gap-2" aria-label="PRO 1 social media channels">
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">f</span>
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-purple-500">v</span>
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-pink-500">◎</span>
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-black">♪</span>
-                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-red-600">▶</span>
+                <i class="fa-brands fa-facebook-f flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-sm text-white" title="Facebook" aria-label="Facebook"></i>
+                <i class="fa-brands fa-viber flex h-7 w-7 items-center justify-center rounded-full bg-purple-600 text-sm text-white" title="Viber" aria-label="Viber"></i>
+                <i class="fa-brands fa-instagram flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-sm text-white" title="Instagram" aria-label="Instagram"></i>
+                <i class="fa-brands fa-tiktok flex h-7 w-7 items-center justify-center rounded-full bg-black text-sm text-white" title="TikTok" aria-label="TikTok"></i>
+                <i class="fa-brands fa-youtube flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-sm text-white" title="YouTube" aria-label="YouTube"></i>
+                <i class="fa-solid fa-paper-plane flex h-7 w-7 items-center justify-center rounded-full bg-sky-500 text-sm text-white" title="Telegram" aria-label="Telegram"></i>
             </div>
         </footer>
     </article>
