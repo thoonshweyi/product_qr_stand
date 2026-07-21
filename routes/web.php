@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('products', ProductController::class);
     Route::post('/products/{product}/print-records', [ProductPrintController::class, 'store'])->name('products.print-records.store');
-    Route::patch('/product-print-records/{printRecord}/close', [ProductPrintController::class, 'close'])->name('products.print-records.close');
+    Route::patch('/product-print-records/{printRecord}/complete', [ProductPrintController::class, 'complete'])->name('products.print-records.complete');
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
 

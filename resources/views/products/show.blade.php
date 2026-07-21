@@ -41,10 +41,12 @@
         <div>
             <p class="text-sm font-semibold text-slate-900">Print tracking</p>
             <p class="mt-0.5 text-xs text-slate-500">
-                <span id="print-request-count">{{ $printRequestCount }}</span> print {{ Str::plural('request', $printRequestCount) }}
-                @if ($latestPrintRequest)
-                    · Last requested {{ $latestPrintRequest->requested_at->diffForHumans() }}
+                Confirmed prints: <span id="printed-count">{{ $printedCount }}</span>
+                <span id="latest-printed-text">
+                @if ($latestPrintedRecord)
+                    · Last printed {{ $latestPrintedRecord->printed_at->diffForHumans() }}
                 @endif
+                </span>
             </p>
         </div>
         <button type="button" id="print-product-button" class="inline-flex items-center justify-center rounded-lg bg-[#073b78] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#052e5e] disabled:cursor-not-allowed disabled:opacity-60">
@@ -145,10 +147,10 @@
 @section('css')
 <style>
     @media print {
-        @page {
+        /* @page {
             size: A4 portrait;
             margin: 0;
-        }
+        } */
 
         .no-print {
             display: none !important;
@@ -183,8 +185,6 @@
                 headers: { Accept: 'application/json' }
             }).done(response => {
                 activePrintRecordId = response.data.id;
-                const count = Number($('#print-request-count').text()) || 0;
-                $('#print-request-count').text(count + 1);
                 window.print();
             }).fail(xhr => {
                 Swal.fire({
@@ -205,13 +205,23 @@
             activePrintRecordId = null;
 
             $.ajax({
-                url: @js(url('/product-print-records')) + `/${recordId}/close`,
+                url: @js(url('/product-print-records')) + `/${recordId}/complete`,
                 method: 'POST',
                 data: {
                     _token: @js(csrf_token()),
                     _method: 'PATCH'
                 },
                 headers: { Accept: 'application/json' }
+            }).done(() => {
+                const count = Number($('#printed-count').text()) || 0;
+                $('#printed-count').text(count + 1);
+                $('#latest-printed-text').text(' · Last printed just now');
+            }).fail(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Unable to save print record',
+                    text: 'Please try again.'
+                });
             });
         });
     });

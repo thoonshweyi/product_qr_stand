@@ -12,16 +12,20 @@ class ProductPrintRecord extends Model
     protected $fillable = [
         'product_id',
         'user_id',
+        'print_reference',
+        'product_code',
+        'product_name',
+        'print_url',
         'status',
         'ip_address',
         'user_agent',
-        'requested_at',
-        'dialog_closed_at',
+        'print_started_at',
+        'printed_at',
     ];
 
     protected $casts = [
-        'requested_at' => 'datetime',
-        'dialog_closed_at' => 'datetime',
+        'print_started_at' => 'datetime',
+        'printed_at' => 'datetime',
     ];
 
     public function product()
