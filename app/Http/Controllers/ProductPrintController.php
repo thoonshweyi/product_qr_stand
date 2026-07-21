@@ -23,12 +23,20 @@ class ProductPrintController extends Controller
             'print_started_at' => now(),
         ]);
 
+        if (! $record->user_id) {
+            $request->session()->put('print_records.'.$record->id, true);
+        }
+
         return $this->sendRespond($record, 'Print preview is ready.');
     }
 
     public function complete(Request $request, ProductPrintRecord $printRecord)
     {
-        abort_unless($printRecord->user_id === $request->user()?->id, 403);
+        $canComplete = $printRecord->user_id
+            ? $printRecord->user_id === $request->user()?->id
+            : (bool) $request->session()->pull('print_records.'.$printRecord->id);
+
+        abort_unless($canComplete, 403);
 
         if (! $printRecord->printed_at) {
             $printRecord->update([

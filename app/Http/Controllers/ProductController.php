@@ -37,6 +37,28 @@ class ProductController extends Controller
         ));
     }
 
+    public function catalog(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $products = Product::with(['category', 'country'])
+            ->where('status_id', 1)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('product_name', 'like', '%'.$search.'%')
+                        ->orWhere('product_code', 'like', '%'.$search.'%')
+                        ->orWhere('brand', 'like', '%'.$search.'%')
+                        ->orWhere('model', 'like', '%'.$search.'%');
+                });
+            })
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('products.catalog', compact('products', 'search'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -227,6 +249,11 @@ class ProductController extends Controller
     public function show(string $id)
     {
         $product = Product::findOrFail($id);
+
+        if (! auth()->check() && $product->status_id !== 1) {
+            abort(404);
+        }
+
         $printedCount = $product->printRecords()->where('status', 'printed')->count();
         $latestPrintedRecord = $product->printRecords()
             ->where('status', 'printed')

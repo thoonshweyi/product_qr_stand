@@ -22,9 +22,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    // return view('welcome');
-    return redirect()->route('dashboards.index');
+    return redirect()->route(auth()->check() ? 'dashboards.index' : 'products.catalog');
 });
+
+Route::get('/catalog/products', [ProductController::class, 'catalog'])->name('products.catalog');
+Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
+Route::post('/products/{product}/print-records', [ProductPrintController::class, 'store'])->name('products.print-records.store');
+Route::patch('/product-print-records/{printRecord}/complete', [ProductPrintController::class, 'complete'])->name('products.print-records.complete');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -43,9 +47,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('roles', RolesController::class);
 
-    Route::resource('products', ProductController::class);
-    Route::post('/products/{product}/print-records', [ProductPrintController::class, 'store'])->name('products.print-records.store');
-    Route::patch('/product-print-records/{printRecord}/complete', [ProductPrintController::class, 'complete'])->name('products.print-records.complete');
+    Route::resource('products', ProductController::class)->except('show');
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
 
