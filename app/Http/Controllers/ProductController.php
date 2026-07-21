@@ -91,6 +91,7 @@ class ProductController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
@@ -171,6 +172,14 @@ class ProductController extends Controller
                 $product->thumbnail = $filepath;
             }
             $product->save();
+
+            if ($request->hasFile('brand_icon')) {
+                $file = $request->file('brand_icon');
+                $imagenewname = uniqid($user_id).$product->id.$file->getClientOriginalName();
+                $file->move(public_path('assets/img/products'), $imagenewname);
+                $product->brand_icon = 'assets/img/products/'.$imagenewname;
+                $product->save();
+            }
             // End Single Image Upload
 
             // foreach (['main_image' => 'main', 'thumbnail_image' => 'thumbnail'] as $inputName => $type) {
@@ -298,6 +307,7 @@ class ProductController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'specifications' => ['required', 'array', 'min:1', 'max:8'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
@@ -351,7 +361,7 @@ class ProductController extends Controller
                 ]);
             }
 
-            foreach (['main_image' => 'image', 'thumbnail_image' => 'thumbnail'] as $input => $column) {
+            foreach (['main_image' => 'image', 'thumbnail_image' => 'thumbnail', 'brand_icon' => 'brand_icon'] as $input => $column) {
                 if (! $request->hasFile($input)) {
                     continue;
                 }

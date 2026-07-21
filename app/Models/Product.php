@@ -23,7 +23,8 @@ class Product extends Model
         'category_id',
         'unit',
         'image',
-        'thumbnail'
+        'thumbnail',
+        'brand_icon',
     ];
 
     public function specificationValues()
@@ -41,7 +42,8 @@ class Product extends Model
         return $this->belongsTo(Status::class);
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
@@ -52,6 +54,6 @@ class Product extends Model
 
     public function country()
     {
-        return $this->belongsTo(Country::class,'country_of_origin','id');
+        return $this->belongsTo(Country::class, 'country_of_origin', 'id');
     }
 }

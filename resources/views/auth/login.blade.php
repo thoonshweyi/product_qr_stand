@@ -1,4 +1,4 @@
-@extends("layouts.mainindex")
+@extends("layouts.main")
 
 @section("content")
 <div class="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">

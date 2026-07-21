@@ -315,6 +315,22 @@
                                 <p id="preview-website-url" class="truncate text-xs text-gray-500 dark:text-gray-400"></p>
                             </div>
                         </div>
+
+                        <div class="mt-5 border-t border-gray-200 pt-5 dark:border-gray-700">
+                            <div class="mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Brand icon</h3>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG or JPG · up to 2 MB</p>
+                            </div>
+                            <label for="brand_icon" class="group relative flex h-28 w-28 cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
+                                <img id="brand-icon-image-preview" class="hidden h-full w-full object-contain p-2" alt="Brand icon preview">
+                                <div id="brand-icon-image-placeholder" class="p-2 text-center">
+                                    <svg class="mx-auto mb-1.5 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+                                    <p class="text-[11px] font-semibold leading-4 text-gray-700 dark:text-gray-200">Add brand icon</p>
+                                </div>
+                                <span id="brand-icon-image-change" class="absolute bottom-2 right-2 hidden rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                <input id="brand_icon" name="brand_icon" type="file" accept="image/png,image/jpeg" class="hidden">
+                            </label>
+                        </div>
                     </div>
 
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800">
@@ -598,6 +614,7 @@
         $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
+        $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
 
         renderRows();
         updateProductPreview();
