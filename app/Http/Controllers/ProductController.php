@@ -227,9 +227,13 @@ class ProductController extends Controller
     public function show(string $id)
     {
         $product = Product::findOrFail($id);
+        $printRequestCount = $product->printRecords()->count();
+        $latestPrintRequest = $product->printRecords()->latest('requested_at')->first();
 
         return view('products.show', compact(
             'product',
+            'printRequestCount',
+            'latestPrintRequest',
         ));
     }
 

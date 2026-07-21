@@ -36,6 +36,24 @@
     ];
 @endphp
 
+<div class="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+    <div class="mx-auto flex max-w-[1180px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold text-slate-900">Print tracking</p>
+            <p class="mt-0.5 text-xs text-slate-500">
+                <span id="print-request-count">{{ $printRequestCount }}</span> print {{ Str::plural('request', $printRequestCount) }}
+                @if ($latestPrintRequest)
+                    · Last requested {{ $latestPrintRequest->requested_at->diffForHumans() }}
+                @endif
+            </p>
+        </div>
+        <button type="button" id="print-product-button" class="inline-flex items-center justify-center rounded-lg bg-[#073b78] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#052e5e] disabled:cursor-not-allowed disabled:opacity-60">
+            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12-4h12v8H6v-8z"/></svg>
+            <span id="print-product-button-label">Print product</span>
+        </button>
+    </div>
+</div>
+
 <div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
     <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
         <header class="flex h-20 items-center bg-white sm:h-28">
@@ -122,4 +140,80 @@
         </footer>
     </article>
 </div>
+@endsection
+
+@section('css')
+<style>
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        html, body, main {
+            background: white !important;
+        }
+
+        article {
+            box-shadow: none !important;
+        }
+    }
+</style>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function () {
+        let activePrintRecordId = null;
+        const $button = $('#print-product-button');
+
+        $button.on('click', function () {
+            $button.prop('disabled', true);
+            $('#print-product-button-label').text('Preparing preview...');
+
+            $.ajax({
+                url: @js(route('products.print-records.store', $product)),
+                method: 'POST',
+                dataType: 'json',
+                data: { _token: @js(csrf_token()) },
+                headers: { Accept: 'application/json' }
+            }).done(response => {
+                activePrintRecordId = response.data.id;
+                const count = Number($('#print-request-count').text()) || 0;
+                $('#print-request-count').text(count + 1);
+                window.print();
+            }).fail(xhr => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Unable to open print preview',
+                    text: xhr.responseJSON?.message || 'The print request could not be recorded.'
+                });
+            }).always(() => {
+                $button.prop('disabled', false);
+                $('#print-product-button-label').text('Print product');
+            });
+        });
+
+        window.addEventListener('afterprint', function () {
+            if (!activePrintRecordId) return;
+
+            const recordId = activePrintRecordId;
+            activePrintRecordId = null;
+
+            $.ajax({
+                url: @js(url('/product-print-records')) + `/${recordId}/close`,
+                method: 'POST',
+                data: {
+                    _token: @js(csrf_token()),
+                    _method: 'PATCH'
+                },
+                headers: { Accept: 'application/json' }
+            });
+        });
+    });
+</script>
 @endsection

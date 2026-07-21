@@ -39,6 +39,11 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    public function printRecords()
+    {
+        return $this->hasMany(ProductPrintRecord::class);
+    }
+
     public function status()
     {
         return $this->belongsTo(Status::class);

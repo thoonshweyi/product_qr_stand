@@ -3,6 +3,7 @@
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPrintController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\StatusesController;
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('roles', RolesController::class);
 
     Route::resource('products', ProductController::class);
+    Route::post('/products/{product}/print-records', [ProductPrintController::class, 'store'])->name('products.print-records.store');
+    Route::patch('/product-print-records/{printRecord}/close', [ProductPrintController::class, 'close'])->name('products.print-records.close');
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
 
