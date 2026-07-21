@@ -309,8 +309,8 @@
                             </div>
 
                             <button type="button" id="generate-qr-button"
-                                class="{{ $product->qr ? 'hidden' : 'inline-flex' }} mt-3 w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                <span id="generate-qr-button-label">Generate QR Code</span>
+                                class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                                <span id="generate-qr-button-label">{{ $product->qr ? 'Regenerate QR Code' : 'Generate QR Code' }}</span>
                             </button>
                             <p id="qr-generation-message" class="mt-2 hidden text-xs" role="status"></p>
                         </div>
@@ -402,6 +402,7 @@
         const maxSpecifications = 8;
         const hasExistingMainImage = @js(filled($product->image));
         const initialProductCode = @js($product->product_code);
+        let qrButtonLabel = @js($product->qr ? 'Regenerate QR Code' : 'Generate QR Code');
         const categories = @js($categories);
         const statuses = @js($statuses);
         let availableSpecifications = [...new Set(@js($specifications))];
@@ -668,14 +669,17 @@
                         .removeClass('hidden')
                         .addClass('text-red-600 dark:text-red-400');
                     $button.prop('disabled', false);
-                    $('#generate-qr-button-label').text('Generate QR Code');
+                    $('#generate-qr-button-label').text(qrButtonLabel);
                     return;
                 }
 
                 $('#product-qr-image')
                     .attr('src', `${response.data.url}?v=${Date.now()}`)
                     .removeClass('hidden');
-                $('#product-qr-placeholder, #generate-qr-button').addClass('hidden');
+                $('#product-qr-placeholder').addClass('hidden');
+                $button.prop('disabled', false);
+                qrButtonLabel = 'Regenerate QR Code';
+                $('#generate-qr-button-label').text(qrButtonLabel);
                 $message.text(response.message || 'QR code generated successfully.')
                     .removeClass('hidden')
                     .addClass('text-green-600 dark:text-green-400');
@@ -683,7 +687,7 @@
                 const message = xhr.responseJSON?.message || 'Unable to generate the QR code. Please try again.';
                 $message.text(message).removeClass('hidden').addClass('text-red-600 dark:text-red-400');
                 $button.prop('disabled', false);
-                $('#generate-qr-button-label').text('Generate QR Code');
+                $('#generate-qr-button-label').text(qrButtonLabel);
             });
         });
 
