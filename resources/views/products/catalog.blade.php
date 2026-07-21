@@ -2,14 +2,14 @@
 
 @section('content')
 <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
-    <nav class="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 text-slate-800 shadow-sm backdrop-blur" aria-label="Main navigation">
+    <nav class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-gradient-to-b from-black/40 to-[#073b78]/90 text-white shadow-lg backdrop-blur-sm" aria-label="Main navigation">
         <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-20 items-center justify-between gap-6">
                 <a href="{{ route('products.catalog') }}" class="flex flex-none items-center" aria-label="PRO 1 Global Product Catalog">
                     <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}" class="h-12 w-auto object-contain" alt="PRO 1 Global Home Center">
                 </a>
 
-                <button type="button" id="catalog-menu-button" class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-[#073b78] hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#073b78] lg:hidden" aria-controls="catalog-menu" aria-expanded="false">
+                <button type="button" id="catalog-menu-button" class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-white/30 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white lg:hidden" aria-controls="catalog-menu" aria-expanded="false">
                     <span class="sr-only">Open navigation menu</span>
                     <svg id="catalog-menu-open-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     <svg id="catalog-menu-close-icon" class="hidden h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -17,7 +17,7 @@
 
                 <div class="hidden min-w-0 items-center justify-end lg:flex" id="catalog-desktop-menu">
                     <ul class="flex items-center gap-1 text-xs font-bold uppercase tracking-wide xl:gap-2 xl:text-sm">
-                        <li><a href="https://pro1globalhomecenter.com/home.html?divisionId=1&townshipId=18" class="block border-b-2 border-[#0a4b91] px-2.5 py-7 text-[#0a4b91] xl:px-3">Home</a></li>
+                        <li><a href="https://pro1globalhomecenter.com/home.html?divisionId=1&townshipId=18" class="block border-b-2 border-white px-2.5 py-7 text-white xl:px-3">Home</a></li>
                         <li><a href="https://pro1globalhomecenter.com/promotion-list.html?divisionId=1&townshipId=18" class="block border-b-2 border-transparent px-2.5 py-7 transition hover:border-[#0a4b91] hover:text-[#0a4b91] xl:px-3">Promotions</a></li>
                         <li><a href="https://pro1globalhomecenter.com/our-services-list.html?divisionId=1&townshipId=18" class="block border-b-2 border-transparent px-2.5 py-7 transition hover:border-[#0a4b91] hover:text-[#0a4b91] xl:px-3">Our Services</a></li>
                         <li><a href="https://pro1globalhomecenter.com/our-center-list.html?divisionId=1&townshipId=18" class="block border-b-2 border-transparent px-2.5 py-7 transition hover:border-[#0a4b91] hover:text-[#0a4b91] xl:px-3">Our Center</a></li>
@@ -29,9 +29,9 @@
             </div>
         </div>
 
-        <div id="catalog-menu" class="mx-auto hidden max-w-screen-2xl border-t border-slate-200 bg-white px-4 pb-4 text-slate-800 sm:px-6 lg:hidden lg:px-8">
+        <div id="catalog-menu" class="mx-auto hidden max-w-screen-2xl border-t border-white/10 bg-[#073b78]/95 px-4 pb-4 text-white backdrop-blur-md sm:px-6 lg:hidden lg:px-8">
             <ul class="space-y-1 pt-3 text-sm font-bold uppercase tracking-wide">
-                <li><a href="https://pro1globalhomecenter.com/home.html?divisionId=1&townshipId=18" class="block rounded-lg bg-blue-50 px-3 py-2.5 text-[#0a4b91]">Home</a></li>
+                <li><a href="https://pro1globalhomecenter.com/home.html?divisionId=1&townshipId=18" class="block rounded-lg bg-white/15 px-3 py-2.5 text-white">Home</a></li>
                 <li><a href="https://pro1globalhomecenter.com/promotion-list.html?divisionId=1&townshipId=18" class="block rounded-lg px-3 py-2.5 hover:bg-slate-100 hover:text-[#0a4b91]">Promotions</a></li>
                 <li><a href="https://pro1globalhomecenter.com/our-services-list.html?divisionId=1&townshipId=18" class="block rounded-lg px-3 py-2.5 hover:bg-slate-100 hover:text-[#0a4b91]">Our Services</a></li>
                 <li><a href="https://pro1globalhomecenter.com/our-center-list.html?divisionId=1&townshipId=18" class="block rounded-lg px-3 py-2.5 hover:bg-slate-100 hover:text-[#0a4b91]">Our Center</a></li>
@@ -42,9 +42,9 @@
         </div>
     </nav>
 
-    <section class="relative mt-20 flex min-h-[310px] items-center bg-cover bg-center px-4 py-14 text-white" style="background-image: url('{{ asset('assets/img/banners/livingroom1.jpg') }}');">
-        <div class="absolute inset-0 bg-slate-950/65"></div>
-        <div class="relative mx-auto w-full max-w-5xl text-center">
+    <section class="relative flex min-h-[520px] items-center bg-cover bg-center px-4 pb-16s pt-32s text-white" style="background-image: url('{{ asset('assets/img/banners/livingroom1.jpg') }}');">
+        <div class="absolute inset-0 bg-slate-950/20"></div>
+        <div class="relative mx-auto w-full max-w-5xl rounded-2xl bg-slate-900/50 px-5 py-10 text-center shadow-2xl backdrop-blur-[2px] sm:px-10">
             <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-200">PRO 1 Global</p>
             <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Explore our products</h1>
             <p class="mt-2 text-slate-200">Browse product information, specifications and usage details.</p>
