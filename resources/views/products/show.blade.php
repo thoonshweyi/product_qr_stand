@@ -228,7 +228,7 @@
         }
 
         .product-print-header h1 {
-            font-size: 10pt !important;
+            font-size: 0.95rem !important;
             line-height: 1.15 !important;
         }
 
@@ -269,6 +269,8 @@
         .product-print-qr img {
             width: 100% !important;
             height: 100% !important;
+            box-sizing: border-box !important;
+            padding-bottom: 4.5mm !important;
             object-fit: contain !important;
         }
 
@@ -281,10 +283,11 @@
 
         .product-print-qr-label {
             right: 2mm !important;
-            bottom: 1mm !important;
+            bottom: 2mm !important;
             left: 2mm !important;
-            padding: 0.5mm 0 !important;
-            font-size: 6pt !important;
+            padding: 0.6mm 0 !important;
+            font-size: 0.625rem !important;
+            line-height: 1.1 !important;
         }
 
         .product-print-main {
@@ -306,22 +309,26 @@
         }
 
         .product-details h2 {
-            margin: 0 0 1.5mm !important;
-            font-size: 10pt !important;
-            line-height: 1.2 !important;
+            margin: 0 0 2mm !important;
+            font-size: 1.25rem !important;
+            line-height: 1.4 !important;
         }
 
         .product-print-specifications {
-            grid-template-columns: 34mm 4mm minmax(0, 1fr) !important;
+            grid-template-columns: 42mm 4mm minmax(0, 1fr) !important;
             gap: 0 !important;
-            font-size: 7.5pt !important;
-            line-height: 1.35 !important;
+            font-size: 1rem !important;
+            line-height: 1.65 !important;
+        }
+
+        .product-print-specifications dt {
+            white-space: nowrap !important;
         }
 
         .product-print-description {
-            margin-top: 2mm !important;
-            font-size: 7pt !important;
-            line-height: 1.4 !important;
+            margin-top: 3mm !important;
+            font-size: 0.95rem !important;
+            line-height: 1.7 !important;
             orphans: 2;
             widows: 2;
         }
@@ -329,7 +336,7 @@
         .product-footer {
             gap: 2mm !important;
             padding: 1.5mm 3mm !important;
-            font-size: 7pt !important;
+            font-size: 0.8rem !important;
             line-height: 1 !important;
             break-inside: avoid-page !important;
             page-break-inside: avoid !important;
@@ -338,7 +345,7 @@
         .product-footer i {
             width: 5mm !important;
             height: 5mm !important;
-            font-size: 7pt !important;
+            font-size: 0.625rem !important;
         }
     }
 
@@ -356,7 +363,7 @@
         }
 
         .product-print-header h1 {
-            font-size: 8pt !important;
+            font-size: 0.85rem !important;
         }
 
         .product-content {
@@ -368,15 +375,25 @@
         }
 
         .product-print-specifications {
-            grid-template-columns: 27mm 3mm minmax(0, 1fr) !important;
-            font-size: 6.5pt !important;
-            line-height: 1.25 !important;
+            grid-template-columns: 38mm 3mm minmax(0, 1fr) !important;
+            font-size: 0.875rem !important;
+            line-height: 1.6 !important;
         }
 
         .product-print-description {
-            margin-top: 1.5mm !important;
-            font-size: 6pt !important;
-            line-height: 1.3 !important;
+            margin-top: 2.5mm !important;
+            font-size: 0.825rem !important;
+            line-height: 1.65 !important;
+        }
+
+        .product-details h2 {
+            margin-bottom: 1.5mm !important;
+            font-size: 1.1rem !important;
+            line-height: 1.4 !important;
+        }
+
+        .product-footer {
+            font-size: 0.725rem !important;
         }
     }
 </style>
