@@ -99,16 +99,16 @@
         <div class="product-content px-4 py-4 sm:px-8 sm:py-6 lg:px-12">
             <section class="product-print-media mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
-                <aside class="product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 mb-4 sm:pb-0 gap-4 sm:gap-0">
+                <aside class="product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 gap-4 sm:gap-0 mb-8 sm:mb-0">
                     <div class="product-print-qr relative min-h-0 bg-white p-2 sm:p-6">
                         @if (filled($product->qr))
                             <img
                                 src="{{ asset($product->qr) }}"
                                 alt="{{ $product->name }} QR code"
-                                class="h-full w-full object-contain pb-8 [image-rendering:pixelated] sm:pb-0"
+                                class="h-full w-full object-contain [image-rendering:pixelated]"
                             >
 
-                            <div class="product-print-qr-label absolute bottom-2 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
+                            <div class="product-print-qr-label absolute left-2 right-2 rounded bg-[#073b78] py-1 text-center text-sm font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6 mt-2">
                                 Scan Here
                             </div>
                         @else
