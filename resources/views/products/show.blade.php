@@ -105,10 +105,10 @@
                             <img
                                 src="{{ asset($product->qr) }}"
                                 alt="{{ $product->name }} QR code"
-                                class="h-full w-full object-contain [image-rendering:pixelated]"
+                                class="h-full w-full object-contain pb-8 [image-rendering:pixelated] sm:pb-0"
                             >
 
-                            <div class="product-print-qr-label absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
+                            <div class="product-print-qr-label absolute bottom-2 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
                                 Scan Here
                             </div>
                         @else
@@ -228,7 +228,7 @@
         }
 
         .product-print-header h1 {
-            font-size: 0.95rem !important;
+            font-size: 1.05rem !important;
             line-height: 1.15 !important;
         }
 
@@ -310,15 +310,15 @@
 
         .product-details h2 {
             margin: 0 0 2mm !important;
-            font-size: 1.25rem !important;
+            font-size: 1.35rem !important;
             line-height: 1.4 !important;
         }
 
         .product-print-specifications {
             grid-template-columns: 42mm 4mm minmax(0, 1fr) !important;
             gap: 0 !important;
-            font-size: 1rem !important;
-            line-height: 1.65 !important;
+            font-size: 0.875rem !important;
+            line-height: 1.5 !important;
         }
 
         .product-print-specifications dt {
@@ -363,7 +363,7 @@
         }
 
         .product-print-header h1 {
-            font-size: 0.85rem !important;
+            font-size: 0.95rem !important;
         }
 
         .product-content {
@@ -376,8 +376,8 @@
 
         .product-print-specifications {
             grid-template-columns: 38mm 3mm minmax(0, 1fr) !important;
-            font-size: 0.875rem !important;
-            line-height: 1.6 !important;
+            font-size: 0.8rem !important;
+            line-height: 1.45 !important;
         }
 
         .product-print-description {
@@ -388,7 +388,7 @@
 
         .product-details h2 {
             margin-bottom: 1.5mm !important;
-            font-size: 1.1rem !important;
+            font-size: 1.2rem !important;
             line-height: 1.4 !important;
         }
 
