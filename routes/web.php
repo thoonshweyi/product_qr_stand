@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect()->route(auth()->check() ? 'dashboards.index' : 'products.catalog');
+    // return redirect()->route(auth()->check() ? 'dashboards.index' : 'products.catalog');
+    return redirect()->route('dashboards.index');
 });
 
 Route::get('/catalog/products', [ProductController::class, 'catalog'])->name('products.catalog');

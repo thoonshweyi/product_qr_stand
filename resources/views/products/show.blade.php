@@ -79,9 +79,9 @@
         </header>
 
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-            <section class="mx-auto grid w-full grid-cols-1 gap-6 sm:aspect-[2/1] sm:w-[70%] sm:grid-cols-4 sm:grid-rows-1">
+            <section class="mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[70%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
-                <aside class="grid min-h-0 w-full grid-cols-2 gap-4 overflow-hiddens pb-4 sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16 sm:pb-0">
+                <aside class="grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0">
                     <div class="relative min-h-0 bg-white p-2">
                         @if (filled($product->qr))
                             <img src="{{ asset($product->qr) }}"
@@ -105,7 +105,7 @@
                 </aside>
 
                 <!-- Main image -->
-                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12">
+                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests">
                     <img src="{{ asset($mainImage) }}"
                         alt="{{ $product->name }}"
                         class="h-full w-full object-cover">
