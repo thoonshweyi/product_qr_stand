@@ -79,25 +79,28 @@
         </header>
 
         <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-            <section class="mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[70%] sm:grid-cols-4 sm:grid-rows-1">
+            <section class="mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
-                <aside class="grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0">
-                    <div class="relative min-h-0 bg-white p-2">
+                <aside class="grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 mb-4 sm:pb-0 gap-4 sm:gap-0">
+                    <div class="relative min-h-0 bg-white p-2 sm:p-6">
                         @if (filled($product->qr))
-                            <img src="{{ asset($product->qr) }}"
+                            <img
+                                src="{{ asset($product->qr) }}"
                                 alt="{{ $product->name }} QR code"
-                                class="h-full w-full object-contain [image-rendering:pixelated]">
-                        @else
-                            <div class="flex h-full min-h-28 items-center justify-center border-2 border-dashed border-slate-300 text-center text-xs font-semibold text-slate-400">QR code unavailable</div>
-                        @endif
-                        @if (filled($product->qr))
-                            <div class="absolute left-2 right-2 top-full mt-1 rounded bg-[#073b78] py-1 text-center text-sm font-bold text-white">
+                                class="h-full w-full object-contain [image-rendering:pixelated]"
+                            >
+
+                            <div class="absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-sm font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
                                 Scan Here
+                            </div>
+                        @else
+                            <div class="flex h-full min-h-28 items-center justify-center border-2 border-dashed border-slate-300 text-center text-xs font-semibold text-slate-400">
+                                QR code unavailable
                             </div>
                         @endif
                     </div>
 
-                    <div class="min-h-0 overflow-hidden bg-slate-100">
+                    <div class="min-h-0 overflow-hidden bg-slate-100tests sm:p-6">
                         <img src="{{ asset($thumbnailImage) }}"
                             alt="{{ $product->name }} thumbnail"
                             class="h-full w-full object-cover">
@@ -105,13 +108,13 @@
                 </aside>
 
                 <!-- Main image -->
-                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests">
+                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests  sm:p-6">
                     <img src="{{ asset($mainImage) }}"
                         alt="{{ $product->name }}"
                         class="h-full w-full object-cover">
                 </div>
             </section>
-            <div class="my-7 h-1 bg-[#0a4b91] sm:my-9"></div>
+            <div class="my-7 h-1 bg-[#0a4b91] sm:my-4"></div>
 
             <section class="relative overflow-hidden pb-5">
                 <img src="{{ asset($brandImage) }}"
