@@ -65,10 +65,10 @@
     </div>
 </div>
 
-<div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
-    <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
+<div class="product-page min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
+    <article class="product-sheet relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
         @if (filled($product->brand_icon))
-            <header class="bg-white px-4 pb-3 pt-3 sm:px-7 sm:pb-4">
+            <header class="product-print-header bg-white px-4 pb-3 pt-3 sm:px-7 sm:pb-4">
                 <div class="flex items-center justify-between gap-6">
                     <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
                         alt="PRO 1 Global Home Center"
@@ -83,7 +83,7 @@
                 </h1>
             </header>
         @else
-            <header class="flex min-h-16 items-start justify-between gap-4 bg-white sm:min-h-20">
+            <header class="product-print-header flex min-h-16 items-start justify-between gap-4 bg-white sm:min-h-20">
                 <div class="flex self-center items-center py-2.5 pl-4 sm:py-3 sm:pl-7">
                     <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
                         alt="PRO 1 Global Home Center"
@@ -96,11 +96,11 @@
             </header>
         @endif
 
-        <div class="px-4 py-4 sm:px-8 sm:py-6 lg:px-12">
-            <section class="mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
+        <div class="product-content px-4 py-4 sm:px-8 sm:py-6 lg:px-12">
+            <section class="product-print-media mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
-                <aside class="grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 mb-4 sm:pb-0 gap-4 sm:gap-0">
-                    <div class="relative min-h-0 bg-white p-2 sm:p-6">
+                <aside class="product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 mb-4 sm:pb-0 gap-4 sm:gap-0">
+                    <div class="product-print-qr relative min-h-0 bg-white p-2 sm:p-6">
                         @if (filled($product->qr))
                             <img
                                 src="{{ asset($product->qr) }}"
@@ -108,7 +108,7 @@
                                 class="h-full w-full object-contain [image-rendering:pixelated]"
                             >
 
-                            <div class="absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
+                            <div class="product-print-qr-label absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
                                 Scan Here
                             </div>
                         @else
@@ -118,7 +118,7 @@
                         @endif
                     </div>
 
-                    <div class="min-h-0 overflow-hidden bg-slate-100tests sm:p-6">
+                    <div class="product-print-thumbnail min-h-0 overflow-hidden bg-slate-100tests sm:p-6">
                         <img src="{{ asset($thumbnailImage) }}"
                             alt="{{ $product->name }} thumbnail"
                             class="h-full w-full object-cover">
@@ -126,15 +126,15 @@
                 </aside>
 
                 <!-- Main image -->
-                <div class="min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests  sm:p-6">
+                <div class="product-print-main min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests sm:p-6">
                     <img src="{{ asset($mainImage) }}"
                         alt="{{ $product->name }}"
                         class="h-full w-full object-cover">
                 </div>
             </section>
-            <div class="my-5 h-0.5 bg-[#0a4b91] sm:my-4"></div>
+            <div class="product-print-divider my-5 h-0.5 bg-[#0a4b91] sm:my-4"></div>
 
-            <section class="relative overflow-hidden pb-3">
+            <section class="product-details relative overflow-hidden pb-3">
                 <img src="{{ asset($brandImage) }}"
                      alt=""
                      aria-hidden="true"
@@ -149,7 +149,7 @@
                     </div>
                     @endunless
 
-                    <dl class="grid grid-cols-[minmax(110px,1fr)_10px_minmax(0,2fr)] gap-y-0.5 text-xs font-semibold leading-5 sm:grid-cols-[220px_16px_minmax(0,1fr)] sm:text-base sm:leading-6">
+                    <dl class="product-print-specifications grid grid-cols-[minmax(110px,1fr)_10px_minmax(0,2fr)] gap-y-0.5 text-xs font-semibold leading-5 sm:grid-cols-[220px_16px_minmax(0,1fr)] sm:text-base sm:leading-6">
                         @foreach ($specifications as $label => $value)
                             <dt class="before:mr-2 before:content-['•']">{{ $label }}</dt>
                             <dd class="text-center">:</dd>
@@ -157,12 +157,12 @@
                         @endforeach
                     </dl>
 
-                    <div class="mt-4 whitespace-pre-line text-justify text-xs leading-6 sm:text-base sm:leading-7">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                    <div class="product-print-description mt-4 whitespace-pre-line text-justify text-xs leading-6 sm:text-base sm:leading-7">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
                 </div>
             </section>
         </div>
 
-        <footer class="flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-3 text-center text-[11px] font-bold text-white sm:flex-row sm:gap-4 sm:text-sm">
+        <footer class="product-footer flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-3 text-center text-[11px] font-bold text-white sm:flex-row sm:gap-4 sm:text-sm">
             <span>WWW.PRO1GLOBALHOMECENTER.COM</span>
             <div class="flex items-center gap-2" aria-label="PRO 1 social media channels">
                 <i class="fa-brands fa-facebook-f flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-sm text-white" title="Facebook" aria-label="Facebook"></i>
@@ -180,21 +180,203 @@
 @section('css')
 <style>
     @media print {
-        /* @page {
-            size: A4 portrait;
-            margin: 0;
-        } */
+        @page {
+            size: auto;
+            margin: 4mm;
+        }
 
         .no-print {
             display: none !important;
         }
 
         html, body, main {
+            width: 100% !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
         }
 
-        article {
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .product-page {
+            min-height: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .product-sheet {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            border-width: 1.5mm !important;
             box-shadow: none !important;
+            break-inside: avoid-page !important;
+            page-break-inside: avoid !important;
+        }
+
+        .product-print-header {
+            min-height: 0 !important;
+        }
+
+        .product-print-header img {
+            max-height: 12mm !important;
+            width: auto !important;
+        }
+
+        .product-print-header h1 {
+            font-size: 10pt !important;
+            line-height: 1.15 !important;
+        }
+
+        .product-content {
+            padding: 2.5mm 4mm !important;
+        }
+
+        .product-print-media {
+            display: grid !important;
+            grid-template-columns: 1fr 3fr !important;
+            grid-template-rows: 1fr !important;
+            gap: 0 !important;
+            width: 74% !important;
+            aspect-ratio: 2 / 1 !important;
+            margin: 0 auto !important;
+            break-inside: avoid-page !important;
+            page-break-inside: avoid !important;
+        }
+
+        .product-print-side {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+            gap: 0 !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
+        .product-print-qr,
+        .product-print-thumbnail {
+            min-height: 0 !important;
+            padding: 2mm !important;
+            overflow: hidden !important;
+        }
+
+        .product-print-qr img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .product-print-thumbnail img,
+        .product-print-main img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        .product-print-qr-label {
+            right: 2mm !important;
+            bottom: 1mm !important;
+            left: 2mm !important;
+            padding: 0.5mm 0 !important;
+            font-size: 6pt !important;
+        }
+
+        .product-print-main {
+            grid-column: auto !important;
+            min-height: 0 !important;
+            height: 100% !important;
+            padding: 2mm 2mm 2mm 5mm !important;
+        }
+
+        .product-print-divider {
+            height: 0.4mm !important;
+            margin: 2.5mm 0 !important;
+        }
+
+        .product-details {
+            padding-bottom: 1.5mm !important;
+            break-inside: avoid-page !important;
+            page-break-inside: avoid !important;
+        }
+
+        .product-details h2 {
+            margin: 0 0 1.5mm !important;
+            font-size: 10pt !important;
+            line-height: 1.2 !important;
+        }
+
+        .product-print-specifications {
+            grid-template-columns: 34mm 4mm minmax(0, 1fr) !important;
+            gap: 0 !important;
+            font-size: 7.5pt !important;
+            line-height: 1.35 !important;
+        }
+
+        .product-print-description {
+            margin-top: 2mm !important;
+            font-size: 7pt !important;
+            line-height: 1.4 !important;
+            orphans: 2;
+            widows: 2;
+        }
+
+        .product-footer {
+            gap: 2mm !important;
+            padding: 1.5mm 3mm !important;
+            font-size: 7pt !important;
+            line-height: 1 !important;
+            break-inside: avoid-page !important;
+            page-break-inside: avoid !important;
+        }
+
+        .product-footer i {
+            width: 5mm !important;
+            height: 5mm !important;
+            font-size: 7pt !important;
+        }
+    }
+
+    @media print and (max-width: 160mm) {
+        @page {
+            margin: 2.5mm;
+        }
+
+        .product-sheet {
+            border-width: 1mm !important;
+        }
+
+        .product-print-header img {
+            max-height: 9mm !important;
+        }
+
+        .product-print-header h1 {
+            font-size: 8pt !important;
+        }
+
+        .product-content {
+            padding: 2mm 3mm !important;
+        }
+
+        .product-print-media {
+            width: 70% !important;
+        }
+
+        .product-print-specifications {
+            grid-template-columns: 27mm 3mm minmax(0, 1fr) !important;
+            font-size: 6.5pt !important;
+            line-height: 1.25 !important;
+        }
+
+        .product-print-description {
+            margin-top: 1.5mm !important;
+            font-size: 6pt !important;
+            line-height: 1.3 !important;
         }
     }
 </style>
