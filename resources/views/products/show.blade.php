@@ -67,18 +67,36 @@
 
 <div class="min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
     <article class="relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
-        <header class="flex h-20 items-center bg-white sm:h-28">
-            <div class="flex h-full w-1/2 items-center bg-white px-4 sm:px-8">
-                <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
-                     alt="PRO 1 Global Home Center"
-                     class="h-auto w-full max-w-[270px] object-contain sm:max-w-[340px]">
-            </div>
-            <h1 class="flex h-full flex-1 items-center justify-center rounded-bl-[7rem] bg-[#073b78] px-2 text-center text-lg font-extrabold uppercase tracking-wide text-white sm:px-8 sm:text-4xl lg:text-5xl">
-                Product Description
-            </h1>
-        </header>
+        @if (filled($product->brand_icon))
+            <header class="bg-white px-4 pb-3 pt-3 sm:px-7 sm:pb-4">
+                <div class="flex items-center justify-between gap-6">
+                    <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
+                        alt="PRO 1 Global Home Center"
+                        class="h-10 w-auto max-w-[48%] object-contain sm:h-14">
+                    <img src="{{ asset($product->brand_icon) }}"
+                        alt="{{ $product->brand }} logo"
+                        class="h-10 w-auto max-w-[42%] object-contain sm:h-14">
+                </div>
 
-        <div class="px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
+                <h1 class="mt-3 rounded-xl bg-[#073b78] px-4 py-1.5 text-center text-sm font-extrabold uppercase tracking-wide text-white sm:px-7 sm:py-2 sm:text-xl">
+                    Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
+                </h1>
+            </header>
+        @else
+            <header class="flex min-h-16 items-start justify-between gap-4 bg-white sm:min-h-20">
+                <div class="flex self-center items-center py-2.5 pl-4 sm:py-3 sm:pl-7">
+                    <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
+                        alt="PRO 1 Global Home Center"
+                        class="h-10 w-auto max-w-full object-contain sm:h-14">
+                </div>
+
+                <h1 class="w-auto flex-none self-start rounded-bl-[2.5rem] bg-[#073b78] px-5 py-2 text-center text-sm font-extrabold uppercase tracking-wide text-white sm:px-8 sm:py-2.5 sm:text-xl lg:text-2xl">
+                    Product Description
+                </h1>
+            </header>
+        @endif
+
+        <div class="px-4 py-4 sm:px-8 sm:py-6 lg:px-12">
             <section class="mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
                 <aside class="grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 mb-4 sm:pb-0 gap-4 sm:gap-0">
@@ -90,7 +108,7 @@
                                 class="h-full w-full object-contain [image-rendering:pixelated]"
                             >
 
-                            <div class="absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-sm font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
+                            <div class="absolute -bottom-20 left-2 right-2 rounded bg-[#073b78] py-1 text-center text-xs font-bold text-white sm:-bottom-2 sm:left-6 sm:right-6">
                                 Scan Here
                             </div>
                         @else
@@ -114,25 +132,24 @@
                         class="h-full w-full object-cover">
                 </div>
             </section>
-            <div class="my-7 h-1 bg-[#0a4b91] sm:my-4"></div>
+            <div class="my-5 h-0.5 bg-[#0a4b91] sm:my-4"></div>
 
-            <section class="relative overflow-hidden pb-5">
+            <section class="relative overflow-hidden pb-3">
                 <img src="{{ asset($brandImage) }}"
                      alt=""
                      aria-hidden="true"
                      class="pointer-events-none absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 opacity-[0.055] grayscale">
 
                 <div class="relative">
-                    <div class="mb-4 flex items-center justify-between gap-5">
-                        <h2 class="text-xl font-extrabold uppercase sm:text-3xl">
+                    @unless (filled($product->brand_icon))
+                    <div class="mb-3">
+                        <h2 class="text-base font-extrabold uppercase sm:text-xl">
                             Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
                         </h2>
-                        @if (filled($product->brand_icon))
-                            <img src="{{ asset($product->brand_icon) }}" alt="{{ $product->brand }} logo" class="h-12 w-auto max-w-32 object-contain sm:h-16">
-                        @endif
                     </div>
+                    @endunless
 
-                    <dl class="grid grid-cols-[minmax(120px,1fr)_12px_minmax(0,2fr)] gap-y-1 text-sm font-semibold sm:grid-cols-[270px_20px_minmax(0,1fr)] sm:text-xl">
+                    <dl class="grid grid-cols-[minmax(110px,1fr)_10px_minmax(0,2fr)] gap-y-0.5 text-xs font-semibold leading-5 sm:grid-cols-[220px_16px_minmax(0,1fr)] sm:text-base sm:leading-6">
                         @foreach ($specifications as $label => $value)
                             <dt class="before:mr-2 before:content-['•']">{{ $label }}</dt>
                             <dd class="text-center">:</dd>
@@ -140,12 +157,12 @@
                         @endforeach
                     </dl>
 
-                    <div class="mt-6 whitespace-pre-line text-justify text-sm leading-7 sm:text-lg sm:leading-9">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                    <div class="mt-4 whitespace-pre-line text-justify text-xs leading-6 sm:text-base sm:leading-7">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
                 </div>
             </section>
         </div>
 
-        <footer class="flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-4 text-center text-xs font-bold text-white sm:flex-row sm:gap-5 sm:text-base">
+        <footer class="flex flex-col items-center justify-center gap-2 bg-[#073b78] px-4 py-3 text-center text-[11px] font-bold text-white sm:flex-row sm:gap-4 sm:text-sm">
             <span>WWW.PRO1GLOBALHOMECENTER.COM</span>
             <div class="flex items-center gap-2" aria-label="PRO 1 social media channels">
                 <i class="fa-brands fa-facebook-f flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-sm text-white" title="Facebook" aria-label="Facebook"></i>
