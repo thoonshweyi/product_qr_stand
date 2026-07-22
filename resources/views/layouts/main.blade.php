@@ -57,6 +57,9 @@
     </head>
     <body class="bg-gray-50 dark:bg-gray-800">
 
+        @include("layouts.navbar")
+      
+
 
         <!-- Start Main -->
         <main class="bg-gray-50 dark:bg-gray-900">

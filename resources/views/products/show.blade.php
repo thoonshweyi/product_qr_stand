@@ -25,48 +25,8 @@
     $brandImage = $product->brand_icon ?: $fallbackImage;
 @endphp
 
-<div class="no-print sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
-    <div class="mx-auto flex max-w-[1180px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        @auth
-        <div>
-            <p class="text-sm font-semibold text-slate-900">Print tracking</p>
-            <p class="mt-0.5 text-xs text-slate-500">
-                Confirmed prints: <span id="printed-count">{{ $printedCount }}</span>
-                <span id="latest-printed-text">
-                @if ($latestPrintedRecord)
-                    · Last printed {{ $latestPrintedRecord->printed_at->diffForHumans() }}
-                @endif
-                </span>
-            </p>
-        </div>
-        @else
-        <p class="text-sm font-semibold text-slate-900">Product details</p>
-        @endauth
-
-        <div class="flex flex-col gap-2 sm:flex-row">
-            <a href="{{ auth()->check() ? route('products.index') : route('products.catalog') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Back to list
-            </a>
-            @if (filled($product->website_url))
-            <a href="{{ $product->website_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-lg border border-[#073b78] bg-white px-4 py-2.5 text-sm font-semibold text-[#073b78] hover:bg-blue-50">
-                Go to website
-                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14M5 7v12h12v-5"/></svg>
-            </a>
-            @endif
-
-            @auth
-            <button type="button" id="print-product-button" class="inline-flex items-center justify-center rounded-lg bg-[#073b78] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#052e5e] disabled:cursor-not-allowed disabled:opacity-60">
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12-4h12v8H6v-8z"/></svg>
-                <span id="print-product-button-label">Print product</span>
-            </button>
-            @endauth
-        </div>
-    </div>
-</div>
-
 <div class="product-page min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
-    <article class="product-sheet relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px]">
+    <article class="product-sheet relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px] mt-20">
         @if (filled($product->brand_icon))
             <header class="product-print-header bg-white px-4 pb-3 pt-3 sm:px-7 sm:pb-4">
                 <div class="flex items-center justify-between gap-6">
@@ -79,7 +39,7 @@
                 </div>
 
                 <h1 class="mt-3 rounded-xl bg-[#073b78] px-4 py-1.5 text-center text-sm font-extrabold uppercase tracking-wide text-white sm:px-7 sm:py-2 sm:text-xl">
-                    Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
+                    Product Description <span class="normal-case">(ထုတ်ကုန်အကြောင်း)</span>
                 </h1>
             </header>
         @else
@@ -144,7 +104,7 @@
                     @unless (filled($product->brand_icon))
                     <div class="mb-3">
                         <h2 class="text-base font-extrabold uppercase sm:text-xl">
-                            Product Description <span class="normal-case">(ကုန်ပစ္စည်းအကြောင်း)</span>
+                            Product Description <span class="normal-case">(ထုတ်ကုန်အကြောင်း)</span>
                         </h2>
                     </div>
                     @endunless
@@ -174,6 +134,32 @@
             </div>
         </footer>
     </article>
+
+    <nav class="no-print mx-4 mt-4 rounded-2xl border border-slate-200 bg-whites p-3 shadow-lgs sm:mx-auto sm:mt-5 sm:max-w-[1180px] sm:p-4" aria-label="Product actions">
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+            <a href="{{ auth()->check() ? route('products.index') : route('products.catalog') }}"
+                class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Back to list
+            </a>
+
+            @if (filled($product->website_url))
+            <a href="{{ $product->website_url }}" target="_blank" rel="noopener noreferrer"
+                class="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#073b78] bg-white px-5 py-2.5 text-sm font-semibold text-[#073b78] transition hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100">
+                Go to website
+                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14M5 7v12h12v-5"/></svg>
+            </a>
+            @endif
+
+            @auth
+            <button type="button" id="print-product-button"
+                class="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#073b78] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#052e5e] focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60">
+                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12-4h12v8H6v-8z"/></svg>
+                <span id="print-product-button-label">Print product</span>
+            </button>
+            @endauth
+        </div>
+    </nav>
 </div>
 @endsection
 
