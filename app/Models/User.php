@@ -70,11 +70,6 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class, 'department_id')->withDefault();
     }
 
-    public function roles(){
-        // return $this->belongsToMany(Role::class);
-        return $this->belongsToMany(Role::class,"role_users");
-    }
-
     public function branches(){
         return $this->belongsToMany(Branch::class,"user_branches");
     }
@@ -82,4 +77,32 @@ class User extends Authenticatable
     public function categories(){
         return $this->belongsToMany(Category::class,"user_categories");
     }
+
+    // Start Authentication & Authorization
+    public function roles(){
+        // return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class,"role_users");
+    }
+
+    public function permissions(){
+        return $this->belongsToMany(Permission::class,"permission_roles");
+    }
+
+    // for single role from route
+    // public function hasRole($rolename){
+    //     return $this->roles()->where('name',$rolename)->exists();
+    // }
+
+    // for multi roles from route
+    public function hasRoles($rolenames){
+        return $this->roles()->whereIn('name',$rolenames)->exists();
+    }
+
+    public function hasPermission($permissionname){
+        return $this->roles()->whereHas('permissions',function($query) use ($permissionname){
+            $query->where('name',$permissionname);
+        })->exists();
+    }
+    // End Authentication & Authorization
+
 }

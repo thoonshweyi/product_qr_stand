@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en" class="dark">
     <head>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
         <!-- Start Header -->
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -42,7 +41,6 @@
 
 
 
-
         <!-- Standard Practice: Import Library Files -->
         <!-- fontawesome css1 -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -51,9 +49,10 @@
         <link href="{{ asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
 
         <!-- custom css css1 -->
-        <link rel="stylesheet" href="{{ asset('/assets/dist/css/style.css') }}">
+        <!-- <link rel="stylesheet" href="{{ asset('/assets/dist/css/style.css') }}"> -->
         @yield("css")
 
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-gray-50 dark:bg-gray-800">
 

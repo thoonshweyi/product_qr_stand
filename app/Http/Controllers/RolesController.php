@@ -15,10 +15,14 @@ class RolesController extends Controller
     public function index()
     {
         $roles = Role::where(function($query){
+            if($getname = request("filtername")){
+                $query->where("name","LIKE","%".$getname."%");
+            }
+
             if($statusid = request("filterstatus_id")){
                 $query->where("status_id",$statusid);
             }
-        })->paginate(5);
+        })->paginate(5)->withQueryString();
         $filterstatuses = Status::whereIn("id",[3,4])->get()->pluck('name',"id")->prepend("Choose Status","");
         // dd($filterstatuses);
         return view("roles.index",compact("roles"),compact("filterstatuses"));

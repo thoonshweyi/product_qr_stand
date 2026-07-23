@@ -25,7 +25,7 @@ class UsersController extends Controller
         $categories = Category::where('status_id',3)->orderBy('id','asc')->get();
         $roles = Role::where('status_id',3)->orderBy('id','asc')->get();
 
-        $users = $results->with('branch')
+        $users = $results->orderBy('id','desc')->with('branch')
                 ->with('department')
                 ->with('roles')
                 ->paginate(15);
