@@ -105,4 +105,9 @@ class User extends Authenticatable
     }
     // End Authentication & Authorization
 
+    public function isOwner($model){
+        return $this->id === $model->user_id;
+    }
+
+
 }
