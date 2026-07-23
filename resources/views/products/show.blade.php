@@ -60,7 +60,7 @@
             <section class="product-print-media mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
                 <!-- QR and thumbnail -->
                 <aside class="product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 gap-4 sm:gap-0 mb-8 sm:mb-0">
-                    <div class="product-print-qr relative min-h-0 bg-white p-2 sm:p-6 self-end">
+                    <div class="product-print-qr relative min-h-0 bg-white p-2 sm:p-6">
                         @if (filled($product->qr))
                             <img
                                 src="{{ asset($product->qr) }}"

@@ -56,7 +56,10 @@
     </head>
     <body class="bg-gray-50 dark:bg-gray-800">
 
-        @include("layouts.navbar")
+        @hasSection('hide-navbar')
+        @else
+            @include("layouts.navbar")
+        @endif
       
 
 
