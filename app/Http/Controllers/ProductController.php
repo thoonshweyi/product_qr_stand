@@ -25,16 +25,41 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $results = Product::query();
+        $keyword = trim((string) $request->query('keyword', ''));
+        $statusId = $request->query('status_id');
+        $brand = trim((string) $request->query('brand', ''));
 
-        $products = $results->orderBy('id', 'desc')->paginate(15);
+        $products = Product::with(['country', 'status', 'user'])
+            ->when($keyword !== '', function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('product_code', 'like', '%'.$keyword.'%')
+                        ->orWhere('name', 'like', '%'.$keyword.'%');
+                });
+            })
+            ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
+            ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
 
-        // dd($products);
-        return view('products.index', compact(
-            'products',
-        ));
+        $statuses = Status::whereIn('id', [1, 2])
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        if ($statuses->isEmpty()) {
+            $statuses = Status::orderBy('id')->get(['id', 'name']);
+        }
+
+        $brands = Product::query()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->orderBy('brand')
+            ->pluck('brand');
+
+        return view('products.index', compact('products', 'statuses', 'brands'));
     }
 
     public function catalog(Request $request)

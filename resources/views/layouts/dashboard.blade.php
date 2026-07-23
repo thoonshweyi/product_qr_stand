@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="">
     <head>
         <!-- Start Header -->
             <meta charset="utf-8">
@@ -31,7 +31,7 @@
 
             <script>
                 // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-                if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                if (localStorage.getItem('color-theme') === 'dark') {
                     document.documentElement.classList.add('dark');
                 } else {
                     document.documentElement.classList.remove('dark')
