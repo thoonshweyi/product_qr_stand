@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Status;
 use Illuminate\Support\Facades\Auth;
@@ -30,11 +31,12 @@ class RolesController extends Controller
     // it doesn't need "LIKE" Sytax because status_id can be checked directly. 
 
     public function create()
-    {    
+    {
          //$statuses = Status::all(); // get all statuses
          $statuses = Status::whereIn("id",[3,4])->get()->pluck('name',"id");
+         $permissions = Permission::where("status_id",3)->orderBy("name")->get();
         //  dd($statuses);
-         return view("roles.create",compact("statuses"));
+         return view("roles.create",compact("statuses","permissions"));
     }
 
     public function store(Request $request)
@@ -43,6 +45,8 @@ class RolesController extends Controller
             "name" => "required|max:50|unique:roles,name",
             "image" => "image|mimes:jpg,jpeg,png|max:1024",
             "status_id" => "required|in:3,4",
+            "permission_ids" => "nullable|array",
+            "permission_ids.*" => "integer|exists:permissions,id",
         ]);
 
        $user = Auth::user();
@@ -67,6 +71,7 @@ class RolesController extends Controller
         }    
 
        $role->save();
+       $role->permissions()->sync($request->permission_ids ?? []);
        return redirect(route("roles.index"));
     }
 
@@ -87,7 +92,8 @@ class RolesController extends Controller
     {
         // $role = Role::findOrFail($id);
         $statuses = Status::whereIn("id",[3,4])->get();
-        return view("roles.edit")->with("role",$role)->with("statuses",$statuses);
+        $permissions = Permission::where("status_id",3)->orderBy("name")->get();
+        return view("roles.edit")->with("role",$role)->with("statuses",$statuses)->with("permissions",$permissions);
     }
 
     public function update(Request $request, string $id)
@@ -96,6 +102,8 @@ class RolesController extends Controller
             "name" => ["required","max:50","unique:roles,name,".$id],
             "image" => ["image","mimes:jpg,jpeg,png","max:1024"],
             "status_id" => ["required","in:3,4"],
+            "permission_ids" => ["nullable","array"],
+            "permission_ids.*" => ["integer","exists:permissions,id"],
         ]);
 
         $user = Auth::user();
@@ -128,6 +136,7 @@ class RolesController extends Controller
         }    
 
         $role->save();
+        $role->permissions()->sync($request->permission_ids ?? []);
         return redirect(route("roles.index"));
     }
 

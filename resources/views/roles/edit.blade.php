@@ -91,6 +91,11 @@
                     <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+
+            @include('roles.partials.permission-checkboxes', [
+                'columnClass' => 'md:col-span-2',
+                'selectedPermissionIds' => old('permission_ids', $role->permissions->pluck('id')->all()),
+            ])
         </div>
 
         <div class="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
