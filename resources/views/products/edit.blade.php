@@ -402,7 +402,7 @@
     // Using jQuery DOM same as weather forecast json
     $(document).ready(function() {
 
-        const maxSpecifications = 8;
+        const maxSpecifications = 10;
         const hasExistingMainImage = @js(filled($product->image));
         const initialProductCode = @js($product->product_code);
         let qrButtonLabel = @js($product->qr ? 'Regenerate QR Code' : 'Generate QR Code');

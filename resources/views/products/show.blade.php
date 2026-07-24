@@ -23,6 +23,14 @@
     $mainImage = $product->image ?: $fallbackImage;
     $thumbnailImage = $product->thumbnail ?: null;
     $brandImage = $product->brand_icon ?: $fallbackImage;
+
+    $mainImageIsPortrait = false;
+    $mainImagePath = public_path($mainImage);
+
+    if (is_file($mainImagePath)) {
+        $mainImageSize = @getimagesize($mainImagePath);
+        $mainImageIsPortrait = $mainImageSize && $mainImageSize[1] > $mainImageSize[0];
+    }
 @endphp
 
 <div class="product-page min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
@@ -57,9 +65,24 @@
         @endif
 
         <div class="product-content px-4 py-4 sm:px-8 sm:py-6 lg:px-12">
-            <section class="product-print-media mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1">
+            <div class="show-desktop-image-section">
+                @include('products.partials.product-image-section', compact(
+                    'product',
+                    'mainImage',
+                    'thumbnailImage',
+                    'mainImageIsPortrait',
+                ))
+            </div>
+
+            <section @class([
+                'show-mobile-image-section product-print-media mx-auto grid w-full grid-cols-1 gap-6tests sm:aspect-[2/1] sm:w-[75%] sm:grid-cols-4 sm:grid-rows-1',
+                'portrait-main' => $mainImageIsPortrait,
+            ])>
                 <!-- QR and thumbnail -->
-                <aside class="product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 gap-4 sm:gap-0 mb-8 sm:mb-0">
+                <aside @class([
+                    'product-print-side grid min-h-0 w-full grid-cols-2 gap-4tests overflow-hiddens pb-4tests sm:h-full sm:grid-cols-1 sm:grid-rows-2 sm:gap-16tests sm:pb-0 gap-4 sm:gap-0 mb-8 sm:mb-0',
+                    'without-thumbnail' => ! $thumbnailImage,
+                ])>
                     <div class="product-print-qr relative min-h-0 bg-white p-2 sm:p-6">
                         @if (filled($product->qr))
                             <img
@@ -167,6 +190,166 @@
 
 @section('css')
 <style>
+    .show-desktop-image-section {
+        display: none;
+    }
+
+    @media screen and (min-width: 640px) {
+        .show-desktop-image-section {
+            display: block;
+        }
+
+        .show-mobile-image-section {
+            display: none !important;
+        }
+
+        .show-desktop-image-section .sheet-media {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            grid-template-rows: 1fr;
+            gap: 0;
+            width: 75%;
+            aspect-ratio: 2 / 1;
+            margin: 0 auto;
+        }
+
+        .show-desktop-image-section .sheet-media.portrait-main {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .show-desktop-image-section .sheet-side {
+            display: grid;
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            min-height: 0;
+            height: 100%;
+        }
+
+        .show-desktop-image-section .sheet-side.without-thumbnail {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .show-desktop-image-section .sheet-side.without-thumbnail .sheet-qr {
+            width: 100%;
+            height: 50%;
+        }
+
+        .show-desktop-image-section .sheet-qr,
+        .show-desktop-image-section .sheet-thumbnail {
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+
+        .show-desktop-image-section .sheet-qr img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 32px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .show-desktop-image-section .sheet-qr-label {
+            position: absolute;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0;
+            background: #073b78;
+            color: #ffffff;
+            font-size: 0.875rem;
+            font-weight: 700;
+            line-height: 1.25rem;
+            text-align: center;
+        }
+
+        .show-desktop-image-section .sheet-media.portrait-main .sheet-qr-label {
+            right: auto;
+            left: 50%;
+            width: 43%;
+            transform: translateX(-50%);
+        }
+
+        .show-desktop-image-section .sheet-thumbnail img,
+        .show-desktop-image-section .sheet-main img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .show-desktop-image-section .sheet-thumbnail img {
+            object-position: left center;
+        }
+
+        .show-desktop-image-section .sheet-main {
+            min-height: 0;
+            height: 100%;
+            overflow: hidden;
+            padding: 1.5rem 1.5rem 1.5rem 3.5rem;
+        }
+
+        .show-desktop-image-section .sheet-media.portrait-main .sheet-main {
+            padding: 1.5rem;
+        }
+
+        .show-desktop-image-section .sheet-missing {
+            display: flex;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #cbd5e1;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .product-print-thumbnail img {
+            object-fit: contain !important;
+            object-position: left center !important;
+        }
+
+        .product-print-media.portrait-main {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .product-print-media.portrait-main .product-print-main {
+            grid-column: auto !important;
+            padding: 1.5rem !important;
+        }
+
+        .product-print-media.portrait-main .product-print-main img {
+            object-fit: contain !important;
+            object-position: center !important;
+        }
+
+        .product-print-media.portrait-main .product-print-side.without-thumbnail {
+            display: flex !important;
+            align-items: flex-end !important;
+        }
+
+        .product-print-media.portrait-main .product-print-side.without-thumbnail .product-print-qr {
+            width: 100% !important;
+            height: 50% !important;
+        }
+
+        .product-print-media.portrait-main .product-print-qr img {
+            padding-bottom: 32px !important;
+        }
+
+        .product-print-media.portrait-main .product-print-qr-label {
+            right: auto !important;
+            left: 50% !important;
+            bottom: 24px !important;
+            width: 43% !important;
+            transform: translateX(-50%) !important;
+        }
+    }
+
     @media print {
         @page {
             size: auto;
@@ -283,7 +466,7 @@
         .product-print-main img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important;
         }
 
         .product-print-qr-label {

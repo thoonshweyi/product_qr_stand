@@ -384,7 +384,7 @@
     // Using jQuery DOM same as weather forecast json
     $(document).ready(function() {
 
-        const maxSpecifications = 8;
+        const maxSpecifications = 10;
         const categories = @js($categories);
         const statuses = @js($statuses);
         let availableSpecifications = [...new Set(@js($specifications))];
