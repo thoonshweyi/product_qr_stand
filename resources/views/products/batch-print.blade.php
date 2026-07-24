@@ -195,6 +195,13 @@
             padding: 6px;
         }
 
+        .sheet-media.portrait-main .sheet-qr-label {
+            right: auto;
+            left: 50%;
+            width: 72px;
+            transform: translateX(-50%);
+        }
+
         .sheet-side {
             display: grid;
             grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -472,3 +479,24 @@
     </script>
 </body>
 </html>
+
+<!-- 
+thumbnail portrait = object-fit: contain;
+main portrait = object-position: left center;
+
+.sheet-thumbnail img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* object-position: left center; */
+}
+
+.sheet-main img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: left center;
+}
+-->
