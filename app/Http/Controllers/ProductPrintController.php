@@ -50,6 +50,42 @@ class ProductPrintController extends Controller
         return $this->sendRespond($printRecord, 'Print result recorded.');
     }
 
+    public function storeBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'product_ids' => ['required', 'array', 'min:1', 'max:50'],
+            'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id'],
+        ]);
+
+        $products = Product::query()
+            ->whereIn('id', $validated['product_ids'])
+            ->get();
+
+        $user = $request->user();
+        $printedAt = now();
+
+        foreach ($products as $product) {
+            $product->printRecords()->create([
+                'user_id' => $user?->id,
+                'branch_id' => $user?->branch_id,
+                'print_reference' => (string) Str::uuid(),
+                'product_code' => $product->product_code,
+                'product_name' => $product->name,
+                'print_url' => route('products.show', $product),
+                'status' => 'printed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'print_started_at' => $printedAt,
+                'printed_at' => $printedAt,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Batch print records saved.',
+            'recorded_products' => $products->count(),
+        ]);
+    }
+
     public function history(Product $product)
     {
         $branches = Branch::query()

@@ -428,5 +428,31 @@
             </section>
         @endforeach
     </main>
+
+    <script>
+        let batchPrintRecorded = false;
+
+        window.addEventListener('beforeprint', function () {
+            if (batchPrintRecorded) return;
+
+            batchPrintRecorded = true;
+
+            const formData = new FormData();
+            formData.append('_token', @js(csrf_token()));
+
+            @foreach ($products as $product)
+                formData.append('product_ids[]', @js($product->id));
+            @endforeach
+
+            const queued = navigator.sendBeacon(
+                @js(route('products.batch-print-records.store')),
+                formData
+            );
+
+            if (!queued) {
+                batchPrintRecorded = false;
+            }
+        });
+    </script>
 </body>
 </html>
