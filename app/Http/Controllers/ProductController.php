@@ -595,3 +595,35 @@ class ProductController extends Controller
         ];
     }
 }
+
+
+//  sudo apt install php8.2-imagick -y
+
+// 1. Ubuntu / Debian (Nginx or Apache)
+// Run the following commands in your terminal:
+
+// Bash
+// # Update package list
+// sudo apt update
+
+// # Install the extension for your PHP version
+// sudo apt install php-imagick -y
+// (If you are running a specific PHP version like PHP 8.2 or 8.3, install php8.2-imagick or php8.3-imagick instead).
+
+// Restart Your Web Server / PHP-FPM
+// After installation, you must restart your web service so PHP loads the extension:
+
+// For Nginx + PHP-FPM:
+
+// Bash
+// sudo systemctl restart php8.3-fpm   # Replace with your PHP version
+// sudo systemctl restart nginx
+// For Apache:
+
+// Bash
+// sudo systemctl restart apache2
+// 2. Check if Imagick is Enabled
+// Run this command in terminal to confirm it's loaded:
+
+// Bash
+// php -m | grep imagick
