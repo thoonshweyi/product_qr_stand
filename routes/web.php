@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionsController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
+    Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])
+        ->name('products.batch-print');
     Route::resource('products', ProductController::class)->except('show');
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');

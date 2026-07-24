@@ -297,6 +297,34 @@ class ProductController extends Controller
     }
 
     /**
+     * Display selected products as two fixed sheets per A4 landscape page.
+     */
+    public function batchPrint(Request $request)
+    {
+        $validated = $request->validate([
+            'product_ids' => ['required', 'array', 'min:1', 'max:50'],
+            'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id'],
+        ]);
+
+        $selectedIds = collect($validated['product_ids'])
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $productsById = Product::with([
+            'category',
+            'country',
+            'specificationValues.specification',
+        ])->whereIn('id', $selectedIds)->get()->keyBy('id');
+
+        $products = $selectedIds
+            ->map(fn ($id) => $productsById->get($id))
+            ->filter()
+            ->values();
+
+        return view('products.batch-print', compact('products'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)

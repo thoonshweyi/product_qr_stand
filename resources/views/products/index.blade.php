@@ -23,12 +23,21 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Search products and manage their information and availability.</p>
         </div>
 
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="submit" form="product-batch-print-form" id="batch-print-button" disabled
+                class="inline-flex w-fit items-center justify-center rounded-lg border border-primary-700 bg-white px-4 py-2.5 text-sm font-medium text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white">
+                <i class="fas fa-print mr-2"></i>
+                Print selected
+                <span id="selected-product-count" class="ml-1">(0)</span>
+            </button>
+
         @can('create', App\Models\Product::class)
             <a href="{{ route('products.create') }}" class="inline-flex w-fit items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">
                 <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H6a1 1 0 1 1 0-2h3V6a1 1 0 0 1 1-1Z" clip-rule="evenodd"/></svg>
                 Add product
             </a>
         @endcan
+        </div>
     </div>
 </div>
 
@@ -73,10 +82,17 @@
         </form>
     </div>
 
+    <form id="product-batch-print-form" action="{{ route('products.batch-print') }}" method="POST" target="_blank">
+        @csrf
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
+                    <th class="w-12 p-4 text-left">
+                        <input type="checkbox" id="select-all-products"
+                            class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                            aria-label="Select all products on this page">
+                    </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
@@ -90,6 +106,11 @@
             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 @forelse ($products as $index => $product)
                     <tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                        <td class="w-12 p-4">
+                            <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
+                                class="product-print-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                                aria-label="Select {{ $product->name }} for printing">
+                        </td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }}</td>
                         <td class="whitespace-nowrap p-4">
                             <div class="flex items-center gap-3">
@@ -150,12 +171,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
+                        <td colspan="9" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+    </form>
 
     @if ($products->hasPages())
         <div class="border-t border-gray-200 p-4 dark:border-gray-700">{{ $products->links() }}</div>
@@ -166,6 +188,26 @@
 @section('scripts')
 <script>
     $(document).ready(function () {
+        const $productCheckboxes = $('.product-print-checkbox');
+        const $selectAll = $('#select-all-products');
+        const $batchPrintButton = $('#batch-print-button');
+        const $selectedCount = $('#selected-product-count');
+
+        function updateBatchPrintSelection() {
+            const selected = $productCheckboxes.filter(':checked').length;
+            $selectedCount.text(`(${selected})`);
+            $batchPrintButton.prop('disabled', selected === 0);
+            $selectAll.prop('checked', selected > 0 && selected === $productCheckboxes.length);
+            $selectAll.prop('indeterminate', selected > 0 && selected < $productCheckboxes.length);
+        }
+
+        $selectAll.on('change', function () {
+            $productCheckboxes.prop('checked', this.checked);
+            updateBatchPrintSelection();
+        });
+
+        $productCheckboxes.on('change', updateBatchPrintSelection);
+
         $('.delete-product-button').on('click', function () {
             const $button = $(this);
             const productId = $button.data('product-id');
