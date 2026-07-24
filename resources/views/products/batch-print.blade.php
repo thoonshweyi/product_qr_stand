@@ -187,6 +187,14 @@
             margin: 0 auto;
         }
 
+        .sheet-media.portrait-main {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .sheet-media.portrait-main .sheet-main {
+            padding: 6px;
+        }
+
         .sheet-side {
             display: grid;
             grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -249,7 +257,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            object-position: left center;
+            object-position: center;
         }
 
         .sheet-main {

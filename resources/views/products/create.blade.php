@@ -752,9 +752,11 @@
                                     });
                                     
 
-                                    setTimeout(() => {                                            
-                                        window.location.href="{{ route('products.index') }}";
-                                    }, 3000);
+                                    // setTimeout(() => {                                            
+                                    //     window.location.href="{{ route('products.index') }}";
+                                    // }, 3000);
+                                    window.location.href="{{ route('products.index') }}";
+
 
                                 }else{
                                     Swal.fire({

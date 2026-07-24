@@ -18,6 +18,14 @@
     $mainImage = $product->image ?: $fallbackImage;
     $thumbnailImage = $product->thumbnail ?: null;
     $brandImage = $product->brand_icon ?: $fallbackImage;
+
+    $mainImageIsPortrait = false;
+    $mainImagePath = public_path($mainImage);
+
+    if (is_file($mainImagePath)) {
+        $mainImageSize = @getimagesize($mainImagePath);
+        $mainImageIsPortrait = $mainImageSize && $mainImageSize[1] > $mainImageSize[0];
+    }
 @endphp
 
 <article class="product-sheet">
@@ -37,7 +45,7 @@
     @endif
 
     <div class="sheet-content">
-        <section class="sheet-media">
+        <section @class(['sheet-media', 'portrait-main' => $mainImageIsPortrait])>
             <aside class="sheet-side {{ $thumbnailImage ? '' : 'without-thumbnail' }}">
                 <div class="sheet-qr">
                     @if (filled($product->qr))
