@@ -236,12 +236,20 @@
             text-align: center;
         }
 
-        .sheet-thumbnail img,
+        .sheet-thumbnail img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* object-position: left center; */
+        }
+
         .sheet-main img {
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: left center;
         }
 
         .sheet-main {
