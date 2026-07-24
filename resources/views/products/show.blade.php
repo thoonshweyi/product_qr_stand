@@ -170,7 +170,7 @@
     @media print {
         @page {
             size: auto;
-            margin: 4mm;
+            margin: 0;
         }
 
         .no-print {
@@ -179,7 +179,8 @@
 
         html, body, main {
             width: 100% !important;
-            min-height: 0 !important;
+            height: 100% !important;
+            min-height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
@@ -191,16 +192,29 @@
         }
 
         .product-page {
-            min-height: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            height: 100vh !important;
+            min-height: 100vh !important;
             padding: 0 !important;
             background: white !important;
         }
 
         .product-sheet {
-            width: 100% !important;
-            max-width: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            width: 489.6px !important;
+            min-width: 489.6px !important;
+            max-width: 489.6px !important;
+            height: 556.8px !important;
+            min-height: 556.8px !important;
+            max-height: 556.8px !important;
+            box-sizing: border-box !important;
             margin: 0 !important;
-            border-width: 1.5mm !important;
+            overflow: hidden !important;
+            border-width: 5px !important;
             box-shadow: none !important;
             break-inside: avoid-page !important;
             page-break-inside: avoid !important;
@@ -211,17 +225,20 @@
         }
 
         .product-print-header img {
-            max-height: 12mm !important;
+            max-height: 34px !important;
             width: auto !important;
         }
 
         .product-print-header h1 {
-            font-size: 1.05rem !important;
-            line-height: 1.15 !important;
+            font-size: 15px !important;
+            line-height: 18px !important;
         }
 
         .product-content {
-            padding: 2.5mm 4mm !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+            padding: 8px 12px !important;
         }
 
         .product-print-media {
@@ -250,7 +267,7 @@
         .product-print-qr,
         .product-print-thumbnail {
             min-height: 0 !important;
-            padding: 2mm !important;
+            padding: 6px !important;
             overflow: hidden !important;
         }
 
@@ -258,7 +275,7 @@
             width: 100% !important;
             height: 100% !important;
             box-sizing: border-box !important;
-            padding-bottom: 4.5mm !important;
+            padding-bottom: 15px !important;
             object-fit: contain !important;
         }
 
@@ -270,43 +287,44 @@
         }
 
         .product-print-qr-label {
-            right: 2mm !important;
-            bottom: 2mm !important;
-            left: 2mm !important;
-            padding: 0.6mm 0 !important;
-            font-size: 0.625rem !important;
-            line-height: 1.1 !important;
+            right: 6px !important;
+            bottom: 6px !important;
+            left: 6px !important;
+            margin: 0 !important;
+            padding: 2px 0 !important;
+            font-size: 8px !important;
+            line-height: 10px !important;
         }
 
         .product-print-main {
             grid-column: auto !important;
             min-height: 0 !important;
             height: 100% !important;
-            padding: 2mm 2mm 2mm 5mm !important;
+            padding: 6px 6px 6px 14px !important;
         }
 
         .product-print-divider {
-            height: 0.4mm !important;
-            margin: 2.5mm 0 !important;
+            height: 2px !important;
+            margin: 7px 0 !important;
         }
 
         .product-details {
-            padding-bottom: 1.5mm !important;
+            padding-bottom: 4px !important;
             break-inside: avoid-page !important;
             page-break-inside: avoid !important;
         }
 
         .product-details h2 {
-            margin: 0 0 2mm !important;
-            font-size: 1.35rem !important;
-            line-height: 1.4 !important;
+            margin: 0 0 5px !important;
+            font-size: 15px !important;
+            line-height: 18px !important;
         }
 
         .product-print-specifications {
-            grid-template-columns: 42mm 4mm minmax(0, 1fr) !important;
+            grid-template-columns: 112px 10px minmax(0, 1fr) !important;
             gap: 0 !important;
-            font-size: 0.875rem !important;
-            line-height: 1.5 !important;
+            font-size: 10px !important;
+            line-height: 13px !important;
         }
 
         .product-print-specifications dt {
@@ -314,74 +332,27 @@
         }
 
         .product-print-description {
-            margin-top: 3mm !important;
-            font-size: 0.95rem !important;
-            line-height: 1.7 !important;
+            margin-top: 7px !important;
+            font-size: 9px !important;
+            line-height: 12px !important;
             orphans: 2;
             widows: 2;
         }
 
         .product-footer {
-            gap: 2mm !important;
-            padding: 1.5mm 3mm !important;
-            font-size: 0.8rem !important;
-            line-height: 1 !important;
+            flex: 0 0 auto !important;
+            gap: 6px !important;
+            padding: 4px 8px !important;
+            font-size: 8px !important;
+            line-height: 10px !important;
             break-inside: avoid-page !important;
             page-break-inside: avoid !important;
         }
 
         .product-footer i {
-            width: 5mm !important;
-            height: 5mm !important;
-            font-size: 0.625rem !important;
-        }
-    }
-
-    @media print and (max-width: 160mm) {
-        @page {
-            margin: 2.5mm;
-        }
-
-        .product-sheet {
-            border-width: 1mm !important;
-        }
-
-        .product-print-header img {
-            max-height: 9mm !important;
-        }
-
-        .product-print-header h1 {
-            font-size: 0.95rem !important;
-        }
-
-        .product-content {
-            padding: 2mm 3mm !important;
-        }
-
-        .product-print-media {
-            width: 70% !important;
-        }
-
-        .product-print-specifications {
-            grid-template-columns: 38mm 3mm minmax(0, 1fr) !important;
-            font-size: 0.8rem !important;
-            line-height: 1.45 !important;
-        }
-
-        .product-print-description {
-            margin-top: 2.5mm !important;
-            font-size: 0.825rem !important;
-            line-height: 1.65 !important;
-        }
-
-        .product-details h2 {
-            margin-bottom: 1.5mm !important;
-            font-size: 1.2rem !important;
-            line-height: 1.4 !important;
-        }
-
-        .product-footer {
-            font-size: 0.725rem !important;
+            width: 16px !important;
+            height: 16px !important;
+            font-size: 8px !important;
         }
     }
 </style>
