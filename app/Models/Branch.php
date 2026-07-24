@@ -21,6 +21,10 @@ class Branch extends Model
         'erp_branch_id'
     ];
 
+    public function users(){
+        return $this->hasMany(User::class);
+    }
+
     public function user(){
         return $this->belongsTo(User::class);
     }
@@ -29,5 +33,9 @@ class Branch extends Model
         return $this->belongsTo(Status::class);
     }
 
+    public function productPrintRecords()
+    {
+        return $this->hasMany(ProductPrintRecord::class);
+    }
 
 }

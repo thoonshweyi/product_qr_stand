@@ -12,6 +12,7 @@ class ProductPrintRecord extends Model
     protected $fillable = [
         'product_id',
         'user_id',
+        'branch_id',
         'print_reference',
         'product_code',
         'product_name',
@@ -36,5 +37,10 @@ class ProductPrintRecord extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])
         ->name('products.batch-print');
+    Route::get('/products/{product}/print-history', [ProductPrintController::class, 'history'])
+        ->name('products.print-history');
     Route::resource('products', ProductController::class)->except('show');
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');

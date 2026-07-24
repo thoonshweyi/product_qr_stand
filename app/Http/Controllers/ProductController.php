@@ -321,6 +321,25 @@ class ProductController extends Controller
             ->filter()
             ->values();
 
+        $user = $request->user();
+        $printedAt = now();
+
+        foreach ($products as $product) {
+            $product->printRecords()->create([
+                'user_id' => $user?->id,
+                'branch_id' => $user?->branch_id,
+                'print_reference' => (string) Str::uuid(),
+                'product_code' => $product->product_code,
+                'product_name' => $product->name,
+                'print_url' => route('products.show', $product),
+                'status' => 'printed',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'print_started_at' => $printedAt,
+                'printed_at' => $printedAt,
+            ]);
+        }
+
         return view('products.batch-print', compact('products'));
     }
 

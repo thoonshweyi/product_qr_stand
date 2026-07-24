@@ -142,6 +142,13 @@
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->user?->name ?? 'Unknown' }}</td>
                         <td class="whitespace-nowrap p-4 text-right">
                             <div class="flex items-center justify-end gap-2">
+                                <a href="{{ route('products.print-history', $product) }}"
+                                    class="inline-flex items-center rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600"
+                                    aria-label="Print history for {{ $product->name }}"
+                                    title="Branch print history">
+                                    <i class="fas fa-clock-rotate-left h-4 w-4"></i>
+                                </a>
+
                                 <a href="{{ route('products.show', $product) }}" target="_blank"
                                     class="inline-flex items-center rounded-lg bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800"
                                     aria-label="View {{ $product->name }}">
