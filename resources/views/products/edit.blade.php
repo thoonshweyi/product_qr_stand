@@ -163,7 +163,7 @@
                                         <button type="button" id="new-specification-mode" class="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400 dark:text-gray-300 dark:hover:text-white dark:disabled:text-gray-600">New</button>
                                     </div>
                                     <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                        <span id="specification-count">0</span> / <span>8</span>
+                                        <span id="specification-count">0</span> / <span>10</span>
                                     </span>
                                 </div>
                             </div>

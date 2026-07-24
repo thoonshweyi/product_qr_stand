@@ -67,7 +67,11 @@
                         <dd>:</dd>
                         <dd>{{ $value }}</dd>
                     @endforeach
+                    <dt>• {{ "Specification" }}</dt>
+                        <dd>:</dd>
+                    <dd>{{ "Value" }}</dd>
                 </dl>
+          
 
                 <div class="sheet-description">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
             </div>

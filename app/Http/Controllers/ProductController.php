@@ -139,7 +139,7 @@ class ProductController extends Controller
             'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'specifications' => ['required', 'array', 'min:1', 'max:8'],
+            'specifications' => ['required', 'array', 'min:1', 'max:10'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);
@@ -399,7 +399,7 @@ class ProductController extends Controller
             'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'specifications' => ['required', 'array', 'min:1', 'max:8'],
+            'specifications' => ['required', 'array', 'min:1', 'max:10'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);

@@ -102,19 +102,19 @@
                     </div>
 
                     @if($thumbnailImage)
-                    <div class="product-print-thumbnail min-h-0 overflow-hidden bg-slate-100tests sm:p-6">
+                    <div class="product-print-thumbnail aspect-square min-h-0 overflow-hidden bg-slate-100tests sm:aspect-auto sm:p-6">
                         <img src="{{ asset($thumbnailImage) }}"
                             alt="{{ $product->name }} thumbnail"
-                            class="h-full w-full object-cover">
+                            class="h-full w-full object-contain sm:object-cover">
                     </div>
                     @endif
                 </aside>
 
                 <!-- Main image -->
-                <div class="product-print-main min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:ps-12tests sm:p-6">
+                <div class="product-print-main aspect-[3/2] min-h-0 w-full overflow-hidden sm:col-span-3 sm:h-full sm:aspect-auto sm:ps-12tests sm:p-6">
                     <img src="{{ asset($mainImage) }}"
                         alt="{{ $product->name }}"
-                        class="h-full w-full object-cover">
+                        class="h-full w-full object-contain sm:object-cover">
                 </div>
             </section>
             <div class="product-print-divider my-5 h-0.5 bg-[#0a4b91] sm:my-4"></div>
