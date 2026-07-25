@@ -10,10 +10,9 @@
         'Code' => $product->product_code,
         'Country of origin' => $product->country?->name,
         //'Category' => $product->category?->name,
-        'Sales unit' => $product->unit,
     ])->filter(fn ($value) => filled($value));
 
-    foreach ($product->specificationValues as $specificationValue) {
+    foreach ($product->specificationValues->take(10) as $specificationValue) {
         if ($specificationValue->specification && filled($specificationValue->value)) {
             $specifications->put($specificationValue->specification->name, $specificationValue->value);
         }
@@ -492,6 +491,8 @@
         }
 
         .product-details {
+            min-height: 0 !important;
+            overflow: hidden !important;
             padding-bottom: 4px !important;
             break-inside: avoid-page !important;
             page-break-inside: avoid !important;
@@ -510,14 +511,23 @@
             line-height: 13px !important;
         }
 
-        .product-print-specifications dt {
+        .product-print-specifications dt,
+        .product-print-specifications dd {
+            min-width: 0 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
             white-space: nowrap !important;
         }
 
         .product-print-description {
+            display: -webkit-box !important;
+            max-height: 48px !important;
+            overflow: hidden !important;
             margin-top: 7px !important;
             font-size: 9px !important;
             line-height: 12px !important;
+            -webkit-box-orient: vertical !important;
+            -webkit-line-clamp: 4 !important;
             orphans: 2;
             widows: 2;
         }

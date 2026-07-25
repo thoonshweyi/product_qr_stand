@@ -294,6 +294,7 @@
 
         .sheet-details {
             position: relative;
+            min-height: 0;
             overflow: hidden;
             padding-bottom: 4px;
         }
@@ -334,9 +335,8 @@
         .sheet-specifications dd {
             min-width: 0;
             margin: 0;
-        }
-
-        .sheet-specifications dt {
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
 
@@ -345,11 +345,16 @@
         }
 
         .sheet-description {
+            display: -webkit-box;
+            max-height: 48px;
+            overflow: hidden;
             margin-top: 7px;
             white-space: pre-line;
             font-size: 9px;
             line-height: 12px;
             text-align: justify;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
         }
 
         .sheet-footer {

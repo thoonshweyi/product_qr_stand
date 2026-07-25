@@ -5,10 +5,9 @@
         'Model' => $product->model,
         'Code' => $product->product_code,
         'Country of origin' => $product->country?->name,
-        'Sales unit' => $product->unit,
     ])->filter(fn ($value) => filled($value));
 
-    foreach ($product->specificationValues as $specificationValue) {
+    foreach ($product->specificationValues->take(10) as $specificationValue) {
         if ($specificationValue->specification && filled($specificationValue->value)) {
             $specifications->put($specificationValue->specification->name, $specificationValue->value);
         }
@@ -67,9 +66,6 @@
                         <dd>:</dd>
                         <dd>{{ $value }}</dd>
                     @endforeach
-                    <dt>• {{ "Specification" }}</dt>
-                        <dd>:</dd>
-                    <dd>{{ "Value" }}</dd>
                 </dl>
           
 
