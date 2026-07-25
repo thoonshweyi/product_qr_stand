@@ -314,10 +314,10 @@
         }
 
         .sheet-details h2 {
-            margin: 0 0 5px;
+            margin: 0 0 4px;
             font-size: 15px;
             font-weight: 800;
-            line-height: 18px;
+            line-height: 24px;
             text-transform: uppercase;
         }
 
@@ -327,8 +327,8 @@
             gap: 0;
             margin: 0;
             font-size: 10px;
-            font-weight: 600;
-            line-height: 12.6px;
+            font-weight: 700;
+            line-height: 12px;
         }
 
         .sheet-specifications dt,
@@ -348,9 +348,9 @@
             display: -webkit-box;
             max-height: var(--description-height);
             overflow: hidden;
-            margin-top: 7px;
+            margin-top: 4px;
             white-space: pre-line;
-            font-size: 9px;
+            font-size: 8px;
             line-height: 12px;
             text-align: justify;
             -webkit-box-orient: vertical;
