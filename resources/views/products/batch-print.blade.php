@@ -296,7 +296,8 @@
             position: relative;
             min-height: 0;
             overflow: hidden;
-            padding-bottom: 4px;
+            padding-bottom: 0;
+            font-family: Arial, "Padauk Book", "Myanmar Text", sans-serif;
         }
 
         .sheet-watermark {
@@ -314,7 +315,7 @@
         }
 
         .sheet-details h2 {
-            margin: 0 0 4px;
+            margin: 0 0 2px;
             font-size: 15px;
             font-weight: 800;
             line-height: 24px;
@@ -326,9 +327,9 @@
             grid-template-columns: 132px 10px minmax(0, 1fr);
             gap: 0;
             margin: 0;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
-            line-height: 12px;
+            line-height: 1.4;
         }
 
         .sheet-specifications dt,
@@ -346,12 +347,12 @@
 
         .sheet-description {
             display: -webkit-box;
-            max-height: var(--description-height);
             overflow: hidden;
-            margin-top: 4px;
+            margin-top: 2px;
             white-space: pre-line;
-            font-size: 8px;
-            line-height: 12px;
+            font-size: 9px;
+            line-height: 1.4;
+            font-weight: 400;
             text-align: justify;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: var(--description-lines);

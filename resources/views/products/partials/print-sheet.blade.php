@@ -72,7 +72,7 @@
           
 
                 <div class="sheet-description"
-                    style="--description-lines: {{ $descriptionLineLimit }}; --description-height: {{ $descriptionLineLimit * 12 }}px;">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                    style="--description-lines: {{ $descriptionLineLimit }};">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
             </div>
         </section>
     </div>
