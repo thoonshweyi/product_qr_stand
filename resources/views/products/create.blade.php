@@ -739,6 +739,9 @@
                             data:formData,
                             processData: false,
                             contentType: false,
+                            headers: {
+                                Accept: 'application/json'
+                            },
                             success:async function(response){
                                 console.log(response);
 
@@ -772,13 +775,21 @@
 
                                 }
                             },
-                            error:function(response){
-                                console.log("Error: ",response);
+                            error:function(xhr){
+                                console.log("Error: ", xhr);
+
+                                const response = xhr.responseJSON || {};
+                                const serverErrors = response.errors || {
+                                    request: [response.message || 'Something went wrong while saving the product.']
+                                };
+                                const messages = Object.values(serverErrors).flat();
+
+                                displayValidationErrors(serverErrors);
 
                                 Swal.fire({
                                     icon: "error",
-                                    title: "Product Save Error!!",
-                                    text: "Something went wrong while saving product.",
+                                    title: xhr.status === 422 ? "Please check the form" : "Product Save Error",
+                                    html: `<ul class="space-y-1 text-left">${messages.map(message => `<li>• ${escapeHtml(message)}</li>`).join('')}</ul>`,
                                 });
 
                                 isSubmitting = false;

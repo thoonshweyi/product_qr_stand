@@ -853,14 +853,14 @@
                                 const serverErrors = response.errors || {
                                     request: [response.message || 'Something went wrong while updating the product.']
                                 };
-                                const firstMessage = Object.values(serverErrors).flat()[0];
+                                const messages = Object.values(serverErrors).flat();
 
                                 displayValidationErrors(serverErrors);
 
                                 Swal.fire({
                                     icon: "error",
                                     title: xhr.status === 422 ? "Please check the form" : "Product Update Error",
-                                    text: firstMessage,
+                                    html: `<ul class="space-y-1 text-left">${messages.map(message => `<li>• ${escapeHtml(message)}</li>`).join('')}</ul>`,
                                 });
 
                                 isSubmitting = false;

@@ -168,7 +168,7 @@ class ProductController extends Controller
                 'name' => $request['name'],
                 'model' => $request['model'] ?? '',
                 'country_of_origin' => $request['country_of_origin'] ?? '',
-                // 'website_url' => $request['website_url'] ?? '',
+                'website_url' => $request['website_url'] ?? '',
                 'description' => $request['description'] ?? '',
                 'status_id' => $request['status_id'] ?? null,
                 'category_id' => $request['category_id'] ?? null,
