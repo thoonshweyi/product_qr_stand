@@ -190,7 +190,7 @@
                             </div>
 
                             <p id="specification-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400"></p>
-                            <p id="specification-limit" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 specifications can be added.</p>
+                            <p id="specification-limit" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 10 specifications can be added.</p>
                         </div>
 
                         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
@@ -528,7 +528,7 @@
 
         function addSpecification() {
             showError();
-            if (rows.length >= maxSpecifications) return showError('Maximum 8 specifications can be added.');
+            if (rows.length >= maxSpecifications) return showError('Maximum 10 specifications can be added.');
             const requestedName = entryName();
             if (!requestedName) return showError(entryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.');
             const existingName = availableSpecifications.find(name => normalize(name) === normalize(requestedName));

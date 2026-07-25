@@ -191,7 +191,7 @@
                             </div>
 
                             <p id="specification-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400"></p>
-                            <p id="specification-limit" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 8 specifications can be added.</p>
+                            <p id="specification-limit" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-400">Maximum 10 specifications can be added.</p>
                         </div>
 
                         <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
@@ -549,7 +549,7 @@
 
         function addSpecification() {
             showError();
-            if (rows.length >= maxSpecifications) return showError('Maximum 8 specifications can be added.');
+            if (rows.length >= maxSpecifications) return showError('Maximum 10 specifications can be added.');
             const requestedName = entryName();
             if (!requestedName) return showError(entryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.');
             const existingName = availableSpecifications.find(name => normalize(name) === normalize(requestedName));
@@ -765,10 +765,10 @@
                 showError();
 
                 const errors = clientValidationErrors();
-                // if (Object.keys(errors).length) {
-                //     displayValidationErrors(errors);
-                //     return;
-                // }
+                if (Object.keys(errors).length) {
+                    displayValidationErrors(errors);
+                    return;
+                }
 
                 displayValidationErrors({});
                 // $.ajax({
@@ -813,6 +813,9 @@
                             data:formData,
                             processData: false,
                             contentType: false,
+                            headers: {
+                                Accept: 'application/json'
+                            },
                             success:async function(response){
                                 console.log(response);
 
@@ -843,13 +846,21 @@
 
                                 }
                             },
-                            error:function(response){
-                                console.log("Error: ",response);
+                            error:function(xhr){
+                                console.log("Error: ", xhr);
+
+                                const response = xhr.responseJSON || {};
+                                const serverErrors = response.errors || {
+                                    request: [response.message || 'Something went wrong while updating the product.']
+                                };
+                                const firstMessage = Object.values(serverErrors).flat()[0];
+
+                                displayValidationErrors(serverErrors);
 
                                 Swal.fire({
                                     icon: "error",
-                                    title: "Product Save Error!!",
-                                    text: "Something went wrong while saving product.",
+                                    title: xhr.status === 422 ? "Please check the form" : "Product Update Error",
+                                    text: firstMessage,
                                 });
 
                                 isSubmitting = false;
