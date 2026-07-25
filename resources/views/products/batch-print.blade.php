@@ -174,7 +174,7 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow: hidden;
-            padding: 8px 12px;
+            padding: 4px 12px;
         }
 
         .sheet-media {
@@ -182,7 +182,7 @@
             grid-template-columns: 1fr 3fr;
             grid-template-rows: 1fr;
             gap: 0;
-            width: 74%;
+            width: 70%;
             aspect-ratio: 2 / 1;
             margin: 0 auto;
         }
@@ -297,7 +297,8 @@
             min-height: 0;
             overflow: hidden;
             padding-bottom: 0;
-            font-family: Arial, "Padauk Book", "Myanmar Text", sans-serif;
+            font-family: Arial, "Myanmar3", "Myanmar Text", sans-serif;
+            text-rendering: optimizeLegibility;
         }
 
         .sheet-watermark {
@@ -327,9 +328,9 @@
             grid-template-columns: 132px 10px minmax(0, 1fr);
             gap: 0;
             margin: 0;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .sheet-specifications dt,
@@ -350,8 +351,8 @@
             overflow: hidden;
             margin-top: 2px;
             white-space: pre-line;
-            font-size: 9px;
-            line-height: 1.4;
+            font-size: 10px;
+            line-height: 1.35;
             font-weight: 400;
             text-align: justify;
             -webkit-box-orient: vertical;
