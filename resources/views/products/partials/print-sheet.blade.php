@@ -13,6 +13,8 @@
         }
     }
 
+    $descriptionLineLimit = max(5, 20 - min($specifications->count(), 15));
+
     $fallbackImage = 'assets/img/icon/pro1globalicon.png';
     $mainImage = $product->image ?: $fallbackImage;
     $thumbnailImage = $product->thumbnail ?: null;
@@ -69,7 +71,8 @@
                 </dl>
           
 
-                <div class="sheet-description">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                <div class="sheet-description"
+                    style="--description-lines: {{ $descriptionLineLimit }}; --description-height: {{ $descriptionLineLimit * 12 }}px;">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
             </div>
         </section>
     </div>

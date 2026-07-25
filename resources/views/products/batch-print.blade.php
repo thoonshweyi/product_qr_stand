@@ -323,12 +323,12 @@
 
         .sheet-specifications {
             display: grid;
-            grid-template-columns: 112px 10px minmax(0, 1fr);
+            grid-template-columns: 132px 10px minmax(0, 1fr);
             gap: 0;
             margin: 0;
             font-size: 10px;
             font-weight: 600;
-            line-height: 13px;
+            line-height: 12.6px;
         }
 
         .sheet-specifications dt,
@@ -346,7 +346,7 @@
 
         .sheet-description {
             display: -webkit-box;
-            max-height: 48px;
+            max-height: var(--description-height);
             overflow: hidden;
             margin-top: 7px;
             white-space: pre-line;
@@ -354,7 +354,7 @@
             line-height: 12px;
             text-align: justify;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: var(--description-lines);
         }
 
         .sheet-footer {
