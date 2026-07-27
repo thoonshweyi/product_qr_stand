@@ -418,16 +418,16 @@ class ProductController extends Controller
             $oldProductCode = $product->product_code;
 
             $product->update([
-                'product_code' => $request->product_code,
+                // 'product_code' => $request->product_code,
                 'name' => $request->name,
-                'product_name' => $request->product_name,
-                'brand' => $request->brand,
+                // 'product_name' => $request->product_name,
+                // 'brand' => $request->brand,
                 'model' => $request->model,
                 'country_of_origin' => $request->country_of_origin,
                 'website_url' => $request->website_url ?? '',
                 'description' => $request->description ?? '',
                 'status_id' => $request->status_id,
-                'category_id' => $request->category_id,
+                // 'category_id' => $request->category_id,
                 'user_id' => $request->user()?->id,
             ]);
 
