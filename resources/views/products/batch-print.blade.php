@@ -302,6 +302,7 @@
             overflow: hidden;
             padding-bottom: 0;
             font-family: Arial, "Myanmar3", "Myanmar Text", sans-serif;
+            /* font-family: "Poppins", "Pyidaungsu", sans-serif; */
             text-rendering: optimizeLegibility;
         }
 
@@ -332,9 +333,10 @@
             grid-template-columns: 132px 10px minmax(0, 1fr);
             gap: 0;
             margin: 0;
-            font-size: 9px;
-            font-weight: 800;
-            line-height: 1.4;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 13px;
+            /* -webkit-text-stroke: 0.15px currentColor; */
         }
 
         .sheet-specifications dt,
@@ -353,10 +355,10 @@
         .sheet-description {
             display: -webkit-box;
             overflow: hidden;
-            margin-top: 2px;
+            margin-top: 0;
             white-space: pre-line;
             font-size: 9px;
-            line-height: 1.5;
+            line-height: 13px;
             font-weight: 400;
             text-align: justify;
             -webkit-box-orient: vertical;
