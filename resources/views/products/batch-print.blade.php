@@ -98,9 +98,12 @@
             width: 489.6px;
             min-width: 489.6px;
             max-width: 489.6px;
-            height: 556.8px;
+            /* height: 556.8px;
             min-height: 556.8px;
-            max-height: 556.8px;
+            max-height: 556.8px; */
+            height: 550px;
+            min-height: 550px;
+            max-height: 550px;
             overflow: hidden;
             border: 5px solid #073b78;
             background: #ffffff;
@@ -288,7 +291,8 @@
 
         .sheet-divider {
             height: 2px;
-            margin: 7px 0;
+            /* margin: 6px 0; */
+            margin-bottom: 6px;
             background: #0a4b91;
         }
 
@@ -317,7 +321,7 @@
 
         .sheet-details h2 {
             margin: 0 0 2px;
-            font-size: 12.4px;
+            font-size: 12px;
             font-weight: 900;
             line-height: 1.5; 
             text-transform: uppercase;
@@ -352,7 +356,7 @@
             margin-top: 2px;
             white-space: pre-line;
             font-size: 9px;
-            line-height: 1.4;
+            line-height: 1.5;
             font-weight: 400;
             text-align: justify;
             -webkit-box-orient: vertical;
