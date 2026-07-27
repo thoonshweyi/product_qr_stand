@@ -285,6 +285,73 @@
             object-position: left center;
         }
 
+        .show-desktop-image-section .sheet-thumbnail-measurement {
+            position: absolute;
+            inset: 1.5rem;
+            pointer-events: none;
+            color: #111827;
+            font-family: Arial, sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .show-desktop-image-section .sheet-measurement-top {
+            position: absolute;
+            top: -1rem;
+            right: 0;
+            left: 0;
+            border-top: 1px solid currentColor;
+            text-align: center;
+        }
+
+        .show-desktop-image-section .sheet-measurement-top::before,
+        .show-desktop-image-section .sheet-measurement-top::after {
+            display: none;
+        }
+
+        .show-desktop-image-section .sheet-measurement-top::before { left: 0; }
+        .show-desktop-image-section .sheet-measurement-top::after { right: 0; }
+
+        .show-desktop-image-section .sheet-measurement-top span {
+            position: relative;
+            top: -0.4rem;
+            display: inline-block;
+            padding: 0 0.35rem;
+            background: #ffffff;
+        }
+
+        .show-desktop-image-section .sheet-measurement-left {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -1rem;
+            border-left: 1px solid currentColor;
+        }
+
+        .show-desktop-image-section .sheet-measurement-left::before,
+        .show-desktop-image-section .sheet-measurement-left::after {
+            display: none;
+        }
+
+        .show-desktop-image-section .sheet-measurement-left::before { top: 0; }
+        .show-desktop-image-section .sheet-measurement-left::after { bottom: 0; }
+
+        .show-desktop-image-section .sheet-measurement-left span {
+            position: absolute;
+            top: 50%;
+            left: -0.4rem;
+            display: inline-block;
+            padding: 0.2rem 0.3rem;
+            background: #ffffff;
+            white-space: nowrap;
+            transform: translate(-50%, -50%) rotate(-90deg);
+        }
+
+        .show-desktop-image-section .sheet-thumbnail.has-measurement {
+            overflow: visible;
+        }
+
         .show-desktop-image-section .sheet-main {
             min-height: 0;
             height: 100%;
@@ -553,6 +620,58 @@
 
 @section('scripts')
 <script>
+    function positionThumbnailMeasurements() {
+        document.querySelectorAll('.sheet-thumbnail.has-measurement').forEach(container => {
+            const image = container.querySelector('img');
+            const measurement = container.querySelector('.sheet-thumbnail-measurement');
+            if (!image || !measurement || !image.naturalWidth || !image.naturalHeight) return;
+
+            const styles = getComputedStyle(container);
+            const paddingLeft = parseFloat(styles.paddingLeft) || 0;
+            const paddingRight = parseFloat(styles.paddingRight) || 0;
+            const paddingTop = parseFloat(styles.paddingTop) || 0;
+            const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+            const availableWidth = container.clientWidth - paddingLeft - paddingRight;
+            const availableHeight = container.clientHeight - paddingTop - paddingBottom;
+            if (availableWidth <= 0 || availableHeight <= 0) return;
+
+            const scale = Math.min(
+                availableWidth / image.naturalWidth,
+                availableHeight / image.naturalHeight
+            );
+            const renderedWidth = image.naturalWidth * scale;
+            const renderedHeight = image.naturalHeight * scale;
+            const [positionX = '50%', positionY = '50%'] = getComputedStyle(image).objectPosition.split(/\s+/);
+            const positionRatio = value => {
+                if (value.endsWith('%')) return parseFloat(value) / 100;
+                if (value === 'left' || value === 'top') return 0;
+                if (value === 'right' || value === 'bottom') return 1;
+                return 0.5;
+            };
+            const offsetX = (availableWidth - renderedWidth) * positionRatio(positionX);
+            const offsetY = (availableHeight - renderedHeight) * positionRatio(positionY);
+
+            Object.assign(measurement.style, {
+                left: `${paddingLeft + offsetX}px`,
+                top: `${paddingTop + offsetY}px`,
+                width: `${renderedWidth}px`,
+                height: `${renderedHeight}px`,
+                right: 'auto',
+                bottom: 'auto'
+            });
+        });
+    }
+
+    document.querySelectorAll('.sheet-thumbnail.has-measurement img').forEach(image => {
+        if (image.complete) {
+            positionThumbnailMeasurements();
+        } else {
+            image.addEventListener('load', positionThumbnailMeasurements);
+        }
+    });
+    window.addEventListener('load', positionThumbnailMeasurements);
+    window.addEventListener('resize', positionThumbnailMeasurements);
+
     $(document).ready(function () {
         let activePrintRecordId = null;
         const $button = $('#print-product-button');
