@@ -369,7 +369,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 4px 8px;
+            padding: 4px 4px;
             background: #073b78;
             color: #ffffff;
             font-size: 8px;
@@ -386,8 +386,8 @@
 
         .sheet-socials i {
             display: flex;
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
