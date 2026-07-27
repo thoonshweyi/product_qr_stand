@@ -182,7 +182,7 @@
             grid-template-columns: 1fr 3fr;
             grid-template-rows: 1fr;
             gap: 0;
-            width: 70%;
+            width: 80%;
             aspect-ratio: 2 / 1;
             margin: 0 auto;
         }
@@ -317,9 +317,9 @@
 
         .sheet-details h2 {
             margin: 0 0 2px;
-            font-size: 15px;
-            font-weight: 800;
-            line-height: 24px;
+            font-size: 12.4px;
+            font-weight: 900;
+            line-height: 1.5; 
             text-transform: uppercase;
         }
 
@@ -328,9 +328,9 @@
             grid-template-columns: 132px 10px minmax(0, 1fr);
             gap: 0;
             margin: 0;
-            font-size: 10px;
-            font-weight: 700;
-            line-height: 1.35;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1.4;
         }
 
         .sheet-specifications dt,
@@ -351,8 +351,8 @@
             overflow: hidden;
             margin-top: 2px;
             white-space: pre-line;
-            font-size: 10px;
-            line-height: 1.35;
+            font-size: 9px;
+            line-height: 1.4;
             font-weight: 400;
             text-align: justify;
             -webkit-box-orient: vertical;
