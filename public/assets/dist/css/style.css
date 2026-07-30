@@ -73,3 +73,26 @@ body{
     border-color: rgb(59, 130, 246) !important;
 }
 /* End Customize Select2 */
+
+/* Reusable frozen table header
+   Add .freeze-table-header to the table's scroll wrapper.
+   Override --freeze-table-max-height when a page needs a different height. */
+.freeze-table-header {
+    position: relative;
+    max-height: var(--freeze-table-max-height, calc(100vh - 18rem));
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.freeze-table-header > table > thead > tr > th {
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    background-color: rgb(243, 244, 246);
+    box-shadow: inset 0 -1px 0 rgb(229, 231, 235);
+}
+
+.dark .freeze-table-header > table > thead > tr > th {
+    background-color: rgb(55, 65, 81);
+    box-shadow: inset 0 -1px 0 rgb(75, 85, 99);
+}

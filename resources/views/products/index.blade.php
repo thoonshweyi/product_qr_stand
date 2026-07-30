@@ -84,7 +84,7 @@
 
     <form id="product-batch-print-form" action="{{ route('products.batch-print') }}" method="POST" target="_blank">
         @csrf
-    <div class="overflow-x-auto">
+    <div class="freeze-table-header" style="--freeze-table-max-height: calc(100vh - 18rem);">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
