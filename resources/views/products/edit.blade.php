@@ -832,6 +832,8 @@
                                     //     window.location.href="{{ route('products.index') }}";
                                     // }, 3000);
 
+                                    $('#update-product-button').prop('disabled', false);
+                                    $('#update-product-button-label').text('Update product');
                                 }else{
                                     Swal.fire({
                                         icon: "error",

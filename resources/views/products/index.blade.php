@@ -122,7 +122,7 @@
                                     </span>
                                 @endif
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $product->name }}</p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{Str::limit($product->name,50)}}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $product->product_code }}</p>
                                 </div>
                             </div>
@@ -218,12 +218,12 @@
         $('.delete-product-button').on('click', function () {
             const $button = $(this);
             const productId = $button.data('product-id');
-            const productName = $button.data('product-name');
+            const productName = ($button.data('product-name') || '').substring(0, 50);
 
             Swal.fire({
                 icon: 'warning',
                 title: 'Delete product?',
-                text: `Are you sure you want to delete ${productName}? This action cannot be undone.`,
+                text: `Are you sure you want to delete '${productName}'? This action cannot be undone.`,
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it',
                 confirmButtonColor: '#dc2626',
