@@ -12,7 +12,7 @@ class BranchesController extends Controller
      */
     public function index()
     {
-        $branches = Branch::paginate(10);
+        $branches = Branch::orderBy('branch_code','asc')->paginate(10);
         return view("branches.index",compact("branches"));
     }
 
@@ -62,5 +62,13 @@ class BranchesController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function changestatus(Request $request){
+        $branch = Branch::findOrFail($request["id"]);
+        $branch->status_id = $request["status_id"];
+        $branch->save();
+
+        return response()->json(["success"=>"Status Change Successfully"]);
     }
 }

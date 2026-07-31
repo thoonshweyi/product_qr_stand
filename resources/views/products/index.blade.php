@@ -130,6 +130,25 @@
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->brand }}</td>
                         <td class="max-w-xs truncate p-4 text-sm text-gray-600 dark:text-gray-300" title="{{ $product->model }}">{{ $product->model }}</td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->country?->name ?? '—' }}</td>
+
+                        @can('edit', $product)
+                        <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input
+                                    type="checkbox"
+                                    class="peer sr-only change-btn"
+                                    {{ $product->status_id === 1 ? "checked" : "" }}
+                                    data-id="{{ $product->id }}"
+                                />
+                                <div
+                                    class="h-5 w-9 rounded-full bg-gray-300 transition-colors
+                                        after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4
+                                        after:rounded-full after:bg-white after:transition-transform
+                                        peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
+                                </div>
+                            </label>
+                        </td>
+                        @else
                         <td class="whitespace-nowrap p-4">
                             <span @class([
                                 'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
@@ -139,6 +158,8 @@
                                 {{ $product->status?->name ?? 'Unknown' }}
                             </span>
                         </td>
+                        @endcan
+
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->user?->name ?? 'Unknown' }}</td>
                         <td class="whitespace-nowrap p-4 text-right">
                             <div class="flex items-center justify-end gap-2">
@@ -262,6 +283,34 @@
                 });
             });
         });
+
+        //Start change-btn
+        $(document).on("change",".change-btn",function(){
+
+            var getid = $(this).data("id");
+            // console.log(getid); // 1 2
+
+            var setstatus = $(this).prop("checked") === true ? 1 : 2;
+            // console.log(setstatus); // 3 4
+
+            $.ajax({
+                    url:"productsstatus",
+                    type:"GET",
+                    dataType:"json",
+                    data:{"id":getid,"status_id":setstatus},
+                    success:function(response){
+                        console.log(response); // {success: 'Status Change Successfully'}
+                        console.log(response.success); // Status Change Successfully
+                    
+                        Swal.fire({
+                            title: "Updated!",
+                            text: "Updated Successfully",
+                            icon: "success"
+                        });
+                    }
+            });
+        });
+        // End change btn
     });
 </script>
 @endsection

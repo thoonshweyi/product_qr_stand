@@ -18,7 +18,7 @@ class ProductPol
     // Admin can view all leave data 
     public function viewany(User $user){
         // check if the user has the 'Admin' role
-        return $user->hasRoles(['Admin','Administrator']);
+        return $user->hasRoles(['Admin','Administrator','Editor']);
     }
 
     // Users can view their own leave datas

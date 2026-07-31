@@ -89,7 +89,8 @@ class ProductPrintController extends Controller
     public function history(Product $product)
     {
         $branches = Branch::query()
-            ->orderBy('branch_name')
+            ->orderBy('branch_code','asc')
+            ->where('status_id', '3')
             ->get(['id', 'branch_name', 'branch_code', 'branch_short_name']);
 
         $summaryByBranch = $product->printRecords()

@@ -43,13 +43,21 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboards', [DashboardsController::class, 'index'])->name('dashboards.index');
 
-    Route::resource('users', UsersController::class);
-    Route::resource('branches', BranchesController::class);
     Route::resource('statuses', StatusesController::class);
+
+    Route::resource('users', UsersController::class);
+
+    Route::resource('branches', BranchesController::class);
+    Route::get("/branchesstatus",[BranchesController::class,"changestatus"]);
+
 
     Route::resource('roles', RolesController::class);
     Route::resource('permissions', PermissionsController::class)
         ->only(['index', 'store', 'update', 'destroy']);
+
+
+    Route::resource('products', ProductController::class)->except('show');
+    Route::get("/productsstatus",[ProductController::class,"changestatus"]);
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])
         ->name('products.batch-print');
@@ -57,7 +65,8 @@ Route::middleware('auth')->group(function () {
         ->name('products.batch-print-records.store');
     Route::get('/products/{product}/print-history', [ProductPrintController::class, 'history'])
         ->name('products.print-history');
-    Route::resource('products', ProductController::class)->except('show');
+
+
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
 

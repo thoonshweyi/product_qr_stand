@@ -18,7 +18,8 @@ class Branch extends Model
         'branch_short_name',
         'branch_address',
         'branch_phone_no',
-        'erp_branch_id'
+        'erp_branch_id',
+        'status_id',
     ];
 
     public function users(){

@@ -40,6 +40,7 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(!auth()->user()->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
@@ -277,7 +278,10 @@ class ProductController extends Controller
             'category',
             'country',
             'specificationValues.specification',
-        ])->findOrFail($id);
+        ])
+        ->where('id', $id)
+        ->when(!auth()->user()->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
+        ->firstOrFail();
 
         if (! auth()->check() && $product->status_id !== 1) {
             abort(404);
@@ -621,6 +625,14 @@ class ProductController extends Controller
             'path' => $relativePath,
             'url' => asset($relativePath),
         ];
+    }
+
+    public function changestatus(Request $request){
+        $product = Product::findOrFail($request["id"]);
+        $product->status_id = $request["status_id"];
+        $product->save();
+
+        return response()->json(["success"=>"Status Change Successfully"]);
     }
 }
 

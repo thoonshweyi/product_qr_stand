@@ -307,3 +307,38 @@
 
 
 @endsection
+
+@section('scripts')
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //Start change-btn
+            $(document).on("change",".change-btn",function(){
+
+                var getid = $(this).data("id");
+                // console.log(getid); // 1 2
+
+                var setstatus = $(this).prop("checked") === true ? 3 : 4;
+                // console.log(setstatus); // 3 4
+
+                $.ajax({
+                        url:"branchesstatus",
+                        type:"GET",
+                        dataType:"json",
+                        data:{"id":getid,"status_id":setstatus},
+                        success:function(response){
+                            console.log(response); // {success: 'Status Change Successfully'}
+                            console.log(response.success); // Status Change Successfully
+                        
+                            Swal.fire({
+                                title: "Updated!",
+                                text: "Updated Successfully",
+                                icon: "success"
+                            });
+                        }
+                });
+            });
+            // End change btn
+            
+        });
+    </script>
+@endsection
