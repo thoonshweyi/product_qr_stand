@@ -280,7 +280,7 @@ class ProductController extends Controller
             'specificationValues.specification',
         ])
         ->where('id', $id)
-        ->when(!auth()->user()->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
+        ->when(!auth()->user()?->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
         ->firstOrFail();
 
         if (! auth()->check() && $product->status_id !== 1) {
