@@ -21,6 +21,14 @@
                 @if ($search !== '')
                     <a href="{{ route('products.catalog') }}" class="flex items-center px-3 text-sm font-medium text-slate-500 hover:text-slate-900">Clear</a>
                 @endif
+                <a href="{{ route('products.scanner') }}"
+                    class="group relative flex items-center justify-center border-l border-slate-200 px-3.5 text-[#073b78] transition hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                    aria-label="Scan product QR code" title="Scan product QR code">
+                    <svg class="h-6 w-6 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 8V5.75a2 2 0 012-2H8m8 0h2.25a2 2 0 012 2V8m0 8v2.25a2 2 0 01-2 2H16m-8 0H5.75a2 2 0 01-2-2V16M8 8h3v3H8V8zm5 0h3v3h-3V8zm-5 5h3v3H8v-3zm5 0h1.5v1.5H16V16h-3v-3z"/>
+                    </svg>
+                    <span class="sr-only">Open QR scanner</span>
+                </a>
                 <button type="submit" class="bg-[#073b78] px-5 text-sm font-semibold text-white hover:bg-[#052e5e] sm:px-7">Search</button>
             </div>
         </form>

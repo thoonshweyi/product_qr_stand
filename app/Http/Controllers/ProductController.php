@@ -97,6 +97,53 @@ class ProductController extends Controller
     }
 
     /**
+     * Display the public product QR scanner.
+     */
+    public function scanner()
+    {
+        return view('products.scanner');
+    }
+
+    /**
+     * Resolve either a product code or one of this application's product URLs.
+     */
+    public function scanLookup(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $scannedValue = trim($validated['code']);
+        $productId = null;
+        $path = parse_url($scannedValue, PHP_URL_PATH);
+
+        if (is_string($path) && preg_match('#/products/(\d+)/?$#', $path, $matches)) {
+            $productId = (int) $matches[1];
+        }
+
+        $product = Product::query()
+            ->where('status_id', 1)
+            ->when(
+                $productId,
+                fn ($query) => $query->whereKey($productId),
+                fn ($query) => $query->where('product_code', $scannedValue),
+            )
+            ->first();
+
+        if (! $product) {
+            return response()->json([
+                'message' => 'This product is not available in the catalog.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Product found. Opening product details…',
+            'product_code' => $product->product_code,
+            'redirect_url' => route('products.show', $product),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -308,6 +355,11 @@ class ProductController extends Controller
             ->where('status', 'printed')
             ->latest('printed_at')
             ->first();
+
+
+        if(request()->ajax()){
+            return $this->sendRespond($product,"Fetch Single Product Successfully!.");
+        }
 
         return view('products.show', compact(
             'product',

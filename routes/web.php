@@ -29,6 +29,8 @@ Route::get('/', function () {
 });
 
 Route::get('/catalog/products', [ProductController::class, 'catalog'])->name('products.catalog');
+Route::get('/catalog/scan', [ProductController::class, 'scanner'])->name('products.scanner');
+Route::post('/catalog/scan/lookup', [ProductController::class, 'scanLookup'])->name('products.scan.lookup');
 Route::get('/products/{product}', [ProductController::class, 'show'])->whereNumber('product')->name('products.show');
 Route::post('/products/{product}/print-records', [ProductPrintController::class, 'store'])->name('products.print-records.store');
 Route::patch('/product-print-records/{printRecord}/complete', [ProductPrintController::class, 'complete'])->name('products.print-records.complete');
