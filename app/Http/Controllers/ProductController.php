@@ -30,8 +30,17 @@ class ProductController extends Controller
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
+        $currentBranchId = $request->user()->branch_id;
+        $currentBranch = $request->user()->branch;
 
-        $products = Product::with(['country', 'status', 'user'])
+        $productsQuery = Product::with(['country', 'status', 'user'])
+            ->when($currentBranchId, function ($query) use ($currentBranchId) {
+                $query->withMax([
+                    'printRecords as current_branch_last_printed_at' => fn ($query) => $query
+                        ->where('branch_id', $currentBranchId)
+                        ->where('status', 'printed'),
+                ], 'printed_at');
+            })
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $query->where('product_code', 'like', '%'.$keyword.'%')
@@ -41,7 +50,9 @@ class ProductController extends Controller
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
             ->when(!auth()->user()->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
-            ->orderByDesc('id')
+            ->orderByDesc('id');
+
+        $products = $productsQuery
             ->paginate(15)
             ->withQueryString();
 
@@ -60,7 +71,7 @@ class ProductController extends Controller
             ->orderBy('brand')
             ->pluck('brand');
 
-        return view('products.index', compact('products', 'statuses', 'brands'));
+        return view('products.index', compact('products', 'statuses', 'brands', 'currentBranch', 'currentBranchId'));
     }
 
     public function catalog(Request $request)
