@@ -101,6 +101,8 @@ class ProductController extends Controller
      */
     public function create()
     {
+            $this->authorize('create',Product::class);
+
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
             ->get(['id', 'name']);
@@ -138,6 +140,8 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+            $this->authorize('create',Product::class);
+
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
             'status_id' => ['required', 'exists:statuses,id'],
@@ -346,6 +350,8 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $product = Product::with('specificationValues.specification')->findOrFail($id);
+            $this->authorize('edit',$product);
+
 
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
@@ -401,6 +407,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $product = Product::findOrFail($id);
+            $this->authorize('edit',$product);
 
         $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code,'.$product->id],

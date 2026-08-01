@@ -199,6 +199,54 @@
                         </div>
                     </div>
                     </div>
+
+                    <!-- Start User Info -->
+                    @php
+                        $sidebarUser = auth()->user();
+                        $sidebarRoles = $sidebarUser->roles->pluck('name')->join(', ');
+                        $sidebarBranches = $sidebarUser->branches
+                            ->push($sidebarUser->branch)
+                            ->filter(fn ($branch) => $branch->exists)
+                            ->unique('id')
+                            ->sortBy('branch_code')
+                            ->values();
+                    @endphp
+
+                    <div class="flex-none border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                        <div class="flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/60">
+                            <span class="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/50 dark:text-primary-300">
+                                {{ $sidebarUser->avatar }}
+                            </span>
+                            <div class="min-w-0" sidebar-toggle-item>
+                                <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $sidebarUser->name }}</p>
+                                <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">{{ $sidebarRoles ?: 'No role assigned' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mx-1 my-3 border-t border-gray-200 dark:border-gray-600"></div>
+
+                        @if ($sidebarBranches->isNotEmpty())
+                            <form method="POST" action="{{ route('profile.branch.switch') }}" class="relative" sidebar-toggle-item>
+                                @csrf
+                                @method('PATCH')
+                                <i class="fas fa-building pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400"></i>
+                                <select name="branch_id"
+                                    aria-label="Current branch"
+                                    onchange="this.form.submit()"
+                                    class="block w-full cursor-pointer appearance-none border-0 bg-transparent py-2.5 pl-10 pr-9 text-sm font-medium text-gray-700 focus:ring-0 dark:text-gray-200">
+                                    @foreach ($sidebarBranches as $branch)
+                                        <option value="{{ $branch->id }}" @selected((int) $sidebarUser->branch_id === (int) $branch->id)>
+                                            {{ $branch->branch_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                            </form>
+                        @endif
+                    </div>
+                    <!-- End User Info -->
+
+
                     <div class="flex flex-none w-full justify-center p-3 space-x-4 bg-white dark:bg-gray-800" sidebar-bottom-menu>
                     <a href="#" class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"></path></svg>
@@ -281,49 +329,7 @@
                     </div>
                     </div>
 
-                    @php
-                        $sidebarUser = auth()->user();
-                        $sidebarRoles = $sidebarUser->roles->pluck('name')->join(', ');
-                        $sidebarBranches = $sidebarUser->branches
-                            ->push($sidebarUser->branch)
-                            ->filter(fn ($branch) => $branch->exists)
-                            ->unique('id')
-                            ->sortBy('branch_name')
-                            ->values();
-                    @endphp
-
-                    <div class="flex-none border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-                        <div class="flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700/60">
-                            <span class="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700 dark:bg-primary-900/50 dark:text-primary-300">
-                                {{ $sidebarUser->avatar }}
-                            </span>
-                            <div class="min-w-0" sidebar-toggle-item>
-                                <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $sidebarUser->name }}</p>
-                                <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">{{ $sidebarRoles ?: 'No role assigned' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="mx-1 my-3 border-t border-gray-200 dark:border-gray-600"></div>
-
-                        @if ($sidebarBranches->isNotEmpty())
-                            <form method="POST" action="{{ route('profile.branch.switch') }}" class="relative" sidebar-toggle-item>
-                                @csrf
-                                @method('PATCH')
-                                <i class="fas fa-building pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400"></i>
-                                <select name="branch_id"
-                                    aria-label="Current branch"
-                                    onchange="this.form.submit()"
-                                    class="block w-full cursor-pointer appearance-none border-0 bg-transparent py-2.5 pl-10 pr-9 text-sm font-medium text-gray-700 focus:ring-0 dark:text-gray-200">
-                                    @foreach ($sidebarBranches as $branch)
-                                        <option value="{{ $branch->id }}" @selected((int) $sidebarUser->branch_id === (int) $branch->id)>
-                                            {{ $branch->branch_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
-                            </form>
-                        @endif
-                    </div>
+                    
                 </div>
                 </aside>
                 
