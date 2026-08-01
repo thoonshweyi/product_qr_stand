@@ -661,7 +661,7 @@
             $message.addClass('hidden').removeClass('text-green-600 text-red-600 dark:text-green-400 dark:text-red-400').text('');
 
             $.ajax({
-                url: `${generateUrl}/${encodeURIComponent(initialProductCode)}/png`,
+                url: `${generateUrl}/${encodeURIComponent(initialProductCode)}/svg`,
                 method: 'GET',
                 dataType: 'json',
                 headers: { Accept: 'application/json' }

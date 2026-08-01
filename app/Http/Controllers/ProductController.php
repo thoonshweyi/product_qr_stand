@@ -260,7 +260,7 @@ class ProductController extends Controller
 
             // Start Generate QR
             $destinationUrl = route('products.show', $product->id);
-            $qrData = $this->generateQR($destinationUrl, $product->product_code, 'png');
+            $qrData = $this->generateQR($destinationUrl, $product->product_code, 'svg');
 
             $product->qr = $qrData['path'];
             $product->qr_destination = $destinationUrl;
@@ -497,7 +497,7 @@ class ProductController extends Controller
                 }
 
                 $destinationUrl = route('products.show', $product->id);
-                $qrData = $this->generateQR($destinationUrl, $product->product_code, 'png');
+                $qrData = $this->generateQR($destinationUrl, $product->product_code, 'svg');
                 $product->qr = $qrData['path'];
                 $product->qr_destination = $destinationUrl;
             }
@@ -638,6 +638,11 @@ class ProductController extends Controller
         if (! file_exists(dirname($absolutePath))) {
             mkdir(dirname($absolutePath), 0755, true);
         }
+        // Delete existing file if it exists
+        if (file_exists($absolutePath)) {
+            unlink($absolutePath);
+        }
+
         file_put_contents($absolutePath, $qrCode);
 
         return [
