@@ -37,6 +37,32 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
+    public function switchBranch(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'branch_id' => ['required', 'integer', 'exists:branches,id'],
+        ]);
+
+        $user = $request->user();
+        $branchId = (int) $validated['branch_id'];
+        $availableBranchIds = $user->branches()->pluck('branches.id')
+            ->push($user->branch_id)
+            ->filter()
+            ->map(fn ($id) => (int) $id);
+
+        abort_unless($availableBranchIds->contains($branchId), 403);
+
+        if ((int) $user->branch_id !== $branchId) {
+            if ($user->branch_id) {
+                $user->branches()->syncWithoutDetaching([$user->branch_id]);
+            }
+
+            $user->update(['branch_id' => $branchId]);
+        }
+
+        return Redirect::back();
+    }
+
     /**
      * Delete the user's account.
      */
