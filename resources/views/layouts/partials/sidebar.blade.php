@@ -35,6 +35,12 @@
                              <li>
                                 <a href="{{ url('/catalog/products') }}" target="_blank" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Product Catalog</a>
                             </li>
+                            
+                            @can('create', App\Models\Product::class)
+                            <li>
+                                <a href="{{ url('/specifications') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Specifications</a>
+                            </li>
+                            @endcan
                             </ul>
                         </li>
                         @endif

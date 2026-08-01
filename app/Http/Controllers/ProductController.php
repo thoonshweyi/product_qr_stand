@@ -107,6 +107,7 @@ class ProductController extends Controller
         }
 
         $specifications = Specification::orderBy('name')
+            ->where('status_id', 3)
             ->pluck('name')
             ->values();
 
@@ -352,6 +353,7 @@ class ProductController extends Controller
         }
 
         $specifications = Specification::orderBy('name')
+            ->where('status_id', 3)
             ->pluck('name')
             ->values();
 

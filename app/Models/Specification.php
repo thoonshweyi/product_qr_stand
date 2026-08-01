@@ -21,4 +21,19 @@ class Specification extends Model
     {
         return $this->hasMany(ProductSpecificationValue::class);
     }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

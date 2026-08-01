@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\BranchesController;
 use App\Http\Controllers\DashboardsController;
+use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductPrintController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\StatusesController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,9 @@ Route::middleware('auth')->group(function () {
         ->name('products.batch-print-records.store');
     Route::get('/products/{product}/print-history', [ProductPrintController::class, 'history'])
         ->name('products.print-history');
+
+    Route::resource('specifications', SpecificationController::class);
+    Route::get("/specificationsstatus",[SpecificationController::class,"changestatus"]);
 
 
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
