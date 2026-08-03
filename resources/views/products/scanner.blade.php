@@ -17,7 +17,7 @@
                     <div class="mb-5 flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">Product finder</p>
-                            <h1 id="scanner-title" class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Scan QR Code</h1>
+                            <h1 id="scanner-title" class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Scan QR or Barcode</h1>
                         </div>
                         <div id="camera-indicator" class="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 dark:bg-white/10 dark:text-slate-300 dark:ring-white/10">
                             <span id="camera-dot" class="h-2 w-2 rounded-full bg-slate-500"></span>
@@ -32,7 +32,7 @@
                                 <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 8V5.75a2 2 0 012-2H8m8 0h2.25a2 2 0 012 2V8m0 8v2.25a2 2 0 01-2 2H16m-8 0H5.75a2 2 0 01-2-2V16M8 8h3v3H8V8zm5 0h3v3h-3V8zm-5 5h3v3H8v-3zm5 0h1.5v1.5H16V16h-3v-3z"/></svg>
                             </div>
                             <p class="mt-5 font-semibold text-slate-900 dark:text-white">Camera is ready when you are</p>
-                            <p class="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">Allow camera access, then place the product QR code inside the scanning frame.</p>
+                            <p class="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">Allow camera access, then place the product QR code or barcode inside the scanning frame.</p>
                         </div>
                     </div>
 
@@ -52,7 +52,7 @@
                     <div>
                         <p class="text-xs font-bold uppercase tracking-[0.2em] text-[#0a4b91] dark:text-blue-400">How it works</p>
                         <h2 class="mt-2 text-2xl font-bold">Find your product instantly</h2>
-                        <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">Scan the QR code printed on the product card. We will verify its product code and open the matching catalog page.</p>
+                        <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">Scan the QR code or barcode printed on the product. We will verify its product code and open the matching catalog page.</p>
                     </div>
 
                     <div id="scan-status" class="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60" role="status" aria-live="polite">
@@ -92,7 +92,20 @@
     document.addEventListener('DOMContentLoaded', () => {
         const lookupUrl = @js(route('products.scan.lookup'));
         const csrfToken = @js(csrf_token());
-        const reader = new Html5Qrcode('qr-reader');
+        const reader = new Html5Qrcode('qr-reader', {
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.CODE_93,
+                Html5QrcodeSupportedFormats.ITF,
+                Html5QrcodeSupportedFormats.CODABAR,
+            ],
+        });
         const startButton = document.getElementById('start-scanner');
         const stopButton = document.getElementById('stop-scanner');
         const placeholder = document.getElementById('camera-placeholder');
@@ -185,7 +198,15 @@
             try {
                 await reader.start(
                     { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
+                    {
+                        fps: 15,
+                        qrbox: (viewfinderWidth, viewfinderHeight) => {
+                            const width = Math.min(Math.floor(viewfinderWidth * 0.88), 360);
+                            const height = Math.min(Math.floor(width * 0.5), Math.floor(viewfinderHeight * 0.6));
+
+                            return { width, height };
+                        },
+                    },
                     async (decodedText) => {
                         if (isLookingUp) return;
                         const lookup = lookupProduct(decodedText);
@@ -195,7 +216,7 @@
                     () => {}
                 );
                 setCameraState(true);
-                setStatus('info', 'Scanning…', 'Hold the QR code steady inside the square.');
+                setStatus('info', 'Scanning…', 'Hold the QR code or barcode steady inside the frame.');
             } catch (error) {
                 setCameraState(false);
                 setStatus('error', 'Camera unavailable', 'Check camera permission and make sure this page is opened over HTTPS. You can enter the code manually below.');
