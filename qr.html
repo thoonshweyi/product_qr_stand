@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+    <div style="width: 300px;" id="qr-reader"></div> <!-- QR Scanner Container -->
+    <br>
+    <label for="qr-result">Scanned Result:</label>
+    <input type="text" id="qr-result" placeholder="QR result will appear here">
+
+<!-- Working HTML5 QR Code CDN link -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+
+<!-- Input field to display the scanned QR code result -->
+<input type="text" id="qr-result" placeholder="Scan a QR Code" />
+
+<!-- Div where the camera stream will be displayed -->
+<div id="qr-scanner" style="width: 300px;"></div>
+
+<script>
+    // Function to initialize and handle the QR code scanner
+    function startQRScanner() {
+        // Create an instance of the QR code scanner and attach it to the div with id "qr-scanner"
+        const qrScanner = new Html5Qrcode("qr-scanner");
+
+        // Define the success callback when a QR code is successfully scanned
+        function onScanSuccess(decodedText, decodedResult) {
+            // decodedText: The text retrieved from the QR code
+            // decodedResult: Additional details of the decoded QR code (not always needed)
+
+            // Set the scanned QR code result into the input field with id "qr-result"
+            document.getElementById('qr-result').value = decodedText;
+
+            // Optionally, stop the QR scanner after a successful scan
+            qrScanner.stop().then(() => {
+                console.log("QR scanning stopped.");
+            }).catch((err) => {
+                console.error("Failed to stop scanning:", err);
+            });
+        }
+
+        // Define the error callback to handle cases when scanning fails
+        function onScanFailure(error) {
+            // You can log or display errors here. For example:
+            console.warn(`QR scan failed: ${error}`);
+        }
+
+        // Start the QR code scanner with the camera
+        qrScanner.start(
+            { facingMode: "environment" }, // Use the back camera (environment mode)
+            {
+                fps: 10,  // Frames per second for the scanner
+                qrbox: { width: 250, height: 250 }  // Size of the scanning box
+            },
+            onScanSuccess,
+            onScanFailure
+        ).catch((err) => {
+            // Handle the error if the QR scanner fails to start
+            console.error("Failed to start the QR scanner:", err);
+        });
+    }
+
+    // Automatically start the QR scanner when the page loads
+    window.onload = function() {
+        startQRScanner();
+    };
+</script>
+
+</body>
+</html>
+<!-- Please write javascript code for receiving QR scanner result for an input. -->
