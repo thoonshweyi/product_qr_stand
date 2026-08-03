@@ -30,11 +30,13 @@
         $mainImageSize = @getimagesize($mainImagePath);
         $mainImageIsPortrait = $mainImageSize && $mainImageSize[1] > $mainImageSize[0];
     }
+
+    $isHouseBrand = filled($product->brand_icon) && false;
 @endphp
 
 <div class="product-page min-h-screen bg-slate-200 py-0 text-slate-950 sm:px-4 sm:py-6">
     <article class="product-sheet relative mx-auto w-full max-w-[1180px] overflow-hidden border-[10px] border-[#073b78] bg-white shadow-xl sm:border-[14px] mt-20">
-        @if (filled($product->brand_icon))
+        @if ($isHouseBrand)
             <header class="product-print-header bg-white px-4 pb-3 pt-3 sm:px-7 sm:pb-4">
                 <div class="flex items-center justify-between gap-6">
                     <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}"
@@ -125,7 +127,7 @@
                      class="pointer-events-none absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 opacity-[0.055] grayscale">
 
                 <div class="relative">
-                    @unless (filled($product->brand_icon))
+                    @unless ($isHouseBrand)
                     <div class="mb-3">
                         <h2 class="text-base font-extrabold uppercase sm:text-xl">
                             Product Description <span class="normal-case">(ထုတ်ကုန်အကြောင်း)</span>
