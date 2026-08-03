@@ -37,3 +37,33 @@
         </ul>
     </div>
 </nav>
+
+<script>
+    (() => {
+        const button = document.getElementById('catalog-menu-button');
+        const menu = document.getElementById('catalog-menu');
+        const openIcon = document.getElementById('catalog-menu-open-icon');
+        const closeIcon = document.getElementById('catalog-menu-close-icon');
+
+        if (!button || !menu || !openIcon || !closeIcon) return;
+
+        const setMenuOpen = (isOpen) => {
+            menu.classList.toggle('hidden', !isOpen);
+            openIcon.classList.toggle('hidden', isOpen);
+            closeIcon.classList.toggle('hidden', !isOpen);
+            button.setAttribute('aria-expanded', String(isOpen));
+        };
+
+        button.addEventListener('click', () => {
+            setMenuOpen(button.getAttribute('aria-expanded') !== 'true');
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') setMenuOpen(false);
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) setMenuOpen(false);
+        });
+    })();
+</script>

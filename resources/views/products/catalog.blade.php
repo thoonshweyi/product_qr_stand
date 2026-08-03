@@ -67,17 +67,3 @@
     </main>
 </div>
 @endsection
-
-@section('scripts')
-<script>
-    $(document).ready(function () {
-        $('#catalog-menu-button').on('click', function () {
-            const isOpen = !$('#catalog-menu').hasClass('hidden');
-            $('#catalog-menu').toggleClass('hidden', isOpen);
-            $('#catalog-menu-open-icon').toggleClass('hidden', !isOpen);
-            $('#catalog-menu-close-icon').toggleClass('hidden', isOpen);
-            $(this).attr('aria-expanded', String(!isOpen));
-        });
-    });
-</script>
-@endsection
