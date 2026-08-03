@@ -27,10 +27,12 @@
         $mainImageSize = @getimagesize($mainImagePath);
         $mainImageIsPortrait = $mainImageSize && $mainImageSize[1] > $mainImageSize[0];
     }
+
+    $isHouseBrand = filled($product->brand_icon) && false;
 @endphp
 
 <article class="product-sheet">
-    @if (filled($product->brand_icon))
+    @if ($isHouseBrand)
         <header class="sheet-header sheet-header-brand">
             <div class="brand-row">
                 <img src="{{ asset('assets/img/icon/pro1globalicon.png') }}" alt="PRO 1 Global Home Center">
@@ -58,7 +60,7 @@
         <section class="sheet-details">
             <img src="{{ asset($brandImage) }}" alt="" class="sheet-watermark">
             <div class="sheet-details-body">
-                @unless (filled($product->brand_icon))
+                @unless ($isHouseBrand)
                     <h2>Product Description <span>(ထုတ်ကုန်အကြောင်း)</span></h2>
                 @endunless
 
