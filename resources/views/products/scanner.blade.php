@@ -189,6 +189,12 @@
                 setStatus('error', 'Product not found', error.message);
                 isLookingUp = false;
                 findButton.disabled = false;
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Product Not Found!!",
+                    text: `${error.message}`,
+                });
             }
         };
 

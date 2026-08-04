@@ -132,7 +132,7 @@ class ProductController extends Controller
 
         if (! $product) {
             return response()->json([
-                'message' => 'This product is not available in the catalog.',
+                'message' => "This product '$scannedValue' is not available in the catalog.",
             ], 404);
         }
 
