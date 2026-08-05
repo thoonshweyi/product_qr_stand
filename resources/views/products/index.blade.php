@@ -139,16 +139,22 @@
                                     <i class="fas fa-circle-exclamation mr-1.5"></i>
                                     No branch
                                 </span>
-                            @elseif ($product->current_branch_last_printed_at)
-                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300"
-                                    title="Printed at {{ $product->current_branch_last_printed_at }}">
-                                    <i class="fas fa-circle-check mr-1.5"></i>
-                                    Printed
-                                </span>
-                            @else
+                            @elseif (! $product->current_branch_last_printed_version)
                                 <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
                                     <i class="fas fa-clock mr-1.5"></i>
                                     Not printed
+                                </span>
+                            @elseif ((int) $product->current_branch_last_printed_version < (int) $product->print_version)
+                                <span class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
+                                    title="Printed version {{ $product->current_branch_last_printed_version }}; current version {{ $product->print_version }}">
+                                    <i class="fas fa-rotate mr-1.5"></i>
+                                    Reprint required
+                                </span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                                    title="Printed at {{ $product->current_branch_last_printed_at }}">
+                                    <i class="fas fa-circle-check mr-1.5"></i>
+                                    Printed · v{{ $product->print_version }}
                                 </span>
                             @endif
                         </td>

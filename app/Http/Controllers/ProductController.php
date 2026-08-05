@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Country;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductEditLog;
 use App\Models\ProductSpecificationValue;
 use App\Models\Specification;
 use App\Models\Status;
@@ -40,6 +41,11 @@ class ProductController extends Controller
                         ->where('branch_id', $currentBranchId)
                         ->where('status', 'printed'),
                 ], 'printed_at');
+                $query->withMax([
+                    'printRecords as current_branch_last_printed_version' => fn ($query) => $query
+                        ->where('branch_id', $currentBranchId)
+                        ->where('status', 'printed'),
+                ], 'product_version');
             })
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
@@ -492,6 +498,9 @@ class ProductController extends Controller
 
         try {
             $oldProductCode = $product->product_code;
+            $product->load('specificationValues.specification');
+            $oldPrintSnapshot = $this->productPrintSnapshot($product);
+            $fromVersion = (int) $product->print_version;
 
             $product->update([
                 // 'product_code' => $request->product_code,
@@ -555,6 +564,27 @@ class ProductController extends Controller
             }
 
             $product->save();
+
+            $product->refresh()->load('specificationValues.specification');
+            $newPrintSnapshot = $this->productPrintSnapshot($product);
+
+            if ($oldPrintSnapshot !== $newPrintSnapshot) {
+                $product->increment('print_version');
+                $product->refresh();
+
+                ProductEditLog::create([
+                    'product_id' => $product->id,
+                    'user_id' => $request->user()?->id,
+                    'branch_id' => $request->user()?->branch_id,
+                    'from_version' => $fromVersion,
+                    'to_version' => $product->print_version,
+                    'old_values' => $oldPrintSnapshot,
+                    'new_values' => $newPrintSnapshot,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            }
+
             DB::commit();
 
             return $this->sendRespond($product, 'Product updated successfully');
@@ -567,6 +597,32 @@ class ProductController extends Controller
                 'message' => 'There is an error in updating product.',
             ], 500);
         }
+    }
+
+    private function productPrintSnapshot(Product $product): array
+    {
+        return [
+            'product_code' => $product->product_code,
+            'name' => $product->name,
+            'product_name' => $product->product_name,
+            'brand' => $product->brand,
+            'model' => $product->model,
+            'category_id' => $product->category_id,
+            'country_of_origin' => $product->country_of_origin,
+            'description' => $product->description,
+            'status_id' => $product->status_id,
+            'main_image' => $product->image,
+            'thumbnail_image' => $product->thumbnail,
+            'brand_icon' => $product->brand_icon,
+            'specifications' => $product->specificationValues
+                ->map(fn ($value) => [
+                    'name' => $value->specification?->name,
+                    'value' => $value->value,
+                ])
+                ->sortBy(fn ($value) => ($value['name'] ?? '').'|'.($value['value'] ?? ''))
+                ->values()
+                ->all(),
+        ];
     }
 
     /**
@@ -705,9 +761,40 @@ class ProductController extends Controller
     }
 
     public function changestatus(Request $request){
+        $request->validate([
+            'id' => ['required', 'integer', 'exists:products,id'],
+            'status_id' => ['required', 'integer', 'exists:statuses,id'],
+        ]);
+
         $product = Product::findOrFail($request["id"]);
+        $this->authorize('edit', $product);
+
+        if ((int) $product->status_id === (int) $request['status_id']) {
+            return response()->json(["success"=>"Status Change Successfully"]);
+        }
+
+        $product->load('specificationValues.specification');
+        $oldPrintSnapshot = $this->productPrintSnapshot($product);
+        $fromVersion = (int) $product->print_version;
+
         $product->status_id = $request["status_id"];
+        $product->print_version = $fromVersion + 1;
+        $product->user_id = $request->user()?->id;
         $product->save();
+
+        $product->load('specificationValues.specification');
+
+        ProductEditLog::create([
+            'product_id' => $product->id,
+            'user_id' => $request->user()?->id,
+            'branch_id' => $request->user()?->branch_id,
+            'from_version' => $fromVersion,
+            'to_version' => $product->print_version,
+            'old_values' => $oldPrintSnapshot,
+            'new_values' => $this->productPrintSnapshot($product),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return response()->json(["success"=>"Status Change Successfully"]);
     }

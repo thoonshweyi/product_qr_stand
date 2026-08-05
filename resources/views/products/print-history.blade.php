@@ -38,9 +38,11 @@
         <div class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
             @forelse ($branches as $branch)
                 @php($summary = $summaryByBranch->get($branch->id))
+                @php($requiresReprint = $summary && (int) $summary->last_printed_version < (int) $product->print_version)
                 <article @class([
                     'rounded-xl border p-4',
-                    'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' => $summary,
+                    'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' => $summary && ! $requiresReprint,
+                    'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20' => $requiresReprint,
                     'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/30' => ! $summary,
                 ])>
                     <div class="flex items-start justify-between gap-3">
@@ -50,10 +52,11 @@
                         </div>
                         <span @class([
                             'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
-                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' => $summary,
+                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' => $summary && ! $requiresReprint,
+                            'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' => $requiresReprint,
                             'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' => ! $summary,
                         ])>
-                            {{ $summary ? 'Printed' : 'Not printed' }}
+                            {{ ! $summary ? 'Not printed' : ($requiresReprint ? 'Reprint required' : 'Printed') }}
                         </span>
                     </div>
 
@@ -61,6 +64,7 @@
                         <p class="mt-4 text-xs text-gray-600 dark:text-gray-300">
                             {{ $summary->print_count }} {{ Str::plural('print', $summary->print_count) }}
                             · Last {{ \Illuminate\Support\Carbon::parse($summary->last_printed_at)->diffForHumans() }}
+                            · v{{ $summary->last_printed_version }}/v{{ $product->print_version }}
                         </p>
                     @else
                         <p class="mt-4 text-xs text-gray-400">No print record yet</p>
@@ -85,6 +89,7 @@
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">No.</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Branch</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Printed by</th>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Version</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Printed at</th>
                     </tr>
                 </thead>
@@ -100,6 +105,9 @@
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $record->user?->name ?? 'Unknown user' }}</p>
                                 <p class="text-xs text-gray-500">{{ $record->user?->employee_id }}</p>
                             </td>
+                            <td class="whitespace-nowrap p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                v{{ $record->product_version }}
+                            </td>
                             <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">
                                 <p>{{ $record->printed_at?->format('d M Y, h:i A') ?? '—' }}</p>
                                 <p class="text-xs text-gray-500">{{ $record->printed_at?->diffForHumans() }}</p>
@@ -107,7 +115,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-10 text-center text-sm text-gray-500">This product has not been printed yet.</td>
+                            <td colspan="5" class="p-10 text-center text-sm text-gray-500">This product has not been printed yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -117,6 +125,51 @@
         @if ($printRecords->hasPages())
             <div class="border-t border-gray-200 p-4 dark:border-gray-700">{{ $printRecords->links() }}</div>
         @endif
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-white">Product edit activity</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Print-related changes that created a new product version.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Version</th>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Edited by</th>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Branch</th>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Edited at</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($editLogs as $log)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="whitespace-nowrap p-4">
+                                <span class="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800">v{{ $log->from_version }} → v{{ $log->to_version }}</span>
+                            </td>
+                            <td class="whitespace-nowrap p-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->user?->name ?? 'Unknown user' }}</p>
+                                <p class="text-xs text-gray-500">{{ $log->user?->employee_id }}</p>
+                            </td>
+                            <td class="whitespace-nowrap p-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->branch?->branch_name ?? 'Unassigned branch' }}</p>
+                                <p class="text-xs text-gray-500">{{ $log->branch?->branch_code }}</p>
+                            </td>
+                            <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">
+                                <p>{{ $log->created_at?->format('d M Y, h:i A') }}</p>
+                                <p class="text-xs text-gray-500">{{ $log->created_at?->diffForHumans() }}</p>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="p-10 text-center text-sm text-gray-500">No versioned product edits yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>
 @endsection

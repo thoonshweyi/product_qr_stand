@@ -5,30 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductPrintRecord extends Model
+class ProductEditLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'product_id',
-        'product_version',
         'user_id',
         'branch_id',
-        'print_reference',
-        'product_code',
-        'product_name',
-        'print_url',
-        'status',
+        'from_version',
+        'to_version',
+        'old_values',
+        'new_values',
         'ip_address',
         'user_agent',
-        'print_started_at',
-        'printed_at',
     ];
 
     protected $casts = [
-        'product_version' => 'integer',
-        'print_started_at' => 'datetime',
-        'printed_at' => 'datetime',
+        'old_values' => 'array',
+        'new_values' => 'array',
     ];
 
     public function product()

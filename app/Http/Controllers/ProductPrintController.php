@@ -15,6 +15,7 @@ class ProductPrintController extends Controller
         $record = $product->printRecords()->create([
             'user_id' => $request->user()?->id,
             'branch_id' => $request->user()?->branch_id,
+            'product_version' => $product->print_version,
             'print_reference' => (string) Str::uuid(),
             'product_code' => $product->product_code,
             'product_name' => $product->name,
@@ -68,6 +69,7 @@ class ProductPrintController extends Controller
             $product->printRecords()->create([
                 'user_id' => $user?->id,
                 'branch_id' => $user?->branch_id,
+                'product_version' => $product->print_version,
                 'print_reference' => (string) Str::uuid(),
                 'product_code' => $product->product_code,
                 'product_name' => $product->name,
@@ -96,7 +98,7 @@ class ProductPrintController extends Controller
         $summaryByBranch = $product->printRecords()
             ->where('status', 'printed')
             ->whereNotNull('branch_id')
-            ->selectRaw('branch_id, COUNT(*) as print_count, MAX(printed_at) as last_printed_at')
+            ->selectRaw('branch_id, COUNT(*) as print_count, MAX(printed_at) as last_printed_at, MAX(product_version) as last_printed_version')
             ->groupBy('branch_id')
             ->get()
             ->keyBy('branch_id');
@@ -110,11 +112,21 @@ class ProductPrintController extends Controller
             ->latest('printed_at')
             ->paginate(25);
 
+        $editLogs = $product->editLogs()
+            ->with([
+                'branch:id,branch_name,branch_code,branch_short_name',
+                'user:id,name,employee_id',
+            ])
+            ->latest()
+            ->limit(25)
+            ->get();
+
         return view('products.print-history', compact(
             'product',
             'branches',
             'summaryByBranch',
             'printRecords',
+            'editLogs',
         ));
     }
 }

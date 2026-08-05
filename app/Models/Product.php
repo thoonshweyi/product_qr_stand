@@ -9,6 +9,10 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'print_version' => 'integer',
+    ];
+
     protected $fillable = [
         'product_code',
         'brand',
@@ -27,6 +31,7 @@ class Product extends Model
         'qr',
         'brand_icon',
         'qr_destination',
+        'print_version',
     ];
 
     public function specificationValues()
@@ -42,6 +47,11 @@ class Product extends Model
     public function printRecords()
     {
         return $this->hasMany(ProductPrintRecord::class);
+    }
+
+    public function editLogs()
+    {
+        return $this->hasMany(ProductEditLog::class);
     }
 
     public function status()
