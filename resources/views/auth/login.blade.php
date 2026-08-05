@@ -51,6 +51,58 @@
                 Not registered? <a class="text-primary-700 hover:underline dark:text-primary-500">Create account</a>
             </div> -->
         </form>
+
+        <div id="pwa-install-panel" class="hidden border-t border-gray-200 pt-6 dark:border-gray-700">
+            <div class="flex flex-col gap-4 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300">
+                        <i class="fas fa-download"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Install Product QR Stand</p>
+                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Open the platform quickly from your device.</p>
+                    </div>
+                </div>
+                <button id="pwa-install-button" type="button"
+                    class="inline-flex items-center justify-center rounded-lg border border-primary-700 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50 focus:outline-none focus:ring-4 focus:ring-primary-200 dark:border-primary-400 dark:text-primary-300 dark:hover:bg-gray-700">
+                    <i class="fas fa-download mr-2"></i>
+                    Install
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    (() => {
+        const panel = document.getElementById('pwa-install-panel');
+        const button = document.getElementById('pwa-install-button');
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+
+        const syncInstallButton = () => {
+            panel.classList.toggle('hidden', isInstalled || !window.pwaInstallPrompt);
+        };
+
+        window.addEventListener('pwa-install-available', syncInstallButton);
+        window.addEventListener('pwa-install-complete', () => panel.classList.add('hidden'));
+
+        button.addEventListener('click', async () => {
+            const prompt = window.pwaInstallPrompt;
+
+            if (!prompt) {
+                return;
+            }
+
+            prompt.prompt();
+            await prompt.userChoice;
+            window.pwaInstallPrompt = null;
+            panel.classList.add('hidden');
+        });
+
+        syncInstallButton();
+    })();
+</script>
 @endsection
