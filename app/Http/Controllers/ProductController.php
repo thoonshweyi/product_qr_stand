@@ -722,31 +722,35 @@ class ProductController extends Controller
         $fromVersion = (int) $product->print_version;
         $destinationUrl = route('products.show', $product->id);
         $qrData = $this->generateQR($destinationUrl, $product->product_code, $format);
+        $productWasUpdated = $product->qr !== $qrData['path']
+            || $product->qr_destination !== $destinationUrl;
 
-        DB::transaction(function () use ($request, $product, $qrData, $destinationUrl, $oldPrintSnapshot, $fromVersion) {
-            $product->update([
-                'qr' => $qrData['path'],
-                'qr_destination' => $destinationUrl,
-                'print_version' => $fromVersion + 1,
-                'user_id' => $request->user()?->id,
-            ]);
+        if ($productWasUpdated) {
+            DB::transaction(function () use ($request, $product, $qrData, $destinationUrl, $oldPrintSnapshot, $fromVersion) {
+                $product->update([
+                    'qr' => $qrData['path'],
+                    'qr_destination' => $destinationUrl,
+                    'print_version' => $fromVersion + 1,
+                    'user_id' => $request->user()?->id,
+                ]);
 
-            $product->load('specificationValues.specification');
-            $newPrintSnapshot = $this->productPrintSnapshot($product);
-            $newPrintSnapshot['qr_regenerated_at'] = now()->toIso8601String();
+                $product->load('specificationValues.specification');
+                $newPrintSnapshot = $this->productPrintSnapshot($product);
+                $newPrintSnapshot['qr_regenerated_at'] = now()->toIso8601String();
 
-            ProductEditLog::create([
-                'product_id' => $product->id,
-                'user_id' => $request->user()?->id,
-                'branch_id' => $request->user()?->branch_id,
-                'from_version' => $fromVersion,
-                'to_version' => $product->print_version,
-                'old_values' => $oldPrintSnapshot,
-                'new_values' => $newPrintSnapshot,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        });
+                ProductEditLog::create([
+                    'product_id' => $product->id,
+                    'user_id' => $request->user()?->id,
+                    'branch_id' => $request->user()?->branch_id,
+                    'from_version' => $fromVersion,
+                    'to_version' => $product->print_version,
+                    'old_values' => $oldPrintSnapshot,
+                    'new_values' => $newPrintSnapshot,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            });
+        }
 
         return response()->json([
             'success' => true,
@@ -755,6 +759,7 @@ class ProductController extends Controller
                 ...$qrData,
                 'destination_url' => $destinationUrl,
                 'print_version' => $product->print_version,
+                'product_updated' => $productWasUpdated,
             ],
         ]);
     }
