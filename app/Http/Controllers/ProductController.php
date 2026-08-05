@@ -614,6 +614,8 @@ class ProductController extends Controller
             'main_image' => $product->image,
             'thumbnail_image' => $product->thumbnail,
             'brand_icon' => $product->brand_icon,
+            'qr' => $product->qr,
+            'qr_destination' => $product->qr_destination,
             'specifications' => $product->specificationValues
                 ->map(fn ($value) => [
                     'name' => $value->specification?->name,
@@ -708,18 +710,43 @@ class ProductController extends Controller
         }
     }
 
-    public function generateProductQR(string $text, string $format = 'png')
+    public function generateProductQR(Request $request, string $text, string $format = 'png')
     {
         abort_unless(in_array($format, ['png', 'svg'], true), 404);
 
         $product = Product::where('product_code', $text)->firstOrFail();
+        $this->authorize('edit', $product);
+
+        $product->load('specificationValues.specification');
+        $oldPrintSnapshot = $this->productPrintSnapshot($product);
+        $fromVersion = (int) $product->print_version;
         $destinationUrl = route('products.show', $product->id);
         $qrData = $this->generateQR($destinationUrl, $product->product_code, $format);
 
-        $product->update([
-            'qr' => $qrData['path'],
-            'qr_destination' => $destinationUrl,
-        ]);
+        DB::transaction(function () use ($request, $product, $qrData, $destinationUrl, $oldPrintSnapshot, $fromVersion) {
+            $product->update([
+                'qr' => $qrData['path'],
+                'qr_destination' => $destinationUrl,
+                'print_version' => $fromVersion + 1,
+                'user_id' => $request->user()?->id,
+            ]);
+
+            $product->load('specificationValues.specification');
+            $newPrintSnapshot = $this->productPrintSnapshot($product);
+            $newPrintSnapshot['qr_regenerated_at'] = now()->toIso8601String();
+
+            ProductEditLog::create([
+                'product_id' => $product->id,
+                'user_id' => $request->user()?->id,
+                'branch_id' => $request->user()?->branch_id,
+                'from_version' => $fromVersion,
+                'to_version' => $product->print_version,
+                'old_values' => $oldPrintSnapshot,
+                'new_values' => $newPrintSnapshot,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        });
 
         return response()->json([
             'success' => true,
@@ -727,6 +754,7 @@ class ProductController extends Controller
             'data' => [
                 ...$qrData,
                 'destination_url' => $destinationUrl,
+                'print_version' => $product->print_version,
             ],
         ]);
     }

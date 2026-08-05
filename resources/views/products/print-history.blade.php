@@ -138,6 +138,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Version</th>
+                        <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Change</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Edited by</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Branch</th>
                         <th class="p-4 text-left text-xs font-semibold uppercase text-gray-500">Edited at</th>
@@ -148,6 +149,13 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="whitespace-nowrap p-4">
                                 <span class="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800">v{{ $log->from_version }} → v{{ $log->to_version }}</span>
+                            </td>
+                            <td class="whitespace-nowrap p-4 text-sm font-medium text-gray-700 dark:text-gray-200">
+                                @if (isset($log->new_values['qr_regenerated_at']))
+                                    <i class="fas fa-qrcode mr-1.5 text-primary-600"></i>QR generated
+                                @else
+                                    <i class="fas fa-pen mr-1.5 text-gray-400"></i>Product edited
+                                @endif
                             </td>
                             <td class="whitespace-nowrap p-4">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->user?->name ?? 'Unknown user' }}</p>
@@ -164,7 +172,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-10 text-center text-sm text-gray-500">No versioned product edits yet.</td>
+                            <td colspan="5" class="p-10 text-center text-sm text-gray-500">No versioned product edits yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
