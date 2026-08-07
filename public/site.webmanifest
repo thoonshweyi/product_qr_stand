@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Product QR Stand",
-  "short_name": "QR Stand",
+  "name": "Product Information",
+  "short_name": "Product Info",
   "description": "Create, manage and print product QR information sheets.",
   "start_url": "/",
   "scope": "/",

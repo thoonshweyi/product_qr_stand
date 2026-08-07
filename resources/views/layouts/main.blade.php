@@ -8,7 +8,7 @@
             <meta name="author" content="">
             <meta name="generator" content="Hugo">
 
-            <title>Product QR Stand</title>
+            <title>Product Information</title>
 
             <!-- Start Stylesheet -->
                 <!-- <link rel="preconnect" href="https://fonts.googleapis.com">

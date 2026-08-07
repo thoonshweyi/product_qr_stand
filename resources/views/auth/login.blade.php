@@ -6,7 +6,7 @@
 <div class="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
     <a href="" class="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white">
         <img src="{{ asset('assets/img/fav/myfav.png') }}" class="mr-4 h-16" alt="Product QR Stand Logo">
-        <span>Product QR Stand</span>  
+        <span>Product Information/span>  
     </a>
     <!-- Card -->
     <div class="w-full max-w-xl p-6 space-y-8 sm:p-8 bg-white rounded-lg shadow dark:bg-gray-800">
@@ -59,7 +59,7 @@
                         <i class="fas fa-download"></i>
                     </span>
                     <div>
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Install Product QR Stand</p>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Install Information</p>
                         <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Open the platform quickly from your device.</p>
                     </div>
                 </div>
