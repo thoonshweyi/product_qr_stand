@@ -37,13 +37,19 @@
                     </div>
 
                     <div id="camera-zoom-controls" class="mt-4 hidden rounded-xl border border-blue-100 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-magnifying-glass-plus text-sm text-blue-700 dark:text-blue-300"></i>
-                            <label for="camera-zoom" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Camera zoom</label>
-                            <input id="camera-zoom" type="range" class="h-2 min-w-0 flex-1 cursor-pointer accent-blue-700">
-                            <output id="camera-zoom-value" for="camera-zoom" class="w-10 text-right text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200">1.0×</output>
+                        <div id="camera-zoom-slider">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-magnifying-glass-plus text-sm text-blue-700 dark:text-blue-300"></i>
+                                <label for="camera-zoom" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Camera zoom</label>
+                                <input id="camera-zoom" type="range" class="h-2 min-w-0 flex-1 cursor-pointer accent-blue-700">
+                                <output id="camera-zoom-value" for="camera-zoom" class="w-10 text-right text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200">1.0×</output>
+                            </div>
+                            <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Increase zoom until the small barcode fills the scanning frame and looks sharp.</p>
                         </div>
-                        <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Increase zoom until the small barcode fills most of the camera view and looks sharp.</p>
+                        <div id="camera-zoom-unsupported" class="hidden items-center justify-center gap-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <i class="fas fa-circle-info"></i>
+                            This camera does not support zoom.
+                        </div>
                     </div>
 
                     <div class="mt-5 flex flex-wrap justify-center gap-3">
@@ -131,6 +137,8 @@
         const cameraDot = document.getElementById('camera-dot');
         const cameraLabel = document.getElementById('camera-label');
         const zoomControls = document.getElementById('camera-zoom-controls');
+        const zoomSlider = document.getElementById('camera-zoom-slider');
+        const zoomUnsupported = document.getElementById('camera-zoom-unsupported');
         const zoomInput = document.getElementById('camera-zoom');
         const zoomValue = document.getElementById('camera-zoom-value');
         let isRunning = false;
@@ -188,7 +196,10 @@
                 const zoom = capabilities?.zoom;
 
                 if (!zoom || typeof zoom.min !== 'number' || typeof zoom.max !== 'number' || zoom.max <= zoom.min) {
-                    zoomControls.classList.add('hidden');
+                    zoomControls.classList.remove('hidden');
+                    zoomSlider.classList.add('hidden');
+                    zoomUnsupported.classList.remove('hidden');
+                    zoomUnsupported.classList.add('flex');
                     return;
                 }
 
@@ -202,9 +213,15 @@
                 zoomInput.step = zoom.step || 0.1;
                 zoomInput.value = automaticZoom;
                 zoomControls.classList.remove('hidden');
+                zoomSlider.classList.remove('hidden');
+                zoomUnsupported.classList.add('hidden');
+                zoomUnsupported.classList.remove('flex');
                 await applyCameraZoom(automaticZoom);
             } catch (error) {
-                zoomControls.classList.add('hidden');
+                zoomControls.classList.remove('hidden');
+                zoomSlider.classList.add('hidden');
+                zoomUnsupported.classList.remove('hidden');
+                zoomUnsupported.classList.add('flex');
                 console.warn('Unable to read camera zoom capabilities.', error);
             }
         };
@@ -275,6 +292,12 @@
                             height: { ideal: 1080 },
                             focusMode: { ideal: 'continuous' },
                         },
+                        qrbox: (viewfinderWidth, viewfinderHeight) => {
+                            const width = Math.min(Math.floor(viewfinderWidth * 0.88), 360);
+                            const height = Math.min(Math.floor(width * 0.5), Math.floor(viewfinderHeight * 0.6));
+
+                            return { width, height };
+                        },
                     },
                     async (decodedText) => {
                         if (isLookingUp) return;
@@ -286,7 +309,7 @@
                 );
                 setCameraState(true);
                 await configureCameraZoom();
-                setStatus('info', 'Scanning…', 'Move closer or adjust zoom until the barcode is sharp and fills most of the camera view.');
+                setStatus('info', 'Scanning…', 'Hold the code steady inside the frame. Use zoom for very small barcodes.');
             } catch (error) {
                 setCameraState(false);
                 setStatus('error', 'Camera unavailable', 'Check camera permission and make sure this page is opened over HTTPS. You can enter the code manually below.');
