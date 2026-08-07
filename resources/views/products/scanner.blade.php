@@ -1,5 +1,23 @@
 @extends('layouts.main')
 
+@section('css')
+<style>
+    #qr-reader,
+    #qr-reader__scan_region {
+        width: 100% !important;
+        height: 100% !important;
+        border: 0 !important;
+    }
+
+    #qr-reader video {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50 pb-16 pt-28 text-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-white">
     <main class="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -25,7 +43,7 @@
                         </div>
                     </div>
 
-                    <div class="relative min-h-[320px] overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-inner ring-4 ring-white sm:min-h-[400px] dark:border-white/10 dark:bg-slate-900 dark:ring-slate-800">
+                    <div class="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-inner ring-4 ring-white sm:aspect-[5/4] dark:border-white/10 dark:bg-slate-900 dark:ring-slate-800">
                         <div id="qr-reader" class="h-full w-full"></div>
                         <div id="camera-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white to-blue-50 px-8 text-center dark:from-slate-900 dark:to-slate-950">
                             <div class="flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-100 text-blue-700 ring-1 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/30">
@@ -284,14 +302,7 @@
                 await reader.start(
                     { facingMode: 'environment' },
                     {
-                        fps: 20,
-                        disableFlip: true,
-                        videoConstraints: {
-                            facingMode: { ideal: 'environment' },
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 },
-                            focusMode: { ideal: 'continuous' },
-                        },
+                        fps: 15,
                         qrbox: (viewfinderWidth, viewfinderHeight) => {
                             const width = Math.min(Math.floor(viewfinderWidth * 0.88), 360);
                             const height = Math.min(Math.floor(width * 0.5), Math.floor(viewfinderHeight * 0.6));
