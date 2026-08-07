@@ -36,6 +36,16 @@
                         </div>
                     </div>
 
+                    <div id="camera-zoom-controls" class="mt-4 hidden rounded-xl border border-blue-100 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-magnifying-glass-plus text-sm text-blue-700 dark:text-blue-300"></i>
+                            <label for="camera-zoom" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Camera zoom</label>
+                            <input id="camera-zoom" type="range" class="h-2 min-w-0 flex-1 cursor-pointer accent-blue-700">
+                            <output id="camera-zoom-value" for="camera-zoom" class="w-10 text-right text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200">1.0×</output>
+                        </div>
+                        <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Increase zoom until the small barcode fills most of the camera view and looks sharp.</p>
+                    </div>
+
                     <div class="mt-5 flex flex-wrap justify-center gap-3">
                         <button id="start-scanner" type="button" class="inline-flex min-w-[160px] items-center justify-center gap-2 rounded-xl bg-[#073b78] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:-translate-y-0.5 hover:bg-[#0a4b91] focus:outline-none focus:ring-4 focus:ring-blue-400/30">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55-2.275A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
@@ -105,6 +115,9 @@
                 Html5QrcodeSupportedFormats.ITF,
                 Html5QrcodeSupportedFormats.CODABAR,
             ],
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true,
+            },
         });
         const startButton = document.getElementById('start-scanner');
         const stopButton = document.getElementById('stop-scanner');
@@ -117,8 +130,12 @@
         const statusMessage = document.getElementById('status-message');
         const cameraDot = document.getElementById('camera-dot');
         const cameraLabel = document.getElementById('camera-label');
+        const zoomControls = document.getElementById('camera-zoom-controls');
+        const zoomInput = document.getElementById('camera-zoom');
+        const zoomValue = document.getElementById('camera-zoom-value');
         let isRunning = false;
         let isLookingUp = false;
+        let zoomUpdateTimer = null;
 
         const setStatus = (type, title, message) => {
             const styles = {
@@ -150,8 +167,53 @@
                 console.error('Unable to stop QR scanner.', error);
             } finally {
                 setCameraState(false);
+                zoomControls.classList.add('hidden');
             }
         };
+
+        const applyCameraZoom = async (zoom) => {
+            const value = Number(zoom);
+            zoomValue.value = `${value.toFixed(1)}×`;
+
+            try {
+                await reader.applyVideoConstraints({ advanced: [{ zoom: value }] });
+            } catch (error) {
+                console.warn('Camera zoom is not available.', error);
+            }
+        };
+
+        const configureCameraZoom = async () => {
+            try {
+                const capabilities = reader.getRunningTrackCapabilities();
+                const zoom = capabilities?.zoom;
+
+                if (!zoom || typeof zoom.min !== 'number' || typeof zoom.max !== 'number' || zoom.max <= zoom.min) {
+                    zoomControls.classList.add('hidden');
+                    return;
+                }
+
+                const automaticZoom = Math.min(
+                    zoom.max,
+                    Math.max(zoom.min, Math.min(2.5, zoom.min + ((zoom.max - zoom.min) * 0.45)))
+                );
+
+                zoomInput.min = zoom.min;
+                zoomInput.max = zoom.max;
+                zoomInput.step = zoom.step || 0.1;
+                zoomInput.value = automaticZoom;
+                zoomControls.classList.remove('hidden');
+                await applyCameraZoom(automaticZoom);
+            } catch (error) {
+                zoomControls.classList.add('hidden');
+                console.warn('Unable to read camera zoom capabilities.', error);
+            }
+        };
+
+        zoomInput.addEventListener('input', () => {
+            zoomValue.value = `${Number(zoomInput.value).toFixed(1)}×`;
+            window.clearTimeout(zoomUpdateTimer);
+            zoomUpdateTimer = window.setTimeout(() => applyCameraZoom(zoomInput.value), 80);
+        });
 
         const lookupProduct = async (rawCode) => {
             const code = rawCode.trim();
@@ -205,12 +267,13 @@
                 await reader.start(
                     { facingMode: 'environment' },
                     {
-                        fps: 15,
-                        qrbox: (viewfinderWidth, viewfinderHeight) => {
-                            const width = Math.min(Math.floor(viewfinderWidth * 0.88), 360);
-                            const height = Math.min(Math.floor(width * 0.5), Math.floor(viewfinderHeight * 0.6));
-
-                            return { width, height };
+                        fps: 20,
+                        disableFlip: true,
+                        videoConstraints: {
+                            facingMode: { ideal: 'environment' },
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            focusMode: { ideal: 'continuous' },
                         },
                     },
                     async (decodedText) => {
@@ -222,7 +285,8 @@
                     () => {}
                 );
                 setCameraState(true);
-                setStatus('info', 'Scanning…', 'Hold the QR code or barcode steady inside the frame.');
+                await configureCameraZoom();
+                setStatus('info', 'Scanning…', 'Move closer or adjust zoom until the barcode is sharp and fills most of the camera view.');
             } catch (error) {
                 setCameraState(false);
                 setStatus('error', 'Camera unavailable', 'Check camera permission and make sure this page is opened over HTTPS. You can enter the code manually below.');

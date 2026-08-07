@@ -27,3 +27,22 @@ import '../css/app.css';
 =>Load Vite in Blade
 resources/views/layouts/app.blade.php, put this inside <head>:
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+------------------------------------------------------------------------------
+
+These are results for gainscha GS-2406T paper size
+Search instead for gainscha GE-2406T paper size
+AI Overview
+Gainscha GS-2406T 4 Inch TT Barcode Printer | Dream TechThe Gainscha GS-2406T barcode printer supports a media width of 20 mm to 118 mm (0.7" to 4.6"), a maximum print width of 104 mm (4.09"), and a maximum print length up to 2,794 mm (110"). 
+
+Gainscha
+ +1
+Paper and Media Limits
+Media Width: 20 mm – 118 mm (0.7" – 4.6")
+Max Print Width: 104 mm (4.09")
+Max Print Length: 2,794 mm (110")
+Media Roll Capacity: Up to 127 mm (5") outer diameter
+Media Thickness: 0.055 mm – 0.254 mm (2.17 – 10 mil) 
+
+Gainscha
+ +3
