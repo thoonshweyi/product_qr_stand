@@ -26,3 +26,26 @@ return new class extends Migration
         Schema::dropIfExists('workflows');
     }
 };
+
+
+// workflows
+// ---------
+// id
+// code
+// name
+
+// workflow_steps
+// -------------
+// id
+// workflow_id
+// department_id
+// step_order
+// name
+
+// product_workflows
+// ----------------
+// id
+// product_id
+// workflow_id
+// status
+// current_step
