@@ -26,7 +26,7 @@
                         <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        <span class="ml-1 text-gray-500 dark:text-gray-400 md:ml-2">Create</span>
+                        <span class="ml-1 text-gray-500 dark:text-gray-400 md:ml-2">{{ ucfirst($createMode) }} create</span>
                     </div>
                 </li>
             </ol>
@@ -35,15 +35,22 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <div class="mb-2 flex flex-wrap items-center gap-2">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create a new product</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create a new {{ $createMode }} product</h1>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($selectedDestinations as $destination)
+                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $destination === 'online' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}">
+                                {{ ucfirst($destination) }}
+                            </span>
+                        @endforeach
+                    </div>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Add core product details, images and product specifications.</p>
             </div>
-            <a href="{{ route('products.index') }}" class="inline-flex w-fit items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+            <a href="{{ route('products.create') }}" class="inline-flex w-fit items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to products
+                Change selection
             </a>
         </div>
     </div>
@@ -63,6 +70,9 @@
 
     <form id="product-create-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf
+        @foreach ($selectedDestinations as $destination)
+            <input type="hidden" name="destinations[]" value="{{ $destination }}">
+        @endforeach
 
         <div class="mx-auto grid w-full max-w-screen-2xl gap-6 p-4 sm:p-6 lg:grid-cols-12 lg:p-8">
             <div class="space-y-6 lg:col-span-8">

@@ -154,7 +154,56 @@ class ProductController extends Controller
      */
     public function create()
     {
-            $this->authorize('create',Product::class);
+        $this->authorize('create', Product::class);
+
+        return view('products.select-destination');
+    }
+
+    /**
+     * Validate the selected product destinations and open the relevant form.
+     */
+    public function selectDestination(Request $request)
+    {
+        $this->authorize('create', Product::class);
+
+        $validated = $request->validate([
+            'destinations' => ['required', 'array', 'min:1'],
+            'destinations.*' => ['required', 'in:stand,online'],
+        ], [
+            'destinations.required' => 'Please select Stand, Online, or both to continue.',
+            'destinations.min' => 'Please select at least one destination to continue.',
+        ]);
+
+        $destinations = array_values(array_unique($validated['destinations']));
+        $request->session()->put('product_create_destinations', $destinations);
+
+        // Online has its own creation screen whenever it is selected.
+        if (in_array('online', $destinations, true)) {
+            return redirect()->route('products.create.online');
+        }
+
+        return redirect()->route('products.create.stand');
+    }
+
+    public function createStand(Request $request)
+    {
+        return $this->showCreateForm($request, 'stand');
+    }
+
+    public function createOnline(Request $request)
+    {
+        return $this->showCreateForm($request, 'online');
+    }
+
+    private function showCreateForm(Request $request, string $createMode)
+    {
+        $this->authorize('create', Product::class);
+
+        $selectedDestinations = $request->session()->get('product_create_destinations', []);
+
+        if (empty($selectedDestinations)) {
+            return redirect()->route('products.create');
+        }
 
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
@@ -185,7 +234,15 @@ class ProductController extends Controller
             ->pluck('brand')
             ->values();
 
-        return view('products.create', compact('categories', 'statuses', 'countries', 'specifications', 'brands'));
+        return view('products.create', compact(
+            'categories',
+            'statuses',
+            'countries',
+            'specifications',
+            'brands',
+            'createMode',
+            'selectedDestinations',
+        ));
     }
 
     /**

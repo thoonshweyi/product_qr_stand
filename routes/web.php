@@ -60,7 +60,15 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 
 
-    Route::resource('products', ProductController::class)->except('show');
+    Route::get('/products/create', [ProductController::class, 'create'])
+        ->name('products.create');
+    Route::post('/products/create/destination', [ProductController::class, 'selectDestination'])
+        ->name('products.create.destination');
+    Route::get('/products/create/stand', [ProductController::class, 'createStand'])
+        ->name('products.create.stand');
+    Route::get('/products/create/online', [ProductController::class, 'createOnline'])
+        ->name('products.create.online');
+    Route::resource('products', ProductController::class)->except(['show', 'create']);
     Route::get("/productsstatus",[ProductController::class,"changestatus"]);
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])
