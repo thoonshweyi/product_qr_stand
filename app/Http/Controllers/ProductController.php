@@ -6,11 +6,12 @@ use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\Product;
-use App\Models\ProductImage;
 use App\Models\ProductEditLog;
+use App\Models\ProductImage;
 use App\Models\ProductSpecificationValue;
 use App\Models\Specification;
 use App\Models\Status;
+use App\Models\Workflow;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,7 +56,7 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
-            ->when(!auth()->user()->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
+            ->when(! auth()->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderByDesc('id');
 
         $products = $productsQuery
@@ -156,55 +157,6 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        return view('products.select-destination');
-    }
-
-    /**
-     * Validate the selected product destinations and open the relevant form.
-     */
-    public function selectDestination(Request $request)
-    {
-        $this->authorize('create', Product::class);
-
-        $validated = $request->validate([
-            'destinations' => ['required', 'array', 'min:1'],
-            'destinations.*' => ['required', 'in:stand,online'],
-        ], [
-            'destinations.required' => 'Please select Stand, Online, or both to continue.',
-            'destinations.min' => 'Please select at least one destination to continue.',
-        ]);
-
-        $destinations = array_values(array_unique($validated['destinations']));
-        $request->session()->put('product_create_destinations', $destinations);
-
-        // Online has its own creation screen whenever it is selected.
-        if (in_array('online', $destinations, true)) {
-            return redirect()->route('products.create.online');
-        }
-
-        return redirect()->route('products.create.stand');
-    }
-
-    public function createStand(Request $request)
-    {
-        return $this->showCreateForm($request, 'stand');
-    }
-
-    public function createOnline(Request $request)
-    {
-        return $this->showCreateForm($request, 'online');
-    }
-
-    private function showCreateForm(Request $request, string $createMode)
-    {
-        $this->authorize('create', Product::class);
-
-        $selectedDestinations = $request->session()->get('product_create_destinations', []);
-
-        if (empty($selectedDestinations)) {
-            return redirect()->route('products.create');
-        }
-
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
             ->get(['id', 'name']);
@@ -234,14 +186,20 @@ class ProductController extends Controller
             ->pluck('brand')
             ->values();
 
+        $workflows = Workflow::query()
+            ->where(function ($query) {
+                $query->where('status_id', 1)->orWhereNull('status_id');
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
+
         return view('products.create', compact(
             'categories',
             'statuses',
             'countries',
             'specifications',
             'brands',
-            'createMode',
-            'selectedDestinations',
+            'workflows',
         ));
     }
 
@@ -250,7 +208,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-            $this->authorize('create',Product::class);
+        $this->authorize('create', Product::class);
 
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
@@ -269,6 +227,8 @@ class ProductController extends Controller
             'specifications' => ['required', 'array', 'min:1', 'max:10'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
+            'workflow_ids' => ['required', 'array', 'min:1'],
+            'workflow_ids.*' => ['required', 'integer', 'distinct', 'exists:workflows,id'],
         ]);
 
         $user = Auth::user();
@@ -302,6 +262,8 @@ class ProductController extends Controller
                 'user_id' => $request->user()?->id,
                 'product_name' => $request['product_name'],
             ]);
+
+            $product->workflows()->sync($validated['workflow_ids']);
 
             foreach ($specificationRows as $row) {
                 $specificationName = Str::of($row['name'])->squish()->toString();
@@ -405,9 +367,9 @@ class ProductController extends Controller
             'country',
             'specificationValues.specification',
         ])
-        ->where('id', $id)
-        ->when(!auth()->user()?->can('viewany',Product::class), fn ($query) => $query->where('status_id', 1))
-        ->firstOrFail();
+            ->where('id', $id)
+            ->when(! auth()->user()?->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
+            ->firstOrFail();
 
         if (! auth()->check() && $product->status_id !== 1) {
             abort(404);
@@ -419,9 +381,8 @@ class ProductController extends Controller
             ->latest('printed_at')
             ->first();
 
-
-        if(request()->ajax()){
-            return $this->sendRespond($product,"Fetch Single Product Successfully!.");
+        if (request()->ajax()) {
+            return $this->sendRespond($product, 'Fetch Single Product Successfully!.');
         }
 
         return view('products.show', compact(
@@ -465,8 +426,7 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $product = Product::with('specificationValues.specification')->findOrFail($id);
-            $this->authorize('edit',$product);
-
+        $this->authorize('edit', $product);
 
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
@@ -522,7 +482,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $product = Product::findOrFail($id);
-            $this->authorize('edit',$product);
+        $this->authorize('edit', $product);
 
         $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code,'.$product->id],
@@ -850,24 +810,25 @@ class ProductController extends Controller
         ];
     }
 
-    public function changestatus(Request $request){
+    public function changestatus(Request $request)
+    {
         $request->validate([
             'id' => ['required', 'integer', 'exists:products,id'],
             'status_id' => ['required', 'integer', 'exists:statuses,id'],
         ]);
 
-        $product = Product::findOrFail($request["id"]);
+        $product = Product::findOrFail($request['id']);
         $this->authorize('edit', $product);
 
         if ((int) $product->status_id === (int) $request['status_id']) {
-            return response()->json(["success"=>"Status Change Successfully"]);
+            return response()->json(['success' => 'Status Change Successfully']);
         }
 
         $product->load('specificationValues.specification');
         $oldPrintSnapshot = $this->productPrintSnapshot($product);
         $fromVersion = (int) $product->print_version;
 
-        $product->status_id = $request["status_id"];
+        $product->status_id = $request['status_id'];
         $product->print_version = $fromVersion + 1;
         $product->user_id = $request->user()?->id;
         $product->save();
@@ -886,10 +847,9 @@ class ProductController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json(["success"=>"Status Change Successfully"]);
+        return response()->json(['success' => 'Status Change Successfully']);
     }
 }
-
 
 //  sudo apt install php8.2-imagick -y
 

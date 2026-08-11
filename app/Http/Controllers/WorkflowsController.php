@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Channel;
 use App\Models\Status;
+use App\Models\Workflow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-class ChannelsController extends Controller
+class WorkflowsController extends Controller
 {
     public function index(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
 
-        $channels = Channel::with(['status', 'user'])
+        $workflows = Workflow::with(['status', 'user'])
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $query->where('name', 'like', '%'.$keyword.'%')
@@ -31,57 +31,57 @@ class ChannelsController extends Controller
             $statuses = Status::orderBy('id')->get(['id', 'name']);
         }
 
-        return view('channels.index', compact('channels', 'statuses', 'keyword'));
+        return view('workflows.index', compact('workflows', 'statuses', 'keyword'));
     }
 
     public function store(Request $request)
     {
-        $validated = $this->validateChannel($request);
+        $validated = $this->validateWorkflow($request);
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
         $validated['user_id'] = $request->user()->id;
 
-        $channel = Channel::create($validated);
+        $workflow = Workflow::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Channel created successfully.',
-            'data' => $channel,
+            'message' => 'Workflow created successfully.',
+            'data' => $workflow,
         ]);
     }
 
-    public function show(Channel $channel)
+    public function show(Workflow $workflow)
     {
         return response()->json([
             'success' => true,
-            'data' => $channel->load(['status', 'user']),
+            'data' => $workflow->load(['status', 'user']),
         ]);
     }
 
-    public function update(Request $request, Channel $channel)
+    public function update(Request $request, Workflow $workflow)
     {
-        $validated = $this->validateChannel($request, $channel);
+        $validated = $this->validateWorkflow($request, $workflow);
         $validated['slug'] = Str::slug($validated['slug'] ?: $validated['name']);
 
-        $channel->update($validated);
+        $workflow->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Channel updated successfully.',
-            'data' => $channel,
+            'message' => 'Workflow updated successfully.',
+            'data' => $workflow,
         ]);
     }
 
-    public function destroy(Channel $channel)
+    public function destroy(Workflow $workflow)
     {
-        $channel->delete();
+        $workflow->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Channel deleted successfully.',
+            'message' => 'Workflow deleted successfully.',
         ]);
     }
 
-    private function validateChannel(Request $request, ?Channel $channel = null): array
+    private function validateWorkflow(Request $request, ?Workflow $workflow = null): array
     {
         $request->merge([
             'slug' => Str::slug($request->input('slug') ?: $request->input('name', '')),
@@ -92,13 +92,13 @@ class ChannelsController extends Controller
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('channels', 'name')->ignore($channel?->id),
+                Rule::unique('workflows', 'name')->ignore($workflow?->id),
             ],
             'slug' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('channels', 'slug')->ignore($channel?->id),
+                Rule::unique('workflows', 'slug')->ignore($workflow?->id),
             ],
             'status_id' => ['required', 'exists:statuses,id'],
         ]);

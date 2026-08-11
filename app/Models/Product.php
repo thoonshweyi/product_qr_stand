@@ -54,6 +54,11 @@ class Product extends Model
         return $this->hasMany(ProductEditLog::class);
     }
 
+    public function workflows()
+    {
+        return $this->belongsToMany(Workflow::class, 'product_workflows')->withTimestamps();
+    }
+
     public function status()
     {
         return $this->belongsTo(Status::class);

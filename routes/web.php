@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchesController;
-use App\Http\Controllers\ChannelsController;
+use App\Http\Controllers\WorkflowsController;
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductController;
@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UsersController::class);
 
     Route::resource('branches', BranchesController::class);
-    Route::resource('channels', ChannelsController::class)->except(['create', 'edit']);
+    Route::resource('workflows', WorkflowsController::class)->except(['create', 'edit']);
     Route::get("/branchesstatus",[BranchesController::class,"changestatus"]);
 
 
@@ -62,15 +62,7 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 
 
-    Route::get('/products/create', [ProductController::class, 'create'])
-        ->name('products.create');
-    Route::post('/products/create/destination', [ProductController::class, 'selectDestination'])
-        ->name('products.create.destination');
-    Route::get('/products/create/stand', [ProductController::class, 'createStand'])
-        ->name('products.create.stand');
-    Route::get('/products/create/online', [ProductController::class, 'createOnline'])
-        ->name('products.create.online');
-    Route::resource('products', ProductController::class)->except(['show', 'create']);
+    Route::resource('products', ProductController::class)->except('show');
     Route::get("/productsstatus",[ProductController::class,"changestatus"]);
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])

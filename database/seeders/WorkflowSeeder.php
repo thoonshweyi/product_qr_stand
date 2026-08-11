@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Channel;
 use App\Models\Status;
 use App\Models\User;
+use App\Models\Workflow;
 use Illuminate\Database\Seeder;
 
-class ChannelSeeder extends Seeder
+class WorkflowSeeder extends Seeder
 {
     public function run(): void
     {
@@ -18,10 +18,10 @@ class ChannelSeeder extends Seeder
         foreach ([
             ['name' => 'Stand', 'slug' => 'stand'],
             ['name' => 'Online', 'slug' => 'online'],
-        ] as $channel) {
-            Channel::updateOrCreate(
-                ['slug' => $channel['slug']],
-                $channel + ['status_id' => $statusId, 'user_id' => $userId],
+        ] as $workflow) {
+            Workflow::updateOrCreate(
+                ['slug' => $workflow['slug']],
+                $workflow + ['status_id' => $statusId, 'user_id' => $userId],
             );
         }
     }
