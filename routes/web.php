@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchesController;
+use App\Http\Controllers\ChannelsController;
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductController;
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UsersController::class);
 
     Route::resource('branches', BranchesController::class);
+    Route::resource('channels', ChannelsController::class)->except(['create', 'edit']);
     Route::get("/branchesstatus",[BranchesController::class,"changestatus"]);
 
 
