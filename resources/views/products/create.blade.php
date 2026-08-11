@@ -142,17 +142,16 @@
                             <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700/30 sm:flex sm:items-center sm:gap-5">
                                 <div class="mb-3 min-w-40 sm:mb-0">
                                     <div class="flex items-center gap-2">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Workflows <span class="text-red-600">*</span></p>
-                                        <span id="selected-workflow-count" class="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-gray-500 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-600">0 selected</span>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Workflow <span class="text-red-600">*</span></p>
                                     </div>
-                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Select one or more</p>
+                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Select one workflow</p>
                                 </div>
                                 <div class="flex flex-1 flex-wrap gap-2">
                                 @forelse ($workflows as $workflow)
                                     <label class="workflow-card relative inline-flex min-w-32 cursor-pointer items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5 pr-10 transition hover:border-primary-400 hover:shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:hover:border-primary-500">
-                                        <input type="checkbox" name="workflow_ids[]" value="{{ $workflow->id }}" class="workflow-checkbox peer sr-only" @checked(in_array($workflow->id, old('workflow_ids', [])))>
-                                        <span class="absolute right-3 flex h-5 w-5 items-center justify-center rounded border border-gray-300 bg-gray-50 text-transparent transition peer-checked:border-primary-600 peer-checked:bg-primary-600 peer-checked:text-white dark:border-gray-500 dark:bg-gray-700">
-                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m5 12 4 4L19 6"/></svg>
+                                        <input type="radio" name="workflow_id" value="{{ $workflow->id }}" class="workflow-radio peer sr-only" @checked((string) old('workflow_id') === (string) $workflow->id)>
+                                        <span class="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-gray-50 transition peer-checked:border-primary-600 peer-checked:bg-primary-600 dark:border-gray-500 dark:bg-gray-700">
+                                            <span class="h-2 w-2 rounded-full bg-white"></span>
                                         </span>
                                         <span class="flex h-7 w-7 items-center justify-center rounded-md {{ $workflow->slug === 'online' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
@@ -166,7 +165,7 @@
                                 @endforelse
                                 </div>
                             </div>
-                            <p id="workflow-selection-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400">Please select at least one workflow.</p>
+            <p id="workflow-selection-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400">Please select a workflow.</p>
                         </div>
                     </div>
                 </section>
@@ -627,8 +626,8 @@
             const mainImage = document.getElementById('main_image').files[0];
             if (!mainImage) errors.main_image = ['Main image is required.'];
 
-            if (!$('.workflow-checkbox:checked').length) {
-                errors.workflow_ids = ['Please select at least one workflow.'];
+            if (!$('.workflow-radio:checked').length) {
+                errors.workflow_id = ['Please select a workflow.'];
             }
 
             if (!rows.length) {
@@ -664,12 +663,11 @@
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
         $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
-        $('.workflow-checkbox').on('change', function () {
-            const count = $('.workflow-checkbox:checked').length;
-            $('#selected-workflow-count').text(`${count} selected`);
-            $('#workflow-selection-error').toggleClass('hidden', count > 0);
+        $('.workflow-radio').on('change', function () {
+            const hasSelection = $('.workflow-radio:checked').length > 0;
+            $('#workflow-selection-error').toggleClass('hidden', hasSelection);
             $('.workflow-card').each(function () {
-                const selected = $(this).find('.workflow-checkbox').is(':checked');
+                const selected = $(this).find('.workflow-radio').is(':checked');
                 $(this).toggleClass('border-primary-500 bg-primary-50 ring-1 ring-primary-200 dark:bg-primary-900/20 dark:ring-primary-800', selected)
                     .toggleClass('border-gray-300 dark:border-gray-600', !selected);
             });

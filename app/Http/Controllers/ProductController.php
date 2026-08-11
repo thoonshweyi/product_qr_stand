@@ -190,7 +190,7 @@ class ProductController extends Controller
             ->where(function ($query) {
                 $query->where('status_id', 1)->orWhereNull('status_id');
             })
-            ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'name', 'slug']);
 
         return view('products.create', compact(
@@ -227,8 +227,7 @@ class ProductController extends Controller
             'specifications' => ['required', 'array', 'min:1', 'max:10'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
-            'workflow_ids' => ['required', 'array', 'min:1'],
-            'workflow_ids.*' => ['required', 'integer', 'distinct', 'exists:workflows,id'],
+            'workflow_id' => ['required', 'integer', 'exists:workflows,id'],
         ]);
 
         $user = Auth::user();
@@ -261,9 +260,8 @@ class ProductController extends Controller
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
                 'product_name' => $request['product_name'],
+                'workflow_id' => $validated['workflow_id'],
             ]);
-
-            $product->workflows()->sync($validated['workflow_ids']);
 
             foreach ($specificationRows as $row) {
                 $specificationName = Str::of($row['name'])->squish()->toString();

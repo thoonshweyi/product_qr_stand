@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('department_id')->nullable();
             $table->unsignedBigInteger('role_id')->nullable();
             $table->unsignedInteger('step_order')->default(1);
-            $table->string('name')->unique();
+            $table->string('name');
             $table->timestamps();
         });
     }

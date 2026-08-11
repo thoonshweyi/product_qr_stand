@@ -32,6 +32,7 @@ class Product extends Model
         'brand_icon',
         'qr_destination',
         'print_version',
+        'workflow_id',
     ];
 
     public function specificationValues()
@@ -54,9 +55,9 @@ class Product extends Model
         return $this->hasMany(ProductEditLog::class);
     }
 
-    public function workflows()
+    public function workflow()
     {
-        return $this->belongsToMany(Workflow::class, 'product_workflows')->withTimestamps();
+        return $this->belongsTo(Workflow::class);
     }
 
     public function status()
