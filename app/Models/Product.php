@@ -33,6 +33,7 @@ class Product extends Model
         'qr_destination',
         'print_version',
         'workflow_id',
+        'status'
     ];
 
     public function specificationValues()
