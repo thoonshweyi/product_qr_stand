@@ -116,18 +116,25 @@
                 </div>
             </div>
 
-            <div class="mt-7 border-t border-gray-200 pt-6 dark:border-gray-700">
-                <div class="mb-4 flex items-center justify-between gap-4">
+            <div class="mt-6 border-t border-gray-200 pt-5 dark:border-gray-700">
+                <div class="mb-3 flex items-center justify-between gap-4">
                     <div>
                         <h3 class="text-base font-semibold text-gray-900 dark:text-white">Workflow steps</h3>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Steps run from top to bottom.</p>
                     </div>
-                    <button id="add-step-button" type="button" class="inline-flex shrink-0 items-center rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300">
+                    <button id="add-step-button" type="button" class="inline-flex shrink-0 items-center rounded-lg border border-primary-300 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300">
                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Add step
                     </button>
                 </div>
-                <div id="step-rows" class="space-y-3"></div>
+                <div class="hidden grid-cols-[2rem_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,.85fr)_2rem] gap-2 rounded-t-lg border border-b-0 border-gray-200 bg-gray-100 px-2.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-400 md:grid">
+                    <span class="text-center">#</span>
+                    <span>Step</span>
+                    <span>Role</span>
+                    <span>Status</span>
+                    <span></span>
+                </div>
+                <div id="step-rows" class="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 md:rounded-t-none"></div>
                 <p data-error="steps" class="mt-2 hidden text-xs text-red-600"></p>
             </div>
             <div class="mt-7 flex justify-end gap-3">
@@ -174,27 +181,27 @@ $(function () {
 
     function renderSteps() {
         $('#step-rows').html(stepRows.map((step, index) => `
-            <div class="step-row rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30" data-key="${step.key}">
+            <div class="step-row border-t border-gray-200 p-2.5 first:border-t-0 dark:border-gray-700" data-key="${step.key}">
                 <input type="hidden" name="steps[${index}][id]" value="${step.id}">
-                <div class="grid items-end gap-3 md:grid-cols-[2rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,.9fr)_2rem]">
-                    <span class="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">${index + 1}</span>
+                <div class="grid items-center gap-2 md:grid-cols-[2rem_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,.85fr)_2rem]">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-100 text-[11px] font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">${index + 1}</span>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Step name *</label>
-                        <select name="steps[${index}][name]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name">
+                        <label class="mb-1 block text-[11px] font-medium text-gray-500 dark:text-gray-400 md:hidden">Step *</label>
+                        <select name="steps[${index}][name]" class="step-field block h-9 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name">
                             <option value="">Choose step</option>
                             <option value="Check" ${step.name === 'Check' ? 'selected' : ''}>Check</option>
                             <option value="Finish" ${step.name === 'Finish' ? 'selected' : ''}>Finish</option>
                         </select>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Role</label>
-                        <select name="steps[${index}][role_id]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="role_id">${options(roles, step.role_id, 'Any role')}</select>
+                        <label class="mb-1 block text-[11px] font-medium text-gray-500 dark:text-gray-400 md:hidden">Role</label>
+                        <select name="steps[${index}][role_id]" class="step-field block h-9 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="role_id">${options(roles, step.role_id, 'Any role')}</select>
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Status</label>
-                        <select name="steps[${index}][status_id]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="status_id">${options(statuses, step.status_id, 'No status')}</select>
+                        <label class="mb-1 block text-[11px] font-medium text-gray-500 dark:text-gray-400 md:hidden">Status</label>
+                        <select name="steps[${index}][status_id]" class="step-field block h-9 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="status_id">${options(statuses, step.status_id, 'No status')}</select>
                     </div>
-                    <button type="button" class="remove-step mb-1.5 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20" aria-label="Remove step">
+                    <button type="button" class="remove-step flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20" aria-label="Remove step">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
