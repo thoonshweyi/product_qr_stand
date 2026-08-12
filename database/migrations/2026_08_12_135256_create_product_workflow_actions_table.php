@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('product_workflow_actions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('workflow_process_id');
-            $table->unsignedBigInteger("action_by")->nullable();
-            $table->unsignedBigInteger('status_id')->nullable(); // action
-            $table->text('remark')->nullable();
-            $table->timestamp('action_at')->nullable();
+            $table->unsignedBigInteger('product_workflow_id');
+            $table->unsignedBigInteger('workflow_step_id');
+            $table->unsignedBigInteger("user_id")->nullable();
+            $table->string("action");
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

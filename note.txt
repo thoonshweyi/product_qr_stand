@@ -46,3 +46,562 @@ Media Thickness: 0.055 mm – 0.254 mm (2.17 – 10 mil)
 
 Gainscha
  +3
+
+
+
+=> Workflow Schema
+
+သင့်လို ရုံးသုံး Form အတွက်တော့ အရမ်းရိုးရှင်းတဲ့ 5-table Design နဲ့ စလို့ရပါတယ်။
+
+အဓိက Concept
+Form
+  ↓
+Workflow
+  ↓
+Workflow Steps
+  ↓
+Current Step
+  ↓
+History
+ဥပမာ—
+
+Employee
+   ↓
+Submit
+   ↓
+Supervisor → Check
+   ↓
+Manager → Approve
+   ↓
+Completed
+1. forms
+ဒါက တကယ်တင်ထားတဲ့ Form ကို သိမ်းမယ့် table။
+
+forms
+-------------------------
+id
+form_no
+created_by
+status
+current_step_id
+created_at
+updated_at
+ဥပမာ—
+
+id              = 100
+form_no         = FORM-001
+created_by      = 25
+status          = pending
+current_step_id = 2
+current_step_id = 2 ဆိုတာ—
+
+ဒီ Form က အခု Workflow ရဲ့ Step 2 မှာ ရောက်နေတယ်။
+
+2. workflows
+ဒါက ဘယ်လို Approval Flow သွားမလဲ ဆိုတာ သတ်မှတ်တဲ့ table။
+
+workflows
+-------------------------
+id
+name
+description
+ဥပမာ—
+
+id = 1
+name = Leave Approval
+description = Employee leave approval workflow
+နောက်ထပ် Workflow တွေလည်း ရှိနိုင်တယ်။
+
+1 | Leave Approval
+2 | Purchase Approval
+3 | Expense Approval
+3. workflow_steps
+ဒါက Workflow ရဲ့ အသေးစိတ်အဆင့်တွေ ပါ။
+
+workflow_steps
+-------------------------
+id
+workflow_id
+step_no
+name
+role_id
+action
+ဥပမာ Leave Approval Workflow ဆိုရင်—
+
+id	workflow_id	step_no	name	role	action
+1	1	1	Supervisor Check	Supervisor	check
+2	1	2	Manager Approval	Manager	approve
+ဒါဆို—
+
+Leave Approval
+      │
+      ├── Step 1
+      │     Supervisor
+      │     Check
+      │
+      └── Step 2
+            Manager
+            Approve
+ဒီလောက်ပဲ။
+
+4. form_workflows
+ဒီ table ကို ထည့်ထားရင် ပိုရှင်းပါတယ်။
+
+ဘာကြောင့်လဲဆိုတော့—
+
+ဒီ Form က ဘယ် Workflow ကို အသုံးပြုနေလဲ?
+
+ဆိုတာ သိဖို့ပါ။
+
+form_workflows
+-------------------------
+id
+form_id
+workflow_id
+current_step_id
+status
+started_at
+completed_at
+ဥပမာ—
+
+id              = 500
+form_id         = 100
+workflow_id     = 1
+current_step_id = 2
+status          = running
+အဓိပ္ပါယ်က—
+
+Form #100
+   ↓
+Leave Approval Workflow
+   ↓
+Step 2
+   ↓
+Manager Approval
+5. workflow_history
+ဒါက ဘယ်သူ ဘာလုပ်သွားလဲ ဆိုတာ အကုန်မှတ်မယ့် table။
+
+workflow_history
+-------------------------
+id
+form_workflow_id
+step_id
+user_id
+action
+comment
+created_at
+ဥပမာ—
+
+id	form_workflow_id	step	user	action	comment
+1	500	1	25	submitted	-
+2	500	1	30	checked	OK
+3	500	2	40	approved	Approved
+ဒါဆို History က—
+
+09:00
+Aung Aung
+Submitted
+
+        ↓
+
+10:00
+Supervisor Mg Mg
+Checked
+"OK"
+
+        ↓
+
+11:00
+Manager Ko Ko
+Approved
+"Approved"
+ဖြစ်သွားမယ်။
+
+အခု Database က ဒီလောက်ပဲ
+┌──────────────┐
+│    users     │
+└──────┬───────┘
+       │
+       │
+┌──────▼───────┐
+│    forms     │
+└──────┬───────┘
+       │
+       │
+┌──────▼────────────┐
+│  form_workflows   │
+└──────┬────────────┘
+       │
+       │
+       ├──────────────────┐
+       ▼                  ▼
+┌──────────────┐   ┌──────────────────┐
+│workflow_steps│   │workflow_history  │
+└──────┬───────┘   └──────────────────┘
+       │
+       ▼
+    workflows
+လက်တွေ့ Example တစ်ခု
+User တစ်ယောက်က Form တင်တယ်။
+
+Step 1 — Form Create
+forms
+
+id = 100
+status = pending
+Step 2 — Workflow စ
+form_workflows
+
+form_id         = 100
+workflow_id     = 1
+current_step_id = 1
+status          = running
+ဆိုတော့—
+
+Form 100
+   ↓
+Leave Approval
+   ↓
+Supervisor Check
+Step 3 — User Submit
+workflow_history
+
+form_workflow_id = 500
+step_id          = 1
+user_id          = 25
+action           = submitted
+comment          = NULL
+Step 4 — Supervisor Check
+Supervisor က Check နှိပ်တယ်။
+
+History ထဲ record အသစ်ထည့်မယ်—
+
+form_workflow_id = 500
+step_id          = 1
+user_id          = 30
+action           = checked
+comment          = "Everything is OK"
+ပြီးရင်—
+
+current_step_id = 2
+ပြောင်းမယ်။
+
+Step 5 — Manager Approve
+History—
+
+form_workflow_id = 500
+step_id          = 2
+user_id          = 40
+action           = approved
+comment          = "Approved"
+ပြီးရင်—
+
+form_workflows.status = completed
+forms.status          = approved
+အရေးကြီးတာ တစ်ခုပဲ
+ဒီ ၃ ခုကို ခွဲပြီးမှတ်ပါ။
+
+workflow
+ဘယ်လို Flow သွားမလဲ
+
+Supervisor
+   ↓
+Manager
+form_workflow
+ဒီ Form က အခု ဘယ်နေရာရောက်နေလဲ
+
+Form #100
+   ↓
+Manager Approval
+workflow_history
+ဘယ်သူက ဘာလုပ်ခဲ့လဲ
+
+Aung → Submitted
+Mg Mg → Checked
+Ko Ko → Approved
+ကျွန်တော်ဆိုရင် သင့် Project မှာ ဒီ Design နဲ့စမယ်
+users
+forms
+
+workflows
+workflow_steps
+
+form_workflows
+workflow_history
+၆ tables ပဲ။
+
+ပြီးတော့ အခုအဆင့်မှာ workflow_transitions, workflow_instances, workflow_versions, parallel approval စတာတွေ မထည့်သေးပါနဲ့။ လိုလာတဲ့အချိန်မှ ထပ်တိုးတာ ပိုကောင်းပါတယ်။
+
+ဒီ Structure က ရိုးရှင်းပေမယ့် Workflow + Workflow Detail + Current Status + Full History လေးခုလုံးကို သေချာ cover လုပ်နိုင်ပါတယ်။
+
+
+Approve button ကိုသက်ဆိုင်ရာ Role အလိုက်ပေါ်ဖို့ဘယ်လိုလုပ်မလဲ
+
+ဟုတ်ပါတယ်။ ဒီနေရာမှာ အဓိကက workflow_steps.role_id ကို အသုံးပြုတာပါ။
+
+ဥပမာ Workflow က—
+
+User
+  ↓
+Supervisor → Check
+  ↓
+Manager → Approve
+ဆိုရင် Approve/Check button ကို frontend က ကိုယ့်ဘာသာ role ကြည့်ပြီး မဆုံးဖြတ်သင့်ပါဘူး။ Backend က ဒီ User က လက်ရှိ Step ကို လုပ်ပိုင်ခွင့်ရှိ/မရှိ စစ်ပြီး can_action ပြန်ပေးတာ အကောင်းဆုံးပါ။
+
+1. workflow_steps မှာ Role သတ်မှတ်ထားမယ်
+workflow_steps
+------------------------------------------------
+id | workflow_id | step_no | name | role_id | action
+------------------------------------------------
+1  | 1          | 1       | Check | 2       | check
+2  | 1          | 2       | Approve | 3     | approve
+ဥပမာ—
+
+roles
+
+2 = Supervisor
+3 = Manager
+ဆိုတော့—
+
+Step 1
+role_id = 2
+action  = check
+
+Step 2
+role_id = 3
+action  = approve
+2. Form ကိုဖွင့်တဲ့အခါ Backend က စစ်မယ်
+ဥပမာ လက်ရှိ Form က—
+
+form_workflows.current_step_id = 2
+ဆိုရင် Backend က workflow_steps ကိုကြည့်မယ်။
+
+current_step_id = 2
+
+workflow_steps
+-----------------------
+role_id = 3
+action  = approve
+အဓိပ္ပါယ်က—
+
+ဒီ Form ကို လက်ရှိ Manager Role က Approve လုပ်ရမယ်။
+
+3. Login User ရဲ့ Role နဲ့ နှိုင်းမယ်
+ဥပမာ Login User က—
+
+user_id = 40
+role_id = 3
+ဆိုရင်—
+
+Current Step Role = 3
+Login User Role   = 3
+တူတယ်။
+
+ဒါကြောင့်—
+
+can_action = true
+action     = approve
+ပြန်ပေးမယ်။
+
+Frontend မှာ—
+
+[ Approve ]
+ပေါ်မယ်။
+
+Supervisor ဝင်ကြည့်ရင်?
+Supervisor က—
+
+role_id = 2
+လက်ရှိ Step က—
+
+role_id = 3
+ဖြစ်နေတယ်။
+
+2 != 3
+ဒါကြောင့်—
+
+can_action = false
+Frontend မှာ Approve Button မပေါ်တော့ဘူး။
+
+4. API Response ကို ဒီလိုလုပ်ရင် အရမ်းရှင်းတယ်
+ဥပမာ—
+
+{
+    "id": 100,
+    "status": "pending",
+    "current_step": {
+        "id": 2,
+        "name": "Manager Approval",
+        "action": "approve"
+    },
+    "can_action": true
+}
+Manager ဝင်ရင်—
+
+{
+    "can_action": true,
+    "action": "approve"
+}
+Supervisor ဝင်ရင်—
+
+{
+    "can_action": false,
+    "action": "approve"
+}
+5. Frontend
+React ဖြစ်ဖြစ် Blade ဖြစ်ဖြစ် Concept က ဒီလိုပဲ။
+
+{form.can_action && (
+    <button>
+        {form.current_step.action === "approve"
+            ? "Approve"
+            : "Check"}
+    </button>
+)}
+ဒါဆို—
+
+Supervisor
+Current Step
+    ↓
+Supervisor Check
+
+[ Check ]
+Manager
+Current Step
+    ↓
+Manager Approval
+
+[ Approve ]
+တခြား User
+Current Step
+    ↓
+Manager Approval
+
+(no button)
+6. ဒါပေမယ့် အရေးကြီးဆုံးတစ်ချက်
+Button မပေါ်အောင်လုပ်တာဟာ Security မဟုတ်ပါဘူး။
+
+ဥပမာ User တစ်ယောက်က Browser DevTools သုံးပြီး—
+
+POST /forms/100/approve
+ကို တိုက်ရိုက် request ပို့နိုင်ပါတယ်။
+
+ဒါကြောင့် Backend မှာလည်း ထပ်စစ်ရမယ်။
+
+Approve API ရောက်လာတဲ့အခါ—
+
+1. Form ရှိလား?
+       ↓
+2. Workflow ရှိလား?
+       ↓
+3. Current Step ရှိလား?
+       ↓
+4. Current Step ရဲ့ role_id ဘာလဲ?
+       ↓
+5. Login User ရဲ့ role_id နဲ့တူလား?
+       ↓
+6. Action = approve လုပ်ခွင့်ရှိလား?
+       ↓
+7. History မှတ်
+       ↓
+8. Next Step သွား
+7. အဓိက Logic
+Backend မှာ Conceptually ဒီလိုပဲ—
+
+currentStep = formWorkflow.currentStep
+
+if currentStep.role_id == currentUser.role_id:
+
+    allow action
+
+else:
+
+    deny
+ပြီးတော့ action ကိုလည်း စစ်ပါ။
+
+if currentStep.action == "approve":
+    approve()
+
+if currentStep.action == "check":
+    check()
+8. နောက်ပိုင်းမှာ Role တစ်ခုထက်ပိုနိုင်တယ်
+ဥပမာ Manager သို့မဟုတ် Assistant Manager က Approve လုပ်လို့ရတယ်ဆိုရင်—
+
+workflow_step_roles
+---------------------
+step_id
+role_id
+လို table တစ်ခုထည့်နိုင်ပါတယ်။
+
+ဒါပေမယ့် အခုလို ရိုးရှင်းစွာစချင်တယ်ဆိုရင် workflow_steps.role_id တစ်ခုတည်းနဲ့ လုံလောက်ပါတယ်။
+
+အတိုချုပ်
+သင့် System မှာ Button ပေါ်/မပေါ်ကို ဒီလိုစဉ်းစားပါ—
+
+                 Form
+                   ↓
+            Current Step
+                   ↓
+          workflow_steps
+                   ↓
+              role_id
+                   ↓
+        ┌──────────┴──────────┐
+        ↓                     ↓
+ Login User Role         Current Step Role
+        ↓                     ↓
+        └──────── Compare ────┘
+                   ↓
+                Match?
+              /         \
+            YES          NO
+             ↓            ↓
+        Show Button    Hide Button
+အဓိက Rule က Current Step ရဲ့ Role နဲ့ Login User ရဲ့ Role တူမှ Action Button ပေါ်မယ်။
+
+ပြီးတော့ Frontend မှာ button ဖျောက်တာ + Backend မှာ permission စစ်တာ နှစ်ခုလုံး လုပ်ရပါမယ်။
+
+------------------------------------------------------------------------------------------------
+=>forms
+    id
+    form_no
+    created_by
+    status
+    current_step_id
+    created_at
+    updated_at
+
+=>workflows
+    id
+    name
+    description
+    slug
+    status_id
+    user_id
+
+=>workflow_steps
+    id
+    workflow_id
+    step_no
+    name
+    role_id
+    action
+
+=>form_workflows
+    id
+    form_id
+    workflow_id
+    current_step_id
+    status
+    started_at 
+    completed_at
+
+
+=>workflow_actions
+    id
+    form_workflow_id
+    step_id
+    user_id
+    action
+    comment
+    created_at

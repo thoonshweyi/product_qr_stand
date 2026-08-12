@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('workflow_processes', function (Blueprint $table) {
+        Schema::create('product_workflows', function (Blueprint $table) {
             $table->id();
-            $table->integer('workflow_id')->unsigned()->nullable();
-            $table->unsignedBigInteger('department_id')->nullable();
-            $table->unsignedBigInteger('role_id')->nullable();
-            $table->unsignedInteger('step_order')->default(1);
-            $table->string('name');
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workflow_id')->constrained()->cascadeOnDelete();
+            $table->integer('current_step_id')->unsigned()->nullable();
+            $table->string("status")->default("ongoing");
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('workflow_processes');
+        Schema::dropIfExists('product_workflows');
     }
 };

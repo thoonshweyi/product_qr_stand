@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::create('workflow_steps', function (Blueprint $table) {
+            $table->id();
             $table->integer('workflow_id')->unsigned()->nullable();
-            $table->integer('current_process_id')->unsigned()->nullable();
+            $table->unsignedInteger('step_no')->default(1);
+            $table->string('name');
+            $table->string("action");
+            $table->unsignedBigInteger('role_id')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -22,9 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('workflow_id');
-            $table->dropColumn('current_process_id');
-        });
+        Schema::dropIfExists('workflow_steps');
     }
 };

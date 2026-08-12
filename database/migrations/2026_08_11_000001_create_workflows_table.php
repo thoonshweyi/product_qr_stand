@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('workflows', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->string('slug')->unique();
             $table->unsignedBigInteger('status_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
