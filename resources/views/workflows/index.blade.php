@@ -56,7 +56,7 @@
                             <td class="px-5 py-4">
                                 <span class="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">{{ $workflow->status?->name ?? '—' }}</span>
                             </td>
-                            <td class="px-5 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $workflow->processes_count }}</td>
+                            <td class="px-5 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $workflow->steps_count }}</td>
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $workflow->user?->name ?? 'System' }}</td>
                             <td class="px-5 py-4 text-right whitespace-nowrap">
                                 <button type="button" data-id="{{ $workflow->id }}" class="edit-workflow rounded-lg p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700" title="Edit">
@@ -109,21 +109,26 @@
                     </select>
                     <p data-error="status_id" class="mt-1 hidden text-xs text-red-600"></p>
                 </div>
+                <div class="sm:col-span-3">
+                    <label for="workflow-description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description</label>
+                    <textarea id="workflow-description" name="description" rows="2" maxlength="1000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Short description of this workflow"></textarea>
+                    <p data-error="description" class="mt-1 hidden text-xs text-red-600"></p>
+                </div>
             </div>
 
             <div class="mt-7 border-t border-gray-200 pt-6 dark:border-gray-700">
                 <div class="mb-4 flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Workflow process steps</h3>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Workflow steps</h3>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Steps run from top to bottom.</p>
                     </div>
-                    <button id="add-process-button" type="button" class="inline-flex shrink-0 items-center rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300">
+                    <button id="add-step-button" type="button" class="inline-flex shrink-0 items-center rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/20 dark:text-primary-300">
                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Add step
                     </button>
                 </div>
-                <div id="process-rows" class="space-y-3"></div>
-                <p data-error="processes" class="mt-2 hidden text-xs text-red-600"></p>
+                <div id="step-rows" class="space-y-3"></div>
+                <p data-error="steps" class="mt-2 hidden text-xs text-red-600"></p>
             </div>
             <div class="mt-7 flex justify-end gap-3">
                 <button type="button" class="close-workflow-modal rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-300">Cancel</button>
@@ -137,12 +142,12 @@
 @section('scripts')
 <script>
 $(function () {
-    const departments = @js($departments);
     const roles = @js($roles);
+    const statuses = @js($statuses);
     const modal = $('#workflow-modal');
     const form = $('#workflow-form');
-    let processRows = [];
-    let nextProcessKey = 1;
+    let stepRows = [];
+    let nextStepKey = 1;
     const escapeHtml = value => $('<div>').text(value ?? '').html()
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
@@ -157,35 +162,40 @@ $(function () {
     const openModal = () => modal.removeClass('hidden').addClass('flex');
     const closeModal = () => modal.addClass('hidden').removeClass('flex');
 
-    function newProcess(data = {}) {
+    function newStep(data = {}) {
         return {
-            key: nextProcessKey++,
+            key: nextStepKey++,
             id: data.id || '',
             name: data.name || '',
-            department_id: data.department_id || '',
+            action: data.action || '',
             role_id: data.role_id || '',
+            status_id: data.status_id || '',
         };
     }
 
-    function renderProcesses() {
-        $('#process-rows').html(processRows.map((process, index) => `
-            <div class="process-row rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30" data-key="${process.key}">
-                <input type="hidden" name="processes[${index}][id]" value="${process.id}">
-                <div class="grid items-end gap-3 md:grid-cols-[2rem_minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_2rem]">
+    function renderSteps() {
+        $('#step-rows').html(stepRows.map((step, index) => `
+            <div class="step-row rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30" data-key="${step.key}">
+                <input type="hidden" name="steps[${index}][id]" value="${step.id}">
+                <div class="grid items-end gap-3 md:grid-cols-[2rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,.9fr)_minmax(0,.8fr)_2rem]">
                     <span class="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">${index + 1}</span>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Step name *</label>
-                        <input name="processes[${index}][name]" value="${escapeHtml(process.name)}" class="process-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name" placeholder="e.g. Merchandise Check">
+                        <input name="steps[${index}][name]" value="${escapeHtml(step.name)}" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name" placeholder="e.g. Merchandise Check">
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Department</label>
-                        <select name="processes[${index}][department_id]" class="process-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="department_id">${options(departments, process.department_id, 'Any department')}</select>
+                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Action *</label>
+                        <input name="steps[${index}][action]" value="${escapeHtml(step.action)}" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="action" placeholder="e.g. checked">
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Role</label>
-                        <select name="processes[${index}][role_id]" class="process-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="role_id">${options(roles, process.role_id, 'Any role')}</select>
+                        <select name="steps[${index}][role_id]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="role_id">${options(roles, step.role_id, 'Any role')}</select>
                     </div>
-                    <button type="button" class="remove-process mb-1.5 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20" aria-label="Remove step">
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Status</label>
+                        <select name="steps[${index}][status_id]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="status_id">${options(statuses, step.status_id, 'No status')}</select>
+                    </div>
+                    <button type="button" class="remove-step mb-1.5 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20" aria-label="Remove step">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -196,8 +206,8 @@ $(function () {
         form[0].reset();
         $('#workflow-id').val('');
         $('#workflow-modal-title').text('Add workflow');
-        processRows = [newProcess()];
-        renderProcesses();
+        stepRows = [newStep()];
+        renderSteps();
         clearErrors();
         openModal();
     });
@@ -212,31 +222,32 @@ $(function () {
             $('#workflow-name').val(response.data.name);
             $('#workflow-slug').val(response.data.slug);
             $('#workflow-status').val(response.data.status_id);
-            processRows = response.data.processes.map(newProcess);
-            if (!processRows.length) processRows = [newProcess()];
-            renderProcesses();
+            $('#workflow-description').val(response.data.description || '');
+            stepRows = response.data.steps.map(newStep);
+            if (!stepRows.length) stepRows = [newStep()];
+            renderSteps();
             $('#workflow-modal-title').text('Edit workflow');
             openModal();
         });
     });
 
-    $('#add-process-button').on('click', function () {
-        processRows.push(newProcess());
-        renderProcesses();
+    $('#add-step-button').on('click', function () {
+        stepRows.push(newStep());
+        renderSteps();
     });
 
-    $('#process-rows').on('input change', '.process-field', function () {
-        const row = processRows.find(item => item.key === Number($(this).closest('.process-row').data('key')));
+    $('#step-rows').on('input change', '.step-field', function () {
+        const row = stepRows.find(item => item.key === Number($(this).closest('.step-row').data('key')));
         const field = $(this).data('field');
         row[field] = $(this).is(':checkbox') ? $(this).is(':checked') : $(this).val();
-    }).on('click', '.remove-process', function () {
-        if (processRows.length === 1) {
-            $('[data-error="processes"]').removeClass('hidden').text('A workflow must have at least one process step.');
+    }).on('click', '.remove-step', function () {
+        if (stepRows.length === 1) {
+            $('[data-error="steps"]').removeClass('hidden').text('A workflow must have at least one step.');
             return;
         }
-        const key = Number($(this).closest('.process-row').data('key'));
-        processRows = processRows.filter(item => item.key !== key);
-        renderProcesses();
+        const key = Number($(this).closest('.step-row').data('key'));
+        stepRows = stepRows.filter(item => item.key !== key);
+        renderSteps();
     });
 
     form.on('submit', function (event) {

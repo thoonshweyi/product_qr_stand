@@ -16,8 +16,10 @@ return new class extends Migration
             $table->integer('workflow_id')->unsigned()->nullable();
             $table->unsignedInteger('step_no')->default(1);
             $table->string('name');
-            $table->string("action");
+            $table->string('action'); // slug of name
             $table->unsignedBigInteger('role_id')->nullable();
+            $table->unsignedBigInteger('status_id')->nullable();
+            $table->foreign('status_id')->references('id')->on('statuses')->nullOnDelete();
             $table->timestamps();
         });
     }

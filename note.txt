@@ -592,7 +592,7 @@ role_id
     form_id
     workflow_id
     current_step_id
-    status
+    status 
     started_at 
     completed_at
 
