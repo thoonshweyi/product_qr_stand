@@ -9,9 +9,11 @@ use App\Models\Product;
 use App\Models\ProductEditLog;
 use App\Models\ProductImage;
 use App\Models\ProductSpecificationValue;
+use App\Models\ProductWorkflow;
 use App\Models\Specification;
 use App\Models\Status;
 use App\Models\Workflow;
+use App\Models\WorkflowStep;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -227,11 +229,24 @@ class ProductController extends Controller
             'specifications' => ['required', 'array', 'min:1', 'max:10'],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
-            'workflow_id' => ['required', 'integer', 'exists:workflows,id'],
+            'workflow_id' => [
+                'required',
+                'integer',
+                'exists:workflows,id',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (! WorkflowStep::where('workflow_id', $value)->exists()) {
+                        $fail('The selected workflow does not have any steps.');
+                    }
+                },
+            ],
         ]);
 
         $user = Auth::user();
         $user_id = $user->id;
+        $firstWorkflowStep = WorkflowStep::where('workflow_id', $validated['workflow_id'])
+            ->orderBy('step_no')
+            ->orderBy('id')
+            ->firstOrFail();
 
         $specificationRows = collect($request->input('specifications', []))
             ->map(function ($row) {
@@ -260,8 +275,15 @@ class ProductController extends Controller
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
                 'product_name' => $request['product_name'],
-                'workflow_id' => $validated['workflow_id'],
+                'status' => 'ongoing', // default workflow status for new product
             ]);
+
+            $productWorkflow = new ProductWorkflow;
+            $productWorkflow->product_id = $product->id;
+            $productWorkflow->workflow_id = $validated['workflow_id'];
+            $productWorkflow->current_step_id = $firstWorkflowStep->id;
+            $productWorkflow->status = 'ongoing';
+            $productWorkflow->save();
 
             foreach ($specificationRows as $row) {
                 $specificationName = Str::of($row['name'])->squish()->toString();
