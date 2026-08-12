@@ -167,7 +167,6 @@ $(function () {
             key: nextStepKey++,
             id: data.id || '',
             name: data.name || '',
-            action: data.action || '',
             role_id: data.role_id || '',
             status_id: data.status_id || '',
         };
@@ -177,15 +176,15 @@ $(function () {
         $('#step-rows').html(stepRows.map((step, index) => `
             <div class="step-row rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30" data-key="${step.key}">
                 <input type="hidden" name="steps[${index}][id]" value="${step.id}">
-                <div class="grid items-end gap-3 md:grid-cols-[2rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,.9fr)_minmax(0,.8fr)_2rem]">
+                <div class="grid items-end gap-3 md:grid-cols-[2rem_minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,.9fr)_2rem]">
                     <span class="mb-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">${index + 1}</span>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Step name *</label>
-                        <input name="steps[${index}][name]" value="${escapeHtml(step.name)}" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name" placeholder="e.g. Merchandise Check">
-                    </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Action *</label>
-                        <input name="steps[${index}][action]" value="${escapeHtml(step.action)}" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="action" placeholder="e.g. checked">
+                        <select name="steps[${index}][name]" class="step-field block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name">
+                            <option value="">Choose step</option>
+                            <option value="Check" ${step.name === 'Check' ? 'selected' : ''}>Check</option>
+                            <option value="Finish" ${step.name === 'Finish' ? 'selected' : ''}>Finish</option>
+                        </select>
                     </div>
                     <div>
                         <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Role</label>

@@ -43,7 +43,7 @@ class RolesController extends Controller
     {
         $this->validate($request,[
             "name" => "required|max:50|unique:roles,name",
-            "image" => "image|mimes:jpg,jpeg,png|max:1024",
+            "image" => "image|mimes:jpg,jpeg,png|max:5120",
             "status_id" => "required|in:3,4",
             "permission_ids" => "nullable|array",
             "permission_ids.*" => "integer|exists:permissions,id",
