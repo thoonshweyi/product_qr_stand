@@ -10,6 +10,7 @@ use App\Models\ProductEditLog;
 use App\Models\ProductImage;
 use App\Models\ProductSpecificationValue;
 use App\Models\ProductWorkflow;
+use App\Models\ProductWorkflowAction;
 use App\Models\Specification;
 use App\Models\Status;
 use App\Models\Workflow;
@@ -451,6 +452,17 @@ class ProductController extends Controller
             ->latest('id')
             ->first();
 
+        $currentWorkflowStep = $productWorkflow?->current_step_id
+            ? WorkflowStep::find($productWorkflow->current_step_id)
+            : null;
+
+        $canWorkflowAction = $currentWorkflowStep
+            && $productWorkflow->status === 'ongoing'
+            && (
+                ! $currentWorkflowStep->role_id
+                || request()->user()->roles()->whereKey($currentWorkflowStep->role_id)->exists()
+            );
+
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
             ->get(['id', 'name']);
@@ -497,7 +509,64 @@ class ProductController extends Controller
             'brands',
             'initialSpecifications',
             'productWorkflow',
+            'currentWorkflowStep',
+            'canWorkflowAction',
         ));
+    }
+
+    /**
+     * Record the current workflow action and move the product to its next step.
+     */
+    public function workflowAction(Request $request, Product $product)
+    {
+        $this->authorize('edit', $product);
+
+        DB::transaction(function () use ($request, $product) {
+            $productWorkflow = ProductWorkflow::query()
+                ->where('product_id', $product->id)
+                ->latest('id')
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_if($productWorkflow->status !== 'ongoing', 422, 'This workflow has already been completed.');
+
+            $currentStep = WorkflowStep::findOrFail($productWorkflow->current_step_id);
+            $canAction = ! $currentStep->role_id
+                || $request->user()->roles()->whereKey($currentStep->role_id)->exists();
+
+            abort_unless($canAction, 403, 'You cannot perform this workflow action.');
+
+            $actionLog = new ProductWorkflowAction;
+            $actionLog->product_id = $product->id;
+            $actionLog->product_workflow_id = $productWorkflow->id;
+            $actionLog->workflow_step_id = $currentStep->id;
+            $actionLog->user_id = $request->user()->id;
+            $actionLog->action = $currentStep->action;
+            $actionLog->comment = $request->input('comment');
+            $actionLog->save();
+
+            $nextStep = WorkflowStep::query()
+                ->where('workflow_id', $productWorkflow->workflow_id)
+                ->where('step_no', '>', $currentStep->step_no)
+                ->orderBy('step_no')
+                ->orderBy('id')
+                ->first();
+
+            $product->stage = match (strtolower($currentStep->action)) {
+                'check' => 'checked',
+                'finish' => 'finished',
+                default => $currentStep->action,
+            };
+            $product->save();
+
+            $productWorkflow->current_step_id = $nextStep?->id;
+            $productWorkflow->status = $nextStep ? 'ongoing' : 'completed';
+            $productWorkflow->save();
+        });
+
+        return redirect()
+            ->route('products.edit', $product)
+            ->with('success', 'Workflow action completed successfully.');
     }
 
     /**

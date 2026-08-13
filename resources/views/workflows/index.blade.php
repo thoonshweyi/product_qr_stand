@@ -189,8 +189,8 @@ $(function () {
                         <label class="mb-1 block text-[11px] font-medium text-gray-500 dark:text-gray-400 md:hidden">Step *</label>
                         <select name="steps[${index}][name]" class="step-field block h-9 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name">
                             <option value="">Choose step</option>
-                            <option value="Check" ${step.name === 'Check' ? 'selected' : ''}>Check</option>
-                            <option value="Finish" ${step.name === 'Finish' ? 'selected' : ''}>Finish</option>
+                            <option value="Checked" ${step.name === 'Checked' ? 'selected' : ''}>Checked</option>
+                            <option value="Finished" ${step.name === 'Finished' ? 'selected' : ''}>Finished</option>
                         </select>
                     </div>
                     <div>

@@ -137,7 +137,7 @@ class WorkflowsController extends Controller
             'status_id' => ['required', 'exists:statuses,id'],
             'steps' => ['required', 'array', 'min:1'],
             'steps.*.id' => ['nullable', 'integer', 'exists:workflow_steps,id'],
-            'steps.*.name' => ['required', 'string', Rule::in(['Check', 'Finish']), 'distinct'],
+            'steps.*.name' => ['required', 'string', Rule::in(['Check', 'Checked', 'Finish', 'Finished']), 'distinct'],
             'steps.*.role_id' => ['nullable', 'exists:roles,id'],
             'steps.*.status_id' => ['nullable', 'exists:statuses,id'],
         ]);

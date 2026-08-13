@@ -61,6 +61,20 @@
         </div>
     @endif
 
+    @if (session('success'))
+        <div class="mx-auto mt-6 w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+            <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-700 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if ($canWorkflowAction && $currentWorkflowStep)
+        <form id="workflow-action-form" action="{{ route('products.workflow.action', $product) }}" method="POST" class="hidden">
+            @csrf
+        </form>
+    @endif
+
     <form id="product-edit-form" action="{{ route('products.update', $product) }}" method="POST" enctype="multipart/form-data" novalidate>
         @csrf
         @method('PUT')
@@ -383,6 +397,21 @@
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                             <a href="{{ route('products.index') }}" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Cancel</a>
+                            @if ($canWorkflowAction && $currentWorkflowStep)
+                                @php
+                                    $workflowButtonLabel = match (strtolower($currentWorkflowStep->action)) {
+                                        'checked' => 'Check',
+                                        'finished' => 'Finish',
+                                        default => $currentWorkflowStep->name,
+                                    };
+                                @endphp
+                                <button type="submit" form="workflow-action-form" class="inline-flex flex-1 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-900">
+                                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
+                                    </svg>
+                                    {{ $workflowButtonLabel }}
+                                </button>
+                            @endif
                             <button type="submit" id="update-product-button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

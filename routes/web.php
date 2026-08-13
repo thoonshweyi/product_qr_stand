@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\BranchesController;
-use App\Http\Controllers\WorkflowsController;
 use App\Http\Controllers\DashboardsController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\ProductController;
@@ -11,6 +10,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SpecificationController;
 use App\Http\Controllers\StatusesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\WorkflowsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,16 +54,16 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('branches', BranchesController::class);
     Route::resource('workflows', WorkflowsController::class)->except(['create', 'edit']);
-    Route::get("/branchesstatus",[BranchesController::class,"changestatus"]);
-
+    Route::get('/branchesstatus', [BranchesController::class, 'changestatus']);
 
     Route::resource('roles', RolesController::class);
     Route::resource('permissions', PermissionsController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
-
     Route::resource('products', ProductController::class)->except('show');
-    Route::get("/productsstatus",[ProductController::class,"changestatus"]);
+    Route::post('/products/{product}/workflow-action', [ProductController::class, 'workflowAction'])
+        ->name('products.workflow.action');
+    Route::get('/productsstatus', [ProductController::class, 'changestatus']);
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])
         ->name('products.batch-print');
@@ -73,8 +73,7 @@ Route::middleware('auth')->group(function () {
         ->name('products.print-history');
 
     Route::resource('specifications', SpecificationController::class);
-    Route::get("/specificationsstatus",[SpecificationController::class,"changestatus"]);
-
+    Route::get('/specificationsstatus', [SpecificationController::class, 'changestatus']);
 
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
