@@ -448,6 +448,10 @@ class ProductController extends Controller
         $product = Product::with('specificationValues.specification')->findOrFail($id);
         $this->authorize('edit', $product);
 
+        $productWorkflow = ProductWorkflow::where('product_id', $product->id)
+            ->latest('id')
+            ->first();
+
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
             ->get(['id', 'name']);
@@ -493,6 +497,7 @@ class ProductController extends Controller
             'specifications',
             'brands',
             'initialSpecifications',
+            'productWorkflow',
         ));
     }
 

@@ -79,7 +79,17 @@
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-6">
 
                         <div class="lg:col-span-2">
-                            <label for="product_code" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
+                            <div class="mb-2 flex min-h-5 items-center justify-between gap-2">
+                                <label for="product_code" class="block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
+                                @php
+                                    $workflowStatus = $productWorkflow?->status ?? 'not-started';
+                                    $workflowCompleted = in_array(strtolower($workflowStatus), ['completed', 'finished']);
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $workflowCompleted ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-800' : 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800' }}">
+                                    <span class="h-1.5 w-1.5 rounded-full {{ $workflowCompleted ? 'bg-green-500' : 'bg-blue-500' }}"></span>
+                                    {{ ucfirst(str_replace(['_', '-'], ' ', $workflowStatus)) }}
+                                </span>
+                            </div>
                             <input type="search" name="product_code" id="product_code" value="{{ old('product_code', $product->product_code) }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110" readonly>
                             <!-- <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Keep leading zeros in the product code.</p> -->
                         </div>
@@ -566,14 +576,16 @@
             const category = categories.find(item => String(item.id) === String($('#category').val()));
             const status = statuses.find(item => String(item.id) === String($('#status').val()));
             const statusName = status ? status.name : '';
+            const isActiveStatus = statusName.toLowerCase() === 'active';
             $('#preview-category').text(category ? category.name : 'No category selected');
             $('#preview-name').text($('#name').val() || 'Untitled product');
             $('#preview-brand').text($('#brand').val());
             $('#preview-model').text($('#model').val());
             $('#description-count').text($('#description').val().length);
             $('#preview-status').text(statusName || 'No status')
-                .toggleClass('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', statusName.toLowerCase() === 'active')
-                .toggleClass('bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300', statusName.toLowerCase() !== 'active');
+                .toggleClass('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', isActiveStatus)
+                .toggleClass('bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300', !isActiveStatus);
+
         }
 
         function previewImage(input, type) {
