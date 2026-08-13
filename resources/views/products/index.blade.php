@@ -19,17 +19,30 @@
 
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Product management</h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Search products and manage their information and availability.</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
+                    {{ $selectedWorkflow ? $selectedWorkflow->name.' Products' : 'All Products' }}
+                </h1>
+                @if ($selectedWorkflow)
+                    <span class="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        {{ $selectedWorkflow->slug }}
+                    </span>
+                @endif
+            </div>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {{ $selectedWorkflow ? 'Products assigned to the '.$selectedWorkflow->name.' workflow.' : 'Search products and manage their information and availability.' }}
+            </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+            @if($selectedWorkflow?->slug === 'stand-only')
             <button type="submit" form="product-batch-print-form" id="batch-print-button" disabled
                 class="inline-flex w-fit items-center justify-center rounded-lg border border-primary-700 bg-white px-4 py-2.5 text-sm font-medium text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white">
                 <i class="fas fa-print mr-2"></i>
                 Print selected
                 <span id="selected-product-count" class="ml-1">(0)</span>
             </button>
+            @endif
 
         @can('create', App\Models\Product::class)
             <a href="{{ route('products.create') }}" class="inline-flex w-fit items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">
@@ -43,7 +56,7 @@
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form action="{{ route('products.index') }}" method="GET" class="grid w-full max-w-4xl grid-cols-12 items-end gap-3">
+        <form action="{{ $selectedWorkflow ? route('products.workflow.index', $selectedWorkflow) : route('products.index') }}" method="GET" class="grid w-full max-w-4xl grid-cols-12 items-end gap-3">
             <div class="col-span-12 sm:col-span-6 lg:col-span-4">
                 <label for="product-keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                 <input type="search" name="keyword" id="product-keyword" value="{{ request('keyword') }}"
@@ -76,7 +89,7 @@
             <div class="col-span-12 flex gap-2 lg:col-span-4">
                 <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
                 @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand'))
-                    <a href="{{ route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
+                    <a href="{{ $selectedWorkflow ? route('products.workflow.index', $selectedWorkflow) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
                 @endif
             </div>
         </form>
@@ -95,7 +108,7 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
-                    @if(auth()->user()->hasRoles(['Viewer']))
+                    @if($selectedWorkflow?->slug === 'stand-only' && auth()->user()->hasRoles(['Viewer']))
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
@@ -106,6 +119,7 @@
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Model</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Country</th>
+                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stage</th>
                     @if(auth()->user()->hasRoles(['Administrator','Editor']))
                         <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                             Status
@@ -140,7 +154,7 @@
                             </div>
                         </td>
 
-                        @if(auth()->user()->hasRoles(['Viewer']))
+                        @if($selectedWorkflow?->slug === 'stand-only' && auth()->user()->hasRoles(['Viewer']))
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -171,6 +185,26 @@
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->brand }}</td>
                         <td class="max-w-xs truncate p-4 text-sm text-gray-600 dark:text-gray-300" title="{{ $product->model }}">{{ $product->model }}</td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->country?->name ?? '—' }}</td>
+                        <td class="whitespace-nowrap p-4">
+                            @php
+                                $productStage = strtolower($product->stage ?: 'ongoing');
+                                $stageLabel = ucfirst(str_replace(['_', '-'], ' ', $productStage));
+                                $stageClasses = match ($productStage) {
+                                    'finished', 'completed' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+                                    'checked' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+                                    default => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                                };
+                                $stageDotClasses = match ($productStage) {
+                                    'finished', 'completed' => 'bg-green-500',
+                                    'checked' => 'bg-yellow-500',
+                                    default => 'bg-blue-500',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold {{ $stageClasses }}">
+                                <span class="h-1.5 w-1.5 rounded-full {{ $stageDotClasses }}"></span>
+                                {{ $stageLabel }}
+                            </span>
+                        </td>
 
                         @can('edit', $product)
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -231,7 +265,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
+                        <td colspan="11" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
                     </tr>
                 @endforelse
             </tbody>

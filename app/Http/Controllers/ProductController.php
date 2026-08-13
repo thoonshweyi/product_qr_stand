@@ -32,6 +32,19 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        return $this->productList($request);
+    }
+
+    /**
+     * Display products assigned to one workflow on a dedicated page.
+     */
+    public function workflowProducts(Request $request, Workflow $workflow)
+    {
+        return $this->productList($request, $workflow);
+    }
+
+    private function productList(Request $request, ?Workflow $selectedWorkflow = null)
+    {
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
@@ -39,6 +52,14 @@ class ProductController extends Controller
         $currentBranch = $request->user()->branch;
 
         $productsQuery = Product::with(['country', 'status', 'user'])
+            ->when($selectedWorkflow, function ($query) use ($selectedWorkflow) {
+                $query->whereExists(function ($query) use ($selectedWorkflow) {
+                    $query->selectRaw('1')
+                        ->from('product_workflows')
+                        ->whereColumn('product_workflows.product_id', 'products.id')
+                        ->where('product_workflows.workflow_id', $selectedWorkflow->id);
+                });
+            })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
                 $query->withMax([
                     'printRecords as current_branch_last_printed_at' => fn ($query) => $query
@@ -81,7 +102,14 @@ class ProductController extends Controller
             ->orderBy('brand')
             ->pluck('brand');
 
-        return view('products.index', compact('products', 'statuses', 'brands', 'currentBranch', 'currentBranchId'));
+        return view('products.index', compact(
+            'products',
+            'statuses',
+            'brands',
+            'currentBranch',
+            'currentBranchId',
+            'selectedWorkflow',
+        ));
     }
 
     public function catalog(Request $request)
