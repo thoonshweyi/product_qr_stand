@@ -39,7 +39,7 @@ class ProductPol
     public function edit(User $user, Product $product)
     {
         // allow Admin, Teacher to edit all leave records
-        if ($user->hasRoles(['Administrator', 'Editor'])) {
+        if ($user->hasRoles(['Admin', 'Administrator', 'Editor'])) {
             return true;
         }
         $productWorkflow = ProductWorkflow::where('product_id', $product->id)

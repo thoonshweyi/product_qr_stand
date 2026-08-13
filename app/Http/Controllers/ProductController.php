@@ -456,12 +456,16 @@ class ProductController extends Controller
             ? WorkflowStep::find($productWorkflow->current_step_id)
             : null;
 
-        $canWorkflowAction = $currentWorkflowStep
-            && $productWorkflow->status === 'ongoing'
+        $isAdmin = request()->user()->hasRoles(['Admin', 'Administrator']);
+        $hasStepRole = $currentWorkflowStep
             && (
                 ! $currentWorkflowStep->role_id
                 || request()->user()->roles()->whereKey($currentWorkflowStep->role_id)->exists()
             );
+
+        $canWorkflowAction = $currentWorkflowStep
+            && $productWorkflow->status === 'ongoing'
+            && ($isAdmin || $hasStepRole);
 
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
@@ -531,10 +535,11 @@ class ProductController extends Controller
             abort_if($productWorkflow->status !== 'ongoing', 422, 'This workflow has already been completed.');
 
             $currentStep = WorkflowStep::findOrFail($productWorkflow->current_step_id);
-            $canAction = ! $currentStep->role_id
+            $isAdmin = $request->user()->hasRoles(['Admin', 'Administrator']);
+            $hasStepRole = ! $currentStep->role_id
                 || $request->user()->roles()->whereKey($currentStep->role_id)->exists();
 
-            abort_unless($canAction, 403, 'You cannot perform this workflow action.');
+            abort_unless($isAdmin || $hasStepRole, 403, 'You cannot perform this workflow action.');
 
             $actionLog = new ProductWorkflowAction;
             $actionLog->product_id = $product->id;
