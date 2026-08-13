@@ -149,7 +149,7 @@
                                 <div class="flex flex-1 flex-wrap gap-2">
                                 @forelse ($workflows as $workflow)
                                     <label class="workflow-card relative inline-flex min-w-32 cursor-pointer items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5 pr-10 transition hover:border-primary-400 hover:shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:hover:border-primary-500">
-                                        <input type="radio" name="workflow_id" value="{{ $workflow->id }}" class="workflow-radio peer sr-only" @checked((string) old('workflow_id') === (string) $workflow->id)>
+                                        <input type="radio" name="workflow_id" value="{{ $workflow->id }}" data-slug="{{ $workflow->slug }}" class="workflow-radio peer sr-only" @checked((string) old('workflow_id') === (string) $workflow->id)>
                                         <span class="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-gray-50 transition peer-checked:border-primary-600 peer-checked:bg-primary-600 dark:border-gray-500 dark:bg-gray-700">
                                             <span class="h-2 w-2 rounded-full bg-white"></span>
                                         </span>
@@ -192,7 +192,7 @@
                                         <button type="button" id="new-specification-mode" class="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400 dark:text-gray-300 dark:hover:text-white dark:disabled:text-gray-600">New</button>
                                     </div>
                                     <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                        <span id="specification-count">0</span> / <span>10</span>
+                                        <span id="specification-count">0</span><span id="specification-max"> / 10</span>
                                     </span>
                                 </div>
                             </div>
@@ -289,7 +289,7 @@
 
                         <div class="grid grid-cols-3 gap-3">
                             <div class="col-span-2">
-                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image <span class="text-red-600">*</span></p>
+                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image <span id="main-image-required" class="text-red-600">*</span><span id="main-image-optional" class="hidden font-normal text-gray-400"> (Optional)</span></p>
                                 <label for="main_image" class="group relative flex aspect-[3/2] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
                                     <img id="main-image-preview" class="hidden h-full w-full object-contain" alt="Main product image preview">
                                     <div id="main-image-placeholder" class="p-4 text-center">
@@ -437,6 +437,14 @@
             return String(value || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
         }
 
+        function hasSpecificationLimit() {
+            return $('.workflow-radio:checked').data('slug') === 'stand-only';
+        }
+
+        function specificationLimitReached() {
+            return hasSpecificationLimit() && rows.length >= maxSpecifications;
+        }
+
         function escapeHtml(value) {
             return $('<div>').text(value == null ? '' : String(value)).html()
                 .replace(/"/g, '&quot;')
@@ -509,8 +517,9 @@
                     </div>
                 </div>`).join(''));
 
-            const limitReached = rows.length >= maxSpecifications;
+            const limitReached = specificationLimitReached();
             $('#specification-count').text(rows.length);
+            $('#specification-max').toggleClass('hidden', !hasSpecificationLimit());
             $('#empty-specifications').toggleClass('hidden', rows.length > 0);
             $('#specification-limit').toggleClass('hidden', !limitReached);
             $('#new-specification-mode, #specification_picker, #new_specification_name, #specification_value').prop('disabled', limitReached);
@@ -531,7 +540,7 @@
         }
 
         function setEntryMode(mode) {
-            if (mode === 'new' && rows.length >= maxSpecifications) return;
+            if (mode === 'new' && specificationLimitReached()) return;
             entryMode = mode;
             showError();
             const isNew = mode === 'new';
@@ -553,12 +562,12 @@
 
         function updateAddButton() {
             const name = entryName();
-            $('#add-specification').prop('disabled', rows.length >= maxSpecifications || !name || isSelected(name));
+            $('#add-specification').prop('disabled', specificationLimitReached() || !name || isSelected(name));
         }
 
         function addSpecification() {
             showError();
-            if (rows.length >= maxSpecifications) return showError('Maximum 10 specifications can be added.');
+            if (specificationLimitReached()) return showError('Stand Only workflow allows a maximum of 10 specifications.');
             const requestedName = entryName();
             if (!requestedName) return showError(entryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.');
             const existingName = availableSpecifications.find(name => normalize(name) === normalize(requestedName));
@@ -624,7 +633,7 @@
             });
 
             const mainImage = document.getElementById('main_image').files[0];
-            if (!mainImage) errors.main_image = ['Main image is required.'];
+            if (!mainImage && !hasSpecificationLimit()) errors.main_image = ['Main image is required.'];
 
             if (!$('.workflow-radio:checked').length) {
                 errors.workflow_id = ['Please select a workflow.'];
@@ -632,6 +641,8 @@
 
             if (!rows.length) {
                 errors.specifications = ['At least one product specification is required.'];
+            } else if (hasSpecificationLimit() && rows.length > maxSpecifications) {
+                errors.specifications = ['Stand Only workflow allows a maximum of 10 specifications.'];
             } else {
                 rows.forEach((row, index) => {
                     if (!String(row.name || '').trim()) errors[`specifications.${index}.name`] = [`Specification ${index + 1} name is required.`];
@@ -671,6 +682,11 @@
                 $(this).toggleClass('border-primary-500 bg-primary-50 ring-1 ring-primary-200 dark:bg-primary-900/20 dark:ring-primary-800', selected)
                     .toggleClass('border-gray-300 dark:border-gray-600', !selected);
             });
+            const isStandOnly = hasSpecificationLimit();
+            $('#main_image').prop('required', !isStandOnly);
+            $('#main-image-required').toggleClass('hidden', isStandOnly);
+            $('#main-image-optional').toggleClass('hidden', !isStandOnly);
+            renderRows();
         }).trigger('change');
 
         renderRows();

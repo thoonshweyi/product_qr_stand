@@ -241,6 +241,10 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
+        $isStandOnly = Workflow::whereKey($request->input('workflow_id'))
+            ->where('slug', 'stand-only')
+            ->exists();
+
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
             'status_id' => ['required', 'exists:statuses,id'],
@@ -252,10 +256,23 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'main_image' => [$isStandOnly ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'specifications' => ['required', 'array', 'min:1', 'max:10'],
+            'specifications' => [
+                'required',
+                'array',
+                'min:1',
+                function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                    $isStandOnly = Workflow::whereKey($request->input('workflow_id'))
+                        ->where('slug', 'stand-only')
+                        ->exists();
+
+                    if ($isStandOnly && is_array($value) && count($value) > 10) {
+                        $fail('Stand Only workflow allows a maximum of 10 specifications.');
+                    }
+                },
+            ],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
             'workflow_id' => [
@@ -335,8 +352,8 @@ class ProductController extends Controller
             }
 
             // Start Single Image Upload
-            if (file_exists($request['main_image'])) {
-                $file = $request['main_image'];
+            if ($request->hasFile('main_image')) {
+                $file = $request->file('main_image');
                 $fname = $file->getClientOriginalName();
                 $imagenewname = uniqid($user_id).$product['id'].$fname;
                 $file->move(public_path('assets/img/products'), $imagenewname);
@@ -346,8 +363,8 @@ class ProductController extends Controller
             }
             $product->save();
 
-            if (file_exists($request['thumbnail_image'])) {
-                $file = $request['thumbnail_image'];
+            if ($request->hasFile('thumbnail_image')) {
+                $file = $request->file('thumbnail_image');
                 $fname = $file->getClientOriginalName();
                 $imagenewname = uniqid($user_id).$product['id'].$fname;
                 $file->move(public_path('assets/img/products'), $imagenewname);
