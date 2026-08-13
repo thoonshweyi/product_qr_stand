@@ -82,12 +82,16 @@
                             <div class="mb-2 flex min-h-5 items-center justify-between gap-2">
                                 <label for="product_code" class="block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
                                 @php
-                                    $workflowStatus = $productWorkflow?->status ?? 'not-started';
-                                    $workflowCompleted = in_array(strtolower($workflowStatus), ['completed', 'finished']);
+                                    $productStage = strtolower($product->stage ?: 'ongoing');
+                                    $stageLabel = ucfirst(str_replace(['_', '-'], ' ', $productStage));
+                                    $stageIsComplete = in_array($productStage, ['finished', 'completed']);
                                 @endphp
-                                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset {{ $workflowCompleted ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-800' : 'bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800' }}">
-                                    <span class="h-1.5 w-1.5 rounded-full {{ $workflowCompleted ? 'bg-green-500' : 'bg-blue-500' }}"></span>
-                                    {{ ucfirst(str_replace(['_', '-'], ' ', $workflowStatus)) }}
+                                <span class="inline-flex overflow-hidden rounded-full text-[11px] font-semibold ring-1 ring-inset {{ $stageIsComplete ? 'ring-green-200 dark:ring-green-800' : 'ring-blue-200 dark:ring-blue-800' }}" title="Current product stage">
+                                    <!-- <span class="bg-gray-100 px-2 py-1 text-gray-500 dark:bg-gray-700 dark:text-gray-300">Stage</span> -->
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 {{ $stageIsComplete ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' }}">
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $stageIsComplete ? 'bg-green-500' : 'bg-blue-500' }}"></span>
+                                        {{ $stageLabel }}
+                                    </span>
                                 </span>
                             </div>
                             <input type="search" name="product_code" id="product_code" value="{{ old('product_code', $product->product_code) }}" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 2000000602110" readonly>
