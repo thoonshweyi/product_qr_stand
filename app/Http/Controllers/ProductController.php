@@ -275,7 +275,6 @@ class ProductController extends Controller
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
                 'product_name' => $request['product_name'],
-                'status' => 'ongoing', // default workflow status for new product
             ]);
 
             $productWorkflow = new ProductWorkflow;
