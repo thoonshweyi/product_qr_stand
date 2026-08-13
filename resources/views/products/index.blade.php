@@ -95,16 +95,22 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
+                    @if(auth()->user()->hasRoles(['Viewer']))
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
                             <span class="mt-0.5 block normal-case text-[10px] font-normal text-gray-400">{{ $currentBranch->branch_short_name ?: $currentBranch->branch_name }}</span>
                         @endif
                     </th>
+                    @endif
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Model</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Country</th>
-                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Status</th>
+                    @if(auth()->user()->hasRoles(['Administrator','Editor']))
+                        <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                            Status
+                        </th>
+                    @endif
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Updated by</th>
                     <th class="p-4 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
                 </tr>
@@ -133,6 +139,8 @@
                                 </div>
                             </div>
                         </td>
+
+                        @if(auth()->user()->hasRoles(['Viewer']))
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -158,6 +166,8 @@
                                 </span>
                             @endif
                         </td>
+                        @endif
+
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->brand }}</td>
                         <td class="max-w-xs truncate p-4 text-sm text-gray-600 dark:text-gray-300" title="{{ $product->model }}">{{ $product->model }}</td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->country?->name ?? '—' }}</td>
@@ -178,16 +188,6 @@
                                         peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
                                 </div>
                             </label>
-                        </td>
-                        @else
-                        <td class="whitespace-nowrap p-4">
-                            <span @class([
-                                'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold',
-                                'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' => $product->status_id === 1,
-                                'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' => $product->status_id !== 1,
-                            ])>
-                                {{ $product->status?->name ?? 'Unknown' }}
-                            </span>
                         </td>
                         @endcan
 

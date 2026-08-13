@@ -557,11 +557,7 @@ class ProductController extends Controller
                 ->orderBy('id')
                 ->first();
 
-            $product->stage = match (strtolower($currentStep->action)) {
-                'check' => 'checked',
-                'finish' => 'finished',
-                default => $currentStep->action,
-            };
+            $product->stage = $currentStep->action;
             $product->save();
 
             $productWorkflow->current_step_id = $nextStep?->id;
