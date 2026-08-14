@@ -633,7 +633,7 @@
             });
 
             const mainImage = document.getElementById('main_image').files[0];
-            if (!mainImage && !hasSpecificationLimit()) errors.main_image = ['Main image is required.'];
+            if (!mainImage && hasSpecificationLimit()) errors.main_image = ['Main image is required for Stand Only workflow.'];
 
             if (!$('.workflow-radio:checked').length) {
                 errors.workflow_id = ['Please select a workflow.'];
@@ -683,9 +683,9 @@
                     .toggleClass('border-gray-300 dark:border-gray-600', !selected);
             });
             const isStandOnly = hasSpecificationLimit();
-            $('#main_image').prop('required', !isStandOnly);
-            $('#main-image-required').toggleClass('hidden', isStandOnly);
-            $('#main-image-optional').toggleClass('hidden', !isStandOnly);
+            $('#main_image').prop('required', isStandOnly);
+            $('#main-image-required').toggleClass('hidden', !isStandOnly);
+            $('#main-image-optional').toggleClass('hidden', isStandOnly);
             renderRows();
         }).trigger('change');
 

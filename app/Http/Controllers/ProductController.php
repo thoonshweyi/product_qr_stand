@@ -256,7 +256,7 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => [$isStandOnly ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'main_image' => [$isStandOnly ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'specifications' => [
