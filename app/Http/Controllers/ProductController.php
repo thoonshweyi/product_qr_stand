@@ -38,41 +38,34 @@ class ProductController extends Controller
     /**
      * Display products assigned to one workflow on a dedicated page.
      */
-    public function workflowProducts(Request $request, Workflow $workflow)
+    public function workflowProducts(Request $request, string $channel)
     {
-        return $this->productList($request, $workflow);
+        abort_unless(in_array($channel, ['stand', 'online'], true), 404);
+
+        return $this->productList($request, $channel);
     }
 
-    private function productList(Request $request, ?Workflow $selectedWorkflow = null)
+    private function productList(Request $request, ?string $workflowChannel = null)
     {
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
-        $workflowChannel = match ($selectedWorkflow?->slug) {
-            'stand-only' => 'stand',
-            'online-only' => 'online',
-            default => null,
-        };
         $productListTitle = match ($workflowChannel) {
             'stand' => 'Stand Products',
             'online' => 'Online Products',
-            default => $selectedWorkflow ? $selectedWorkflow->name.' Products' : 'All Products',
+            default => 'All Products',
         };
 
         $productsQuery = Product::with(['country', 'status', 'user'])
-            ->when($selectedWorkflow, function ($query) use ($selectedWorkflow, $workflowChannel) {
-                $query->whereExists(function ($query) use ($selectedWorkflow, $workflowChannel) {
+            ->when($workflowChannel, function ($query) use ($workflowChannel) {
+                $query->whereExists(function ($query) use ($workflowChannel) {
                     $query->selectRaw('1')
                         ->from('product_workflows')
                         ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
                         ->whereColumn('product_workflows.product_id', 'products.id')
-                        ->when(
-                            $workflowChannel,
-                            fn ($query) => $query->where('workflows.slug', 'like', '%'.$workflowChannel.'%'),
-                            fn ($query) => $query->where('workflows.id', $selectedWorkflow->id),
-                        );
+                        ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
                 });
             })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
@@ -123,7 +116,7 @@ class ProductController extends Controller
             'brands',
             'currentBranch',
             'currentBranchId',
-            'selectedWorkflow',
+            'workflowChannel',
             'productListTitle',
         ));
     }

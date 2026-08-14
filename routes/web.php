@@ -60,7 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionsController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::get('/products/workflow/{workflow:slug}', [ProductController::class, 'workflowProducts'])
+    Route::get('/products/workflow/{channel}', [ProductController::class, 'workflowProducts'])
+        ->whereIn('channel', ['stand', 'online'])
         ->name('products.workflow.index');
     Route::resource('products', ProductController::class)->except('show');
     Route::post('/products/{product}/workflow-action', [ProductController::class, 'workflowAction'])

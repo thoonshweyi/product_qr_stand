@@ -59,9 +59,13 @@
                             <td class="px-5 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $workflow->steps_count }}</td>
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $workflow->user?->name ?? 'System' }}</td>
                             <td class="px-5 py-4 text-right whitespace-nowrap">
-                                <a href="{{ route('products.workflow.index', $workflow) }}" class="inline-flex rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700" title="View products">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                                </a>
+                                @foreach (['stand', 'online'] as $channel)
+                                    @if (str_contains($workflow->slug, $channel))
+                                        <a href="{{ route('products.workflow.index', $channel) }}" class="inline-flex rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700" title="View {{ ucfirst($channel) }} products">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                        </a>
+                                    @endif
+                                @endforeach
                                 <button type="button" data-id="{{ $workflow->id }}" class="edit-workflow rounded-lg p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700" title="Edit">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
                                 </button>

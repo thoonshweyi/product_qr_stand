@@ -23,25 +23,26 @@
                 <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
                     {{ $productListTitle }}
                 </h1>
-                @if ($selectedWorkflow)
-                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                        {{ $selectedWorkflow->slug }}
+                @if ($workflowChannel)
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-200/70 dark:shadow-none">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                        {{ ucfirst($workflowChannel) }}
                     </span>
                 @endif
             </div>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                @if ($selectedWorkflow?->slug === 'stand-only')
+                @if ($workflowChannel === 'stand')
                     Products assigned to workflows that include Stand.
-                @elseif ($selectedWorkflow?->slug === 'online-only')
+                @elseif ($workflowChannel === 'online')
                     Products assigned to workflows that include Online.
                 @else
-                    {{ $selectedWorkflow ? 'Products assigned to the '.$selectedWorkflow->name.' workflow.' : 'Search products and manage their information and availability.' }}
+                    Search products and manage their information and availability.
                 @endif
             </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            @if($selectedWorkflow?->slug === 'stand-only')
+            @if($workflowChannel === 'stand')
             <button type="submit" form="product-batch-print-form" id="batch-print-button" disabled
                 class="inline-flex w-fit items-center justify-center rounded-lg border border-primary-700 bg-white px-4 py-2.5 text-sm font-medium text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white">
                 <i class="fas fa-print mr-2"></i>
@@ -62,7 +63,7 @@
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form action="{{ $selectedWorkflow ? route('products.workflow.index', $selectedWorkflow) : route('products.index') }}" method="GET" class="grid w-full max-w-4xl grid-cols-12 items-end gap-3">
+        <form action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full max-w-4xl grid-cols-12 items-end gap-3">
             <div class="col-span-12 sm:col-span-6 lg:col-span-4">
                 <label for="product-keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                 <input type="search" name="keyword" id="product-keyword" value="{{ request('keyword') }}"
@@ -95,7 +96,7 @@
             <div class="col-span-12 flex gap-2 lg:col-span-4">
                 <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
                 @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand'))
-                    <a href="{{ $selectedWorkflow ? route('products.workflow.index', $selectedWorkflow) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
+                    <a href="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
                 @endif
             </div>
         </form>
@@ -114,7 +115,7 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
-                    @if($selectedWorkflow?->slug === 'stand-only' && auth()->user()->hasRoles(['Viewer']))
+                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
@@ -160,7 +161,7 @@
                             </div>
                         </td>
 
-                        @if($selectedWorkflow?->slug === 'stand-only' && auth()->user()->hasRoles(['Viewer']))
+                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
