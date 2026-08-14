@@ -24,7 +24,7 @@
                     {{ $selectedWorkflow ? $selectedWorkflow->name.' Products' : 'All Products' }}
                 </h1>
                 @if ($selectedWorkflow)
-                    <span class="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
                         {{ $selectedWorkflow->slug }}
                     </span>
                 @endif

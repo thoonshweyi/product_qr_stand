@@ -148,15 +148,12 @@
                                 </div>
                                 <div class="flex flex-1 flex-wrap gap-2">
                                 @forelse ($workflows as $workflow)
-                                    <label class="workflow-card relative inline-flex min-w-32 cursor-pointer items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2.5 pr-10 transition hover:border-primary-400 hover:shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:hover:border-primary-500">
+                                    <label class="workflow-card relative inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-blue-800 dark:bg-blue-900/30">
                                         <input type="radio" name="workflow_id" value="{{ $workflow->id }}" data-slug="{{ $workflow->slug }}" class="workflow-radio peer sr-only" @checked((string) old('workflow_id') === (string) $workflow->id)>
-                                        <span class="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-gray-50 transition peer-checked:border-primary-600 peer-checked:bg-primary-600 dark:border-gray-500 dark:bg-gray-700">
-                                            <span class="h-2 w-2 rounded-full bg-white"></span>
+                                        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition peer-checked:bg-white/20 peer-checked:text-white dark:bg-blue-900/60 dark:text-blue-300">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
                                         </span>
-                                        <span class="flex h-7 w-7 items-center justify-center rounded-md {{ $workflow->slug === 'online' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                                        </span>
-                                        <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $workflow->name }}</span>
+                                        <span class="text-sm font-semibold text-blue-800 transition peer-checked:text-white dark:text-blue-200">{{ $workflow->name }}</span>
                                     </label>
                                 @empty
                                     <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
@@ -679,8 +676,8 @@
             $('#workflow-selection-error').toggleClass('hidden', hasSelection);
             $('.workflow-card').each(function () {
                 const selected = $(this).find('.workflow-radio').is(':checked');
-                $(this).toggleClass('border-primary-500 bg-primary-50 ring-1 ring-primary-200 dark:bg-primary-900/20 dark:ring-primary-800', selected)
-                    .toggleClass('border-gray-300 dark:border-gray-600', !selected);
+                $(this).toggleClass('border-blue-600 bg-blue-600 shadow-md ring-2 ring-blue-200 dark:border-blue-500 dark:bg-blue-600 dark:ring-blue-900', selected)
+                    .toggleClass('border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/30', !selected);
             });
             const isStandOnly = hasSpecificationLimit();
             $('#main_image').prop('required', isStandOnly);

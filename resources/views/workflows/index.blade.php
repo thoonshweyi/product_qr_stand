@@ -45,11 +45,11 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
                             <td class="px-5 py-4 text-sm text-gray-500">{{ $workflows->firstItem() + $index }}</td>
                             <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $workflow->slug === 'online' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' }}">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200/70 dark:shadow-none">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                                        {{ $workflow->name }}
                                     </span>
-                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $workflow->name }}</span>
                                 </div>
                             </td>
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $workflow->slug }}</td>
@@ -59,7 +59,7 @@
                             <td class="px-5 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $workflow->steps_count }}</td>
                             <td class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $workflow->user?->name ?? 'System' }}</td>
                             <td class="px-5 py-4 text-right whitespace-nowrap">
-                                <a href="{{ route('products.workflow.index', $workflow) }}" class="inline-flex rounded-lg p-2 text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-gray-700" title="View products">
+                                <a href="{{ route('products.workflow.index', $workflow) }}" class="inline-flex rounded-lg p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700" title="View products">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
                                 </a>
                                 <button type="button" data-id="{{ $workflow->id }}" class="edit-workflow rounded-lg p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700" title="Edit">
