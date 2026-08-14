@@ -50,14 +50,29 @@ class ProductController extends Controller
         $brand = trim((string) $request->query('brand', ''));
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
+        $workflowChannel = match ($selectedWorkflow?->slug) {
+            'stand-only' => 'stand',
+            'online-only' => 'online',
+            default => null,
+        };
+        $productListTitle = match ($workflowChannel) {
+            'stand' => 'Stand Products',
+            'online' => 'Online Products',
+            default => $selectedWorkflow ? $selectedWorkflow->name.' Products' : 'All Products',
+        };
 
         $productsQuery = Product::with(['country', 'status', 'user'])
-            ->when($selectedWorkflow, function ($query) use ($selectedWorkflow) {
-                $query->whereExists(function ($query) use ($selectedWorkflow) {
+            ->when($selectedWorkflow, function ($query) use ($selectedWorkflow, $workflowChannel) {
+                $query->whereExists(function ($query) use ($selectedWorkflow, $workflowChannel) {
                     $query->selectRaw('1')
                         ->from('product_workflows')
+                        ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
                         ->whereColumn('product_workflows.product_id', 'products.id')
-                        ->where('product_workflows.workflow_id', $selectedWorkflow->id);
+                        ->when(
+                            $workflowChannel,
+                            fn ($query) => $query->where('workflows.slug', 'like', '%'.$workflowChannel.'%'),
+                            fn ($query) => $query->where('workflows.id', $selectedWorkflow->id),
+                        );
                 });
             })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
@@ -109,6 +124,7 @@ class ProductController extends Controller
             'currentBranch',
             'currentBranchId',
             'selectedWorkflow',
+            'productListTitle',
         ));
     }
 

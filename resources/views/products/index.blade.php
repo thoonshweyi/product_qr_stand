@@ -21,7 +21,7 @@
         <div>
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
-                    {{ $selectedWorkflow ? $selectedWorkflow->name.' Products' : 'All Products' }}
+                    {{ $productListTitle }}
                 </h1>
                 @if ($selectedWorkflow)
                     <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
@@ -30,7 +30,13 @@
                 @endif
             </div>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {{ $selectedWorkflow ? 'Products assigned to the '.$selectedWorkflow->name.' workflow.' : 'Search products and manage their information and availability.' }}
+                @if ($selectedWorkflow?->slug === 'stand-only')
+                    Products assigned to workflows that include Stand.
+                @elseif ($selectedWorkflow?->slug === 'online-only')
+                    Products assigned to workflows that include Online.
+                @else
+                    {{ $selectedWorkflow ? 'Products assigned to the '.$selectedWorkflow->name.' workflow.' : 'Search products and manage their information and availability.' }}
+                @endif
             </p>
         </div>
 
