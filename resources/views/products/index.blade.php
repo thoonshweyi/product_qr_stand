@@ -28,6 +28,10 @@
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
                         {{ ucfirst($workflowChannel) }}
                     </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                        Stand And Online
+                    </span>
                 @endif
             </div>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
