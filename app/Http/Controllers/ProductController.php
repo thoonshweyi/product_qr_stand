@@ -505,6 +505,10 @@ class ProductController extends Controller
             ->latest('id')
             ->first();
 
+        $selectedWorkflow = $productWorkflow
+            ? Workflow::find($productWorkflow->workflow_id)
+            : null;
+
         $currentWorkflowStep = $productWorkflow?->current_step_id
             ? WorkflowStep::find($productWorkflow->current_step_id)
             : null;
@@ -566,6 +570,7 @@ class ProductController extends Controller
             'brands',
             'initialSpecifications',
             'productWorkflow',
+            'selectedWorkflow',
             'currentWorkflowStep',
             'canWorkflowAction',
         ));
@@ -631,6 +636,16 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $this->authorize('edit', $product);
 
+        $productWorkflow = ProductWorkflow::where('product_id', $product->id)
+            ->latest('id')
+            ->first();
+        $selectedWorkflowSlug = $productWorkflow
+            ? Workflow::whereKey($productWorkflow->workflow_id)->value('slug')
+            : null;
+        $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
+        $isStandOnly = $selectedWorkflowSlug === 'stand-only';
+        $mainImageRule = $requiresMainImage && blank($product->image) ? 'required' : 'nullable';
+
         $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code,'.$product->id],
             'status_id' => ['required', 'exists:statuses,id'],
@@ -642,10 +657,19 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'main_image' => [$mainImageRule, 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'specifications' => ['required', 'array', 'min:1', 'max:10'],
+            'specifications' => [
+                'required',
+                'array',
+                'min:1',
+                function (string $attribute, mixed $value, \Closure $fail) use ($isStandOnly) {
+                    if ($isStandOnly && is_array($value) && count($value) > 10) {
+                        $fail('Stand Only workflow allows a maximum of 10 specifications.');
+                    }
+                },
+            ],
             'specifications.*.name' => ['required', 'string', 'max:255'],
             'specifications.*.value' => ['required', 'string', 'max:255'],
         ]);

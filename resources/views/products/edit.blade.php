@@ -92,6 +92,40 @@
 
                     <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-6">
 
+                        @php
+                            $workflowSlug = strtolower($selectedWorkflow?->slug ?? '');
+                            $workflowHasStand = str_contains($workflowSlug, 'stand');
+                            $workflowHasOnline = str_contains($workflowSlug, 'online');
+                            $workflowIsStandOnly = $workflowSlug === 'stand-only';
+                        @endphp
+                        <div class="sm:col-span-2 lg:col-span-6">
+                            <div class="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800 dark:bg-blue-900/20">
+                                <div class="min-w-32">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">Product Workflow</p>
+                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Assigned during product creation</p>
+                                </div>
+                                @if ($selectedWorkflow)
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200/70 dark:shadow-none">
+                                        @if ($workflowHasStand && $workflowHasOnline)
+                                            <span class="inline-flex items-center gap-1">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
+                                            </span>
+                                        @elseif ($workflowHasStand)
+                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                        @elseif ($workflowHasOnline)
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
+                                        @else
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                                        @endif
+                                        {{ $selectedWorkflow->name }}
+                                    </span>
+                                @else
+                                    <span class="rounded-full bg-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">Not assigned</span>
+                                @endif
+                            </div>
+                        </div>
+
                         <div class="lg:col-span-2">
                             <div class="mb-2 flex min-h-5 items-center justify-between gap-2">
                                 <label for="product_code" class="block text-sm font-medium text-gray-900 dark:text-white">Product code <span class="text-red-600">*</span></label>
@@ -197,7 +231,7 @@
                                         <button type="button" id="new-specification-mode" class="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400 dark:text-gray-300 dark:hover:text-white dark:disabled:text-gray-600">New</button>
                                     </div>
                                     <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                                        <span id="specification-count">0</span> / <span>10</span>
+                                        <span id="specification-count">0</span><span id="specification-max" class="{{ $workflowIsStandOnly ? '' : 'hidden' }}"> / 10</span>
                                     </span>
                                 </div>
                             </div>
@@ -294,7 +328,7 @@
 
                         <div class="grid grid-cols-3 gap-3">
                             <div class="col-span-2">
-                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image <span class="text-red-600">*</span></p>
+                                <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Main image <span class="{{ $workflowHasStand ? '' : 'hidden' }} text-red-600">*</span><span class="{{ $workflowHasStand ? 'hidden' : '' }} font-normal text-gray-400"> (Optional)</span></p>
                                 <label for="main_image" class="group relative flex aspect-[3/2] cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 transition hover:border-primary-500 hover:bg-primary-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-primary-500 dark:hover:bg-gray-700">
                                     <img id="main-image-preview" @if($product->image) src="{{ asset($product->image) }}" @endif class="{{ $product->image ? '' : 'hidden' }} h-full w-full object-contain" alt="Main product image preview">
                                     <div id="main-image-placeholder" class="{{ $product->image ? 'hidden' : '' }} p-4 text-center">
@@ -453,6 +487,9 @@
 
         const maxSpecifications = 10;
         const hasExistingMainImage = @js(filled($product->image));
+        const selectedWorkflowSlug = @js($workflowSlug);
+        const hasSpecificationLimit = selectedWorkflowSlug === 'stand-only';
+        const requiresMainImage = selectedWorkflowSlug.includes('stand');
         const initialProductCode = @js($product->product_code);
         let qrButtonLabel = @js($product->qr ? 'Regenerate QR Code' : 'Generate QR Code');
         const categories = @js($categories);
@@ -549,8 +586,9 @@
                     </div>
                 </div>`).join(''));
 
-            const limitReached = rows.length >= maxSpecifications;
+            const limitReached = hasSpecificationLimit && rows.length >= maxSpecifications;
             $('#specification-count').text(rows.length);
+            $('#specification-max').toggleClass('hidden', !hasSpecificationLimit);
             $('#empty-specifications').toggleClass('hidden', rows.length > 0);
             $('#specification-limit').toggleClass('hidden', !limitReached);
             $('#new-specification-mode, #specification_picker, #new_specification_name, #specification_value').prop('disabled', limitReached);
@@ -571,7 +609,7 @@
         }
 
         function setEntryMode(mode) {
-            if (mode === 'new' && rows.length >= maxSpecifications) return;
+            if (mode === 'new' && hasSpecificationLimit && rows.length >= maxSpecifications) return;
             entryMode = mode;
             showError();
             const isNew = mode === 'new';
@@ -593,12 +631,12 @@
 
         function updateAddButton() {
             const name = entryName();
-            $('#add-specification').prop('disabled', rows.length >= maxSpecifications || !name || isSelected(name));
+            $('#add-specification').prop('disabled', (hasSpecificationLimit && rows.length >= maxSpecifications) || !name || isSelected(name));
         }
 
         function addSpecification() {
             showError();
-            if (rows.length >= maxSpecifications) return showError('Maximum 10 specifications can be added.');
+            if (hasSpecificationLimit && rows.length >= maxSpecifications) return showError('Stand Only workflow allows a maximum of 10 specifications.');
             const requestedName = entryName();
             if (!requestedName) return showError(entryMode === 'new' ? 'Enter a specification name.' : 'Choose a specification first.');
             const existingName = availableSpecifications.find(name => normalize(name) === normalize(requestedName));
@@ -666,10 +704,14 @@
             });
 
             const mainImage = document.getElementById('main_image').files[0];
-            if (!mainImage && !hasExistingMainImage) errors.main_image = ['Main image is required.'];
+            if (requiresMainImage && !mainImage && !hasExistingMainImage) {
+                errors.main_image = ['Main image is required for workflows that include Stand.'];
+            }
 
             if (!rows.length) {
                 errors.specifications = ['At least one product specification is required.'];
+            } else if (hasSpecificationLimit && rows.length > maxSpecifications) {
+                errors.specifications = ['Stand Only workflow allows a maximum of 10 specifications.'];
             } else {
                 rows.forEach((row, index) => {
                     if (!String(row.name || '').trim()) errors[`specifications.${index}.name`] = [`Specification ${index + 1} name is required.`];
