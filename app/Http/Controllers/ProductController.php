@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
 use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Country;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProductController extends Controller
@@ -1028,6 +1030,14 @@ class ProductController extends Controller
         ]);
 
         return response()->json(['success' => 'Status Change Successfully']);
+    }
+
+    public function export()
+    {
+        return Excel::download(
+            new ProductsExport,
+            'products.xlsx'
+        );
     }
 }
 
