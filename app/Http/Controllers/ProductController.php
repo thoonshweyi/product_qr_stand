@@ -241,9 +241,8 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $isStandOnly = Workflow::whereKey($request->input('workflow_id'))
-            ->where('slug', 'stand-only')
-            ->exists();
+        $selectedWorkflowSlug = Workflow::whereKey($request->input('workflow_id'))->value('slug');
+        $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
 
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
@@ -256,7 +255,7 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'main_image' => [$isStandOnly ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'specifications' => [

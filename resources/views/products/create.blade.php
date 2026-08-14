@@ -438,6 +438,10 @@
             return $('.workflow-radio:checked').data('slug') === 'stand-only';
         }
 
+        function requiresMainImage() {
+            return String($('.workflow-radio:checked').data('slug') || '').toLowerCase().includes('stand');
+        }
+
         function specificationLimitReached() {
             return hasSpecificationLimit() && rows.length >= maxSpecifications;
         }
@@ -630,7 +634,7 @@
             });
 
             const mainImage = document.getElementById('main_image').files[0];
-            if (!mainImage && hasSpecificationLimit()) errors.main_image = ['Main image is required for Stand Only workflow.'];
+            if (!mainImage && requiresMainImage()) errors.main_image = ['Main image is required for workflows that include Stand.'];
 
             if (!$('.workflow-radio:checked').length) {
                 errors.workflow_id = ['Please select a workflow.'];
@@ -679,10 +683,10 @@
                 $(this).toggleClass('border-blue-600 bg-blue-600 shadow-md ring-2 ring-blue-200 dark:border-blue-500 dark:bg-blue-600 dark:ring-blue-900', selected)
                     .toggleClass('border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/30', !selected);
             });
-            const isStandOnly = hasSpecificationLimit();
-            $('#main_image').prop('required', isStandOnly);
-            $('#main-image-required').toggleClass('hidden', !isStandOnly);
-            $('#main-image-optional').toggleClass('hidden', isStandOnly);
+            const mainImageRequired = requiresMainImage();
+            $('#main_image').prop('required', mainImageRequired);
+            $('#main-image-required').toggleClass('hidden', !mainImageRequired);
+            $('#main-image-optional').toggleClass('hidden', mainImageRequired);
             renderRows();
         }).trigger('change');
 
