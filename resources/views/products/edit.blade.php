@@ -98,31 +98,43 @@
                             $workflowHasOnline = str_contains($workflowSlug, 'online');
                             $workflowIsStandOnly = $workflowSlug === 'stand-only';
                         @endphp
-                        <div class="sm:col-span-2 lg:col-span-6">
-                            <div class="flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800 dark:bg-blue-900/20">
-                                <div class="min-w-32">
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">Product Workflow</p>
-                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Assigned during product creation</p>
+                        <div class="order-last sm:col-span-2 lg:col-span-6">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-700/30 sm:flex sm:items-center sm:gap-5">
+                                <div class="mb-3 min-w-40 sm:mb-0">
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Workflow <span class="text-red-600">*</span></p>
+                                    </div>
+                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Select one workflow</p>
                                 </div>
-                                @if ($selectedWorkflow)
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200/70 dark:shadow-none">
-                                        @if ($workflowHasStand && $workflowHasOnline)
-                                            <span class="inline-flex items-center gap-1">
+                                <div class="flex flex-1 flex-wrap gap-2">
+                                @forelse ($workflows as $workflow)
+                                    @php
+                                        $optionSlug = strtolower($workflow->slug);
+                                        $optionHasStand = str_contains($optionSlug, 'stand');
+                                        $optionHasOnline = str_contains($optionSlug, 'online');
+                                    @endphp
+                                    <label class="workflow-preview-card relative inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-blue-800 dark:bg-blue-900/30">
+                                        <input type="radio" name="workflow_preview_id" value="{{ $workflow->id }}" data-slug="{{ $workflow->slug }}" class="workflow-preview-radio peer sr-only" @checked($selectedWorkflow?->id === $workflow->id)>
+                                        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition peer-checked:bg-white/20 peer-checked:text-white dark:bg-blue-900/60 dark:text-blue-300">
+                                            @if ($optionHasStand && $optionHasOnline)
+                                                <span class="inline-flex items-center gap-0.5">
+                                                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
+                                                </span>
+                                            @elseif ($optionHasStand)
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                            @elseif ($optionHasOnline)
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
-                                            </span>
-                                        @elseif ($workflowHasStand)
-                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
-                                        @elseif ($workflowHasOnline)
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
-                                        @else
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
-                                        @endif
-                                        {{ $selectedWorkflow->name }}
-                                    </span>
-                                @else
+                                            @else
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                                            @endif
+                                        </span>
+                                        <span class="text-sm font-semibold text-blue-800 transition peer-checked:text-white dark:text-blue-200">{{ $workflow->name }}</span>
+                                    </label>
+                                @empty
                                     <span class="rounded-full bg-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">Not assigned</span>
-                                @endif
+                                @endforelse
+                                </div>
                             </div>
                         </div>
 
@@ -743,6 +755,13 @@
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
         $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
+        $('.workflow-preview-radio').on('change', function () {
+            $('.workflow-preview-card').each(function () {
+                const selected = $(this).find('.workflow-preview-radio').is(':checked');
+                $(this).toggleClass('border-blue-600 bg-blue-600 shadow-md ring-2 ring-blue-200 dark:border-blue-500 dark:bg-blue-600 dark:ring-blue-900', selected)
+                    .toggleClass('border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/30', !selected);
+            });
+        }).trigger('change');
 
         $('#generate-qr-button').on('click', function () {
             const $button = $(this);

@@ -148,10 +148,26 @@
                                 </div>
                                 <div class="flex flex-1 flex-wrap gap-2">
                                 @forelse ($workflows as $workflow)
+                                    @php
+                                        $optionSlug = strtolower($workflow->slug);
+                                        $optionHasStand = str_contains($optionSlug, 'stand');
+                                        $optionHasOnline = str_contains($optionSlug, 'online');
+                                    @endphp
                                     <label class="workflow-card relative inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md dark:border-blue-800 dark:bg-blue-900/30">
                                         <input type="radio" name="workflow_id" value="{{ $workflow->id }}" data-slug="{{ $workflow->slug }}" class="workflow-radio peer sr-only" @checked((string) old('workflow_id') === (string) $workflow->id)>
                                         <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition peer-checked:bg-white/20 peer-checked:text-white dark:bg-blue-900/60 dark:text-blue-300">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                                            @if ($optionHasStand && $optionHasOnline)
+                                                <span class="inline-flex items-center gap-0.5">
+                                                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
+                                                </span>
+                                            @elseif ($optionHasStand)
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8v8H3V3Zm2 2v4h4V5H5Zm8-2h8v8h-8V3Zm2 2v4h4V5h-4ZM3 13h8v8H3v-8Zm2 2v4h4v-4H5Zm8-2h3v3h-3v-3Zm5 0h3v5h-2v3h-3v-3h2v-5Zm-5 5h3v3h-3v-3Z"/></svg>
+                                            @elseif ($optionHasOnline)
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h2l2.4 10.1a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H7m3 11.5h.01m7 0h.01"/></svg>
+                                            @else
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M3 11.5V6a3 3 0 0 1 3-3h5.5a2 2 0 0 1 1.414.586l7.5 7.5a2 2 0 0 1 0 2.828l-6.5 6.5a2 2 0 0 1-2.828 0l-7.5-7.5A2 2 0 0 1 3 11.5Z"/></svg>
+                                            @endif
                                         </span>
                                         <span class="text-sm font-semibold text-blue-800 transition peer-checked:text-white dark:text-blue-200">{{ $workflow->name }}</span>
                                     </label>

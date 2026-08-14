@@ -508,6 +508,14 @@ class ProductController extends Controller
         $selectedWorkflow = $productWorkflow
             ? Workflow::find($productWorkflow->workflow_id)
             : null;
+        $workflows = Workflow::query()
+            ->where(function ($query) use ($selectedWorkflow) {
+                $query->where('status_id', 1)
+                    ->orWhereNull('status_id')
+                    ->when($selectedWorkflow, fn ($query) => $query->orWhere('id', $selectedWorkflow->id));
+            })
+            ->orderBy('id')
+            ->get(['id', 'name', 'slug']);
 
         $currentWorkflowStep = $productWorkflow?->current_step_id
             ? WorkflowStep::find($productWorkflow->current_step_id)
@@ -571,6 +579,7 @@ class ProductController extends Controller
             'initialSpecifications',
             'productWorkflow',
             'selectedWorkflow',
+            'workflows',
             'currentWorkflowStep',
             'canWorkflowAction',
         ));
