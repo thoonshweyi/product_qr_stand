@@ -1032,11 +1032,28 @@ class ProductController extends Controller
         return response()->json(['success' => 'Status Change Successfully']);
     }
 
-    public function export()
+    public function exportOnlineProducts()
     {
+        $products = Product::query()
+            ->with([
+                'category:id,name',
+                'country:id,name',
+                'status:id,name',
+                'specificationValues.specification:id,name',
+            ])
+            ->whereExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('product_workflows')
+                    ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
+                    ->whereColumn('product_workflows.product_id', 'products.id')
+                    ->where('workflows.slug', 'like', '%online%');
+            })
+            ->orderBy('products.id')
+            ->get();
+
         return Excel::download(
-            new ProductsExport(Product::all()),
-            'products.xlsx'
+            new ProductsExport($products),
+            'online-products-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 }

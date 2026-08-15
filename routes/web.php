@@ -72,6 +72,8 @@ Route::middleware('auth')->group(function () {
         ->name('products.batch-print');
     Route::post('/products/batch-print-records', [ProductPrintController::class, 'storeBatch'])
         ->name('products.batch-print-records.store');
+    Route::get('/products/workflow/online/export', [ProductController::class, 'exportOnlineProducts'])
+        ->name('products.online.export');
     Route::get('/products/{product}/print-history', [ProductPrintController::class, 'history'])
         ->name('products.print-history');
 
@@ -80,11 +82,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/productsearch', [ProductController::class, 'search_product'])->name('product_search');
     Route::get('/products-generate-qr/{text}/{format?}', [ProductController::class, 'generateProductQR'])->name('products.generateqr');
-
-    Route::get('/products/export', [
-        ProductController::class,
-        'export'
-    ])->name('products.export');
 
     Route::get('/productscreatedemo', function () {
         // Static sample data for the product form prototype. No database records are used here.
