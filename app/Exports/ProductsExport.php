@@ -4,17 +4,27 @@ namespace App\Exports;
 
 use App\Models\Product;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ProductsExport implements FromCollection, WithHeadings, WithMapping
+class ProductsExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithEvents
 {
+
+    public function __construct($products)
+    {
+        $this->products = $products;
+    }
+
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return Product::all();
+        return $this->products;
     }
 
     public function headings(): array
@@ -41,7 +51,8 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping
             'item_member_price',
             'image_name',
             'branch_code_list',
-            'product_feature_status',
+            'product_feature',
+            'status',
             'product_low_stock_qty',
             'product_custom_order',
             'product_custom_order_note',
@@ -79,6 +90,46 @@ class ProductsExport implements FromCollection, WithHeadings, WithMapping
             $product->id,
             $product->name,
             $product->product_code,
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Set the row height for the first row (header row)
+                foreach (range(1, 1) as $row) {
+                    $rowHeightPx = 80;
+                    $rowHeight = $rowHeightPx * 0.75; // Convert pixels to Excel row height scale
+                    $sheet->getRowDimension($row)->setRowHeight($rowHeight);
+                }
+
+                 // **Style Heading Row (Row 1)**
+                $sheet->getStyle('A1:AY1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,        // Bold text
+                        // 'size' => 18,          // Font size
+                        'color' => ['rgb' => 'FFFFFF'], // White font color
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '4F81BD'], // Blue background color
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER, // Center align text
+                        'vertical' => Alignment::VERTICAL_CENTER, // Center vertically
+                    ],
+                    'borders' => [
+                            'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // Thin border
+                            'color' => ['rgb' => 'BFBFBF'], // Light gray border
+                        ],
+                    ],
+                ]);
+
+            },
         ];
     }
 
