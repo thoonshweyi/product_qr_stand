@@ -1032,8 +1032,12 @@ class ProductController extends Controller
         return response()->json(['success' => 'Status Change Successfully']);
     }
 
-    public function exportOnlineProducts()
+    public function exportOnlineProducts(Request $request)
     {
+        $keyword = trim((string) $request->query('keyword', ''));
+        $statusId = $request->query('status_id');
+        $brand = trim((string) $request->query('brand', ''));
+
         $products = Product::query()
             ->with([
                 'category:id,name',
@@ -1048,6 +1052,15 @@ class ProductController extends Controller
                     ->whereColumn('product_workflows.product_id', 'products.id')
                     ->where('workflows.slug', 'like', '%online%');
             })
+            ->when($keyword !== '', function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('product_code', 'like', '%'.$keyword.'%')
+                        ->orWhere('name', 'like', '%'.$keyword.'%');
+                });
+            })
+            ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
+            ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(! $request->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderBy('products.id')
             ->get();
 
