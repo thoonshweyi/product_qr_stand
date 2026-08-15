@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Branch;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -16,14 +17,14 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
 {
     private const COMPANY_MESSAGE = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
 
-    public function __construct(private readonly Collection $products) {}
+    public function __construct(private readonly Collection $preproducts) {}
 
     /**
      * @return \Illuminate\Support\Collection
      */
     public function collection()
     {
-        return $this->products;
+        return $this->preproducts;
     }
 
     public function headings(): array
@@ -83,8 +84,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         ];
     }
 
-    public function map($product): array
+    public function map($preproducts): array
     {
+        $product = $preproducts['product'];
+        $onlinedata = $preproducts['onlinedata'];
+
         $descriptionLines = collect([
             'Brand: '.$product->brand,
             'Name: '.$product->name,
@@ -99,58 +103,68 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             fn ($lines) => $lines->push(trim($product->description)),
         )->push(self::COMPANY_MESSAGE);
 
+        $branchCodes = Branch::query()
+                        ->orderBy('branch_code','asc')
+                        ->where('status_id', '3')
+                        ->pluck('branch_code')
+                        ->filter((fn ($code) => filled($code) && !in_array($code, ['MM-001','MM-112', 'MM-201', 'MM-205'])))
+                        ->values();
+        $branchCodesString = $branchCodes->implode(',');
+        // dd($branchCodesString);
+        // MM-101,MM-102,MM-103,MM-104,MM-105,MM-106,MM-107,MM-108,MM-109,MM-110,MM-113,MM-114,MM-115
+
         return [
             $product->product_code,
-            $product->name,
-            '', // product_name_mm: external source
+            $product->product_name,
+            $product->product_name,
             $product->brand,
             $product->category?->name ?? '',
-            '', // sub_category_name: external source
-            '', // product_group_name: external source
-            '', // product_pattern_name: external source
-            '', // product_type_name: external source
-            '', // product_tags: external source
+            '*', // sub_category_name: online data
+            $onlinedata->group_name, // product_group_name: online data
+            $onlinedata->pattern_name, // product_pattern_name: online data
+            '-', // product_type_name: online data
+            '', // product_tags: fill by online
             $descriptionLines->filter(fn ($line) => filled(trim((string) $line)))->implode("\n"),
-            '', // product_description_mm: external source
+            $descriptionLines->filter(fn ($line) => filled(trim((string) $line)))->implode("\n"), // product_description_mm: online data
             $product->unit ?? '',
-            '', // show_pro1_logo: external source
-            '', // item_code: external source
-            '', // item_name: external source
-            '', // item_color: external source
-            '', // item_sell_price: external source
-            '', // item_member_price: external source
-            $product->image ? basename($product->image) : '',
-            '', // branch_code_list: external source
-            '', // product_feature: external source
-            $product->status?->name ?? '',
-            '', // product_low_stock_qty: external source
-            '', // product_custom_order: external source
-            '', // product_custom_order_note: external source
-            '', // upsell_list: external source
+            '', // show_pro1_logo: online data
+            $onlinedata->barcode_code, // item_code: online data
+            $onlinedata->product_name, // item_name: online data
+            '', // item_color: online data
+            $onlinedata->item_sell_price, // item_sell_price: online data
+            $onlinedata->item_member_price, // item_member_price: online data
+            $onlinedata->barcode_code.'.jpg', // image_name: online data
+            $branchCodesString, // branch_code_list: online data
+            'Yes', // product_feature: 
+            'Active', // status: 
+            '0', // product_low_stock_qty: 
+            '', // product_custom_order: 
+            '', // product_custom_order_note: 
+            '', // upsell_list: 
             $product->model,
             $product->country?->name ?? '',
-            '', // product_custom_product_type: external source
-            '', // product_weight: external source
-            '', // product_length: external source
-            '', // product_width: external source
-            '', // product_height: external source
-            '', // product_size: external source
-            '', // additional_info_1: external source
-            '', // additional_info_2: external source
-            '', // additional_info_3: external source
-            '', // additional_info_4: external source
-            '', // additional_info_5: external source
-            '', // product_shipping_class: external source
-            '', // product_tax: external source
-            '', // layer_1: external source
-            '', // layer_2: external source
-            '', // layer_3: external source
-            '', // layer_4: external source
-            '', // layer_5: external source
-            '', // layer_6: external source
-            '', // layer_7: external source
-            '', // layer_8: external source
-            '', // foc_status: external source
+            '', // product_custom_product_type: 
+            '', // product_weight: 
+            '', // product_length: 
+            '', // product_width: 
+            '', // product_height: 
+            '', // product_size: 
+            '', // additional_info_1: 
+            '', // additional_info_2: 
+            '', // additional_info_3: 
+            '', // additional_info_4: 
+            '', // additional_info_5: 
+            '', // product_shipping_class: 
+            '', // product_tax: 
+            '', // layer_1: 
+            '', // layer_2: 
+            '', // layer_3: 
+            '', // layer_4: 
+            '', // layer_5: 
+            '', // layer_6: 
+            '', // layer_7: 
+            '', // layer_8: 
+            '', // foc_status: 
         ];
     }
 
@@ -172,11 +186,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
                     'font' => [
                         'bold' => true,        // Bold text
                         // 'size' => 18,          // Font size
-                        'color' => ['rgb' => 'FFFFFF'], // White font color
+                        'color' => ['rgb' => '000000'], // White font color
                     ],
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '4F81BD'], // Blue background color
+                        'startColor' => ['rgb' => '92d050'], // Blue background color
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER, // Center align text
@@ -185,7 +199,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // Thin border
-                            'color' => ['rgb' => 'BFBFBF'], // Light gray border
+                            'color' => ['rgb' => '000000'], // Light gray border
                         ],
                     ],
                 ]);

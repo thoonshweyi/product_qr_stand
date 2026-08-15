@@ -16,6 +16,7 @@ use App\Models\Specification;
 use App\Models\Status;
 use App\Models\Workflow;
 use App\Models\WorkflowStep;
+use App\Services\OnlineProductExportDataService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -1032,7 +1033,7 @@ class ProductController extends Controller
         return response()->json(['success' => 'Status Change Successfully']);
     }
 
-    public function exportOnlineProducts(Request $request)
+    public function exportOnlineProducts(Request $request, OnlineProductExportDataService $exportDataService)
     {
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
@@ -1064,8 +1065,10 @@ class ProductController extends Controller
             ->orderBy('products.id')
             ->get();
 
+        $preproducts = $exportDataService->prepare($products);
+
         return Excel::download(
-            new ProductsExport($products),
+            new ProductsExport($preproducts),
             'online-products-'.now()->format('Y-m-d').'.xlsx'
         );
     }
