@@ -339,7 +339,11 @@
         }
 
         .sheet-text-body {
-            margin: auto 0;
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            justify-content: space-evenly;
+            min-height: 0;
         }
 
         .sheet-specifications {
