@@ -312,7 +312,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 72%;
+            width: 90%;
             opacity: 0.055;
             filter: grayscale(1);
             transform: translate(-50%, -50%);
@@ -324,7 +324,7 @@
 
         .sheet-details h2 {
             margin: 0 0 2px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 900;
             line-height: 1.5; 
             text-transform: uppercase;
