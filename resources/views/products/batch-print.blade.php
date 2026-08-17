@@ -2,6 +2,27 @@
 
 @section('css')
     <style>
+        @font-face {
+            font-family: "BatchPrintLatin";
+            src: url("{{ asset('assets/fonts/batch-print/LiberationSans-Regular.ttf') }}") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "BatchPrintLatin";
+            src: url("{{ asset('assets/fonts/batch-print/LiberationSans-Bold.ttf') }}") format("truetype");
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "BatchPrintMyanmar";
+            src: url("{{ asset('assets/fonts/batch-print/Myanmar3.ttf') }}") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -283,8 +304,7 @@
             min-height: 0;
             overflow: hidden;
             padding-bottom: 0;
-            font-family: Arial, "Myanmar3", "Myanmar Text", sans-serif;
-            /* font-family: "Poppins", "Pyidaungsu", sans-serif; */
+            font-family: "BatchPrintLatin", "BatchPrintMyanmar", sans-serif;
             text-rendering: optimizeLegibility;
         }
 
