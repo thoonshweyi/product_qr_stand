@@ -37,9 +37,9 @@ return new class extends Migration
             ProductWorkflow::firstOrCreate(
                 [
                     'product_id' => $product->id,
-                    'workflow_id' => $workflow->id,
                 ],
                 [
+                    'workflow_id' => $workflow->id,
                     'current_step_id' => $firstWorkflowStep->id,
                     'status' => 'ongoing',
                 ]
