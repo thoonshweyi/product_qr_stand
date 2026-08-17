@@ -44,7 +44,7 @@
 
         <!-- Standard Practice: Import Library Files -->
         <!-- fontawesome css1 -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="{{ asset('assets/libs/fontawesome-6.4.0/css/all.min.css') }}">
 
         <!-- select2 css1 js1 -->
         <link href="{{ asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
