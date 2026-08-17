@@ -114,26 +114,26 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         // MM-101,MM-102,MM-103,MM-104,MM-105,MM-106,MM-107,MM-108,MM-109,MM-110,MM-113,MM-114,MM-115
 
         return [
-            $product->product_code,
-            $product->product_name,
-            $product->product_name,
-            $product->brand,
-            $product->category?->name ?? '',
-            '*', // sub_category_name: online data
-            $onlinedata->group_name, // product_group_name: online data
-            $onlinedata->pattern_name, // product_pattern_name: online data
-            '-', // product_type_name: online data
-            '', // product_tags: fill by online
+            $onlinedata->product_code,
+            $onlinedata->product_name,
+            $onlinedata->product_name,
+            $onlinedata->brand_name,
+            $onlinedata->category_name,
+            $onlinedata->sub_category_name, // sub_category_name: online data
+            $onlinedata->product_group_name, // product_group_name: online data
+            $onlinedata->product_pattern_name, // product_pattern_name: online data
+            $onlinedata->product_type_name, // product_type_name: online data
+            '-', // product_tags: fill by online
             $descriptionLines->filter(fn ($line) => filled(trim((string) $line)))->implode("\n"),
             $descriptionLines->filter(fn ($line) => filled(trim((string) $line)))->implode("\n"), // product_description_mm: online data
-            $product->unit ?? '',
+            $onlinedata->unit,
             '', // show_pro1_logo: online data
-            $onlinedata->barcode_code, // item_code: online data
-            $onlinedata->product_name, // item_name: online data
+            $onlinedata->item_code, // item_code: online data
+            $onlinedata->item_name, // item_name: online data
             '', // item_color: online data
             $onlinedata->item_sell_price, // item_sell_price: online data
             $onlinedata->item_member_price, // item_member_price: online data
-            $onlinedata->barcode_code.'.jpg', // image_name: online data
+            $onlinedata->item_code.'.jpg', // image_name: online data
             $branchCodesString, // branch_code_list: online data
             'Yes', // product_feature: 
             'Active', // status: 
