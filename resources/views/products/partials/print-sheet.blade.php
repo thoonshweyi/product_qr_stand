@@ -64,17 +64,18 @@
                     <h2>Product Description <span>(ထုတ်ကုန်အကြောင်း)</span></h2>
                 @endunless
 
-                <dl class="sheet-specifications">
-                    @foreach ($specifications as $label => $value)
-                        <dt>• {{ $label }}</dt>
-                        <dd>:</dd>
-                        <dd>{{ $value }}</dd>
-                    @endforeach
-                </dl>
-          
+                <div class="sheet-text-body">
+                    <dl class="sheet-specifications">
+                        @foreach ($specifications as $label => $value)
+                            <dt>• {{ $label }}</dt>
+                            <dd>:</dd>
+                            <dd>{{ $value }}</dd>
+                        @endforeach
+                    </dl>
 
-                <div class="sheet-description"
-                    style="--description-lines: {{ $descriptionLineLimit }};">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                    <div class="sheet-description"
+                        style="--description-lines: {{ $descriptionLineLimit }};">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                </div>
             </div>
         </section>
     </div>

@@ -177,7 +177,9 @@
         }
 
         .sheet-content {
+            display: grid;
             flex: 1 1 auto;
+            grid-template-rows: auto auto minmax(0, 1fr);
             min-height: 0;
             overflow: hidden;
             padding: 4px 12px;
@@ -301,6 +303,8 @@
 
         .sheet-details {
             position: relative;
+            display: flex;
+            flex-direction: column;
             min-height: 0;
             overflow: hidden;
             padding-bottom: 0;
@@ -320,6 +324,10 @@
 
         .sheet-details-body {
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            width: 100%;
         }
 
         .sheet-details h2 {
@@ -328,6 +336,10 @@
             font-weight: 900;
             line-height: 1.5; 
             text-transform: uppercase;
+        }
+
+        .sheet-text-body {
+            margin: auto 0;
         }
 
         .sheet-specifications {
