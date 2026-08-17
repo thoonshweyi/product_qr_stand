@@ -1,5 +1,10 @@
 @extends('layouts.dashboard')
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+@endsection
+
 @section('content')
 <div class="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 lg:mt-1.5">
     <nav class="mb-5 flex" aria-label="Breadcrumb">
@@ -54,7 +59,7 @@
 
         <div class="flex flex-wrap items-center gap-2">
             @if ($workflowChannel === 'online')
-                <a href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand'])) }}" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
+                <a href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month'])) }}" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
                     Export products
                 </a>
@@ -80,8 +85,8 @@
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full max-w-4xl grid-cols-12 items-end gap-3">
-            <div class="col-span-12 sm:col-span-6 lg:col-span-4">
+        <form action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full {{ $workflowChannel === 'online' ? 'max-w-6xl' : 'max-w-4xl' }} grid-cols-12 items-end gap-3">
+            <div class="col-span-12 sm:col-span-6 {{ $workflowChannel === 'online' ? 'lg:col-span-3' : 'lg:col-span-4' }}">
                 <label for="product-keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                 <input type="search" name="keyword" id="product-keyword" value="{{ request('keyword') }}"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -110,9 +115,18 @@
                 </select>
             </div>
 
-            <div class="col-span-12 flex gap-2 lg:col-span-4">
+            @if ($workflowChannel === 'online')
+                <div class="col-span-6 sm:col-span-3 lg:col-span-2">
+                    <label for="online_month" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Online month</label>
+                    <input type="text" name="online_month" id="online_month" value="{{ request('online_month') }}"
+                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        placeholder="Choose month" autocomplete="off">
+                </div>
+            @endif
+
+            <div class="col-span-12 flex gap-2 {{ $workflowChannel === 'online' ? 'lg:col-span-3' : 'lg:col-span-4' }}">
                 <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
-                @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand'))
+                @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand') || request()->filled('online_month'))
                     <a href="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
                 @endif
             </div>
@@ -304,8 +318,25 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script>
     $(document).ready(function () {
+        const onlineMonthInput = document.getElementById('online_month');
+
+        if (onlineMonthInput) {
+            flatpickr(onlineMonthInput, {
+                allowInput: false,
+                altInput: true,
+                dateFormat: 'Y-m',
+                plugins: [new monthSelectPlugin({
+                    shorthand: false,
+                    dateFormat: 'Y-m',
+                    altFormat: 'F Y',
+                })],
+            });
+        }
+
         const $productCheckboxes = $('.product-print-checkbox');
         const $selectAll = $('#select-all-products');
         const $batchPrintButton = $('#batch-print-button');

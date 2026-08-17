@@ -1,5 +1,10 @@
 @extends('layouts.dashboard')
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+@endsection
+
 @section('content')
 <div id="product-create-page" class="min-h-screen">
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
@@ -179,6 +184,17 @@
                                 </div>
                             </div>
             <p id="workflow-selection-error" class="mt-2 hidden text-xs font-medium text-red-600 dark:text-red-400">Please select a workflow.</p>
+                        </div>
+
+                        <div id="online-date-field" class="hidden lg:col-span-3">
+                            <label for="online_date" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Online Date <span class="text-red-600">*</span></label>
+                            <div class="relative">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v3m8-3v3M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"/></svg>
+                                </div>
+                                <input type="text" name="online_date" id="online_date" value="{{ old('online_date') }}" autocomplete="off" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Choose month and year">
+                            </div>
+                            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">The first day of the selected month will be saved.</p>
                         </div>
                     </div>
                 </section>
@@ -423,6 +439,8 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <script>
     // Using jQuery DOM same as weather forecast json
     $(document).ready(function() {
@@ -456,6 +474,10 @@
 
         function requiresMainImage() {
             return String($('.workflow-radio:checked').data('slug') || '').toLowerCase().includes('stand');
+        }
+
+        function requiresOnlineDate() {
+            return String($('.workflow-radio:checked').data('slug') || '').toLowerCase().includes('online');
         }
 
         function specificationLimitReached() {
@@ -656,6 +678,10 @@
                 errors.workflow_id = ['Please select a workflow.'];
             }
 
+            if (requiresOnlineDate() && !String($('#online_date').val() || '').trim()) {
+                errors.online_date = ['Online Date is required for workflows that include Online.'];
+            }
+
             if (!rows.length) {
                 errors.specifications = ['At least one product specification is required.'];
             } else if (hasSpecificationLimit() && rows.length > maxSpecifications) {
@@ -691,6 +717,16 @@
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
         $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
+        const onlineDatePicker = flatpickr('#online_date', {
+            allowInput: false,
+            altInput: true,
+            dateFormat: 'Y-m-d',
+            plugins: [new monthSelectPlugin({
+                shorthand: false,
+                dateFormat: 'Y-m-d',
+                altFormat: 'F Y',
+            })],
+        });
         $('.workflow-radio').on('change', function () {
             const hasSelection = $('.workflow-radio:checked').length > 0;
             $('#workflow-selection-error').toggleClass('hidden', hasSelection);
@@ -703,6 +739,10 @@
             $('#main_image').prop('required', mainImageRequired);
             $('#main-image-required').toggleClass('hidden', !mainImageRequired);
             $('#main-image-optional').toggleClass('hidden', mainImageRequired);
+            const onlineDateRequired = requiresOnlineDate();
+            $('#online-date-field').toggleClass('hidden', !onlineDateRequired);
+            $('#online_date').prop('required', onlineDateRequired);
+            if (!onlineDateRequired) onlineDatePicker.clear();
             renderRows();
         }).trigger('change');
 

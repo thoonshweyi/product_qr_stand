@@ -17,6 +17,7 @@ use App\Models\Status;
 use App\Models\Workflow;
 use App\Models\WorkflowStep;
 use App\Services\OnlineProductExportDataService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +54,7 @@ class ProductController extends Controller
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
+        $onlineMonth = trim((string) $request->query('online_month', ''));
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
         $productListTitle = match ($workflowChannel) {
@@ -91,6 +93,12 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(
+                $workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
+                fn ($query) => $query
+                    ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
+                    ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
+            )
             ->when(! auth()->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderByDesc('id');
 
@@ -255,6 +263,7 @@ class ProductController extends Controller
 
         $selectedWorkflowSlug = Workflow::whereKey($request->input('workflow_id'))->value('slug');
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
+        $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
 
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
@@ -270,6 +279,7 @@ class ProductController extends Controller
             'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d'],
             'specifications' => [
                 'required',
                 'array',
@@ -332,6 +342,9 @@ class ProductController extends Controller
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
                 'product_name' => $request['product_name'],
+                'online_date' => $requiresOnlineDate
+                    ? Carbon::createFromFormat('Y-m-d', $validated['online_date'])->startOfMonth()->toDateString()
+                    : null,
             ]);
 
             $productWorkflow = new ProductWorkflow;
@@ -655,6 +668,7 @@ class ProductController extends Controller
             ? Workflow::whereKey($productWorkflow->workflow_id)->value('slug')
             : null;
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
+        $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
         $isStandOnly = $selectedWorkflowSlug === 'stand-only';
         $mainImageRule = $requiresMainImage && blank($product->image) ? 'required' : 'nullable';
 
@@ -672,6 +686,7 @@ class ProductController extends Controller
             'main_image' => [$mainImageRule, 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d'],
             'specifications' => [
                 'required',
                 'array',
@@ -714,6 +729,9 @@ class ProductController extends Controller
                 'status_id' => $request->status_id,
                 // 'category_id' => $request->category_id,
                 'user_id' => $request->user()?->id,
+                'online_date' => $requiresOnlineDate
+                    ? Carbon::createFromFormat('Y-m-d', $request->input('online_date'))->startOfMonth()->toDateString()
+                    : null,
             ]);
 
             $product->specificationValues()->delete();
@@ -1038,6 +1056,7 @@ class ProductController extends Controller
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
+        $onlineMonth = trim((string) $request->query('online_month', ''));
 
         $products = Product::query()
             ->with([
@@ -1061,6 +1080,12 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(
+                preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
+                fn ($query) => $query
+                    ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
+                    ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
+            )
             ->when(! $request->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderBy('products.id')
             ->get();

@@ -11,6 +11,7 @@ class Product extends Model
 
     protected $casts = [
         'print_version' => 'integer',
+        'online_date' => 'date',
     ];
 
     protected $fillable = [
@@ -33,7 +34,8 @@ class Product extends Model
         'qr_destination',
         'print_version',
         'workflow_id',
-        'stage'
+        'stage',
+        'online_date',
     ];
 
     public function specificationValues()
