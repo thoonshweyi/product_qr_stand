@@ -140,7 +140,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             '0', // product_low_stock_qty: 
             '', // product_custom_order: 
             '', // product_custom_order_note: 
-            '', // upsell_list: 
+            '-', // upsell_list: 
             $product->model,
             $product->country?->name ?? '',
             '', // product_custom_product_type: 

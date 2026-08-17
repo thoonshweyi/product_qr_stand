@@ -31,6 +31,8 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProductController extends Controller
 {
+    private const ONLINE_REQUIRED_SPECIFICATIONS = ['Weight', 'Length', 'Width', 'Height', 'Size'];
+
     /**
      * Display a listing of the resource.
      */
@@ -284,13 +286,25 @@ class ProductController extends Controller
                 'required',
                 'array',
                 'min:1',
-                function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                function (string $attribute, mixed $value, \Closure $fail) use ($request, $requiresOnlineDate) {
                     $isStandOnly = Workflow::whereKey($request->input('workflow_id'))
                         ->where('slug', 'stand-only')
                         ->exists();
 
                     if ($isStandOnly && is_array($value) && count($value) > 10) {
                         $fail('Stand Only workflow allows a maximum of 10 specifications.');
+                    }
+
+                    if ($requiresOnlineDate && is_array($value)) {
+                        $submittedNames = collect($value)
+                            ->pluck('name')
+                            ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
+                        $missing = collect(self::ONLINE_REQUIRED_SPECIFICATIONS)
+                            ->reject(fn ($name) => $submittedNames->contains(Str::lower($name)));
+
+                        if ($missing->isNotEmpty()) {
+                            $fail('Online workflows require these specifications: '.$missing->implode(', ').'.');
+                        }
                     }
                 },
             ],
@@ -691,9 +705,21 @@ class ProductController extends Controller
                 'required',
                 'array',
                 'min:1',
-                function (string $attribute, mixed $value, \Closure $fail) use ($isStandOnly) {
+                function (string $attribute, mixed $value, \Closure $fail) use ($isStandOnly, $requiresOnlineDate) {
                     if ($isStandOnly && is_array($value) && count($value) > 10) {
                         $fail('Stand Only workflow allows a maximum of 10 specifications.');
+                    }
+
+                    if ($requiresOnlineDate && is_array($value)) {
+                        $submittedNames = collect($value)
+                            ->pluck('name')
+                            ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
+                        $missing = collect(self::ONLINE_REQUIRED_SPECIFICATIONS)
+                            ->reject(fn ($name) => $submittedNames->contains(Str::lower($name)));
+
+                        if ($missing->isNotEmpty()) {
+                            $fail('Online workflows require these specifications: '.$missing->implode(', ').'.');
+                        }
                     }
                 },
             ],

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(WorkflowSeeder::class);
+        $this->call(SpecificationSeeder::class);
 
         // \App\Models\User::factory(10)->create();
 
