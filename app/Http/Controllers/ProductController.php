@@ -626,6 +626,8 @@ class ProductController extends Controller
             'workflows',
             'currentWorkflowStep',
             'canWorkflowAction',
+            'defaultDescriptionMm',
+            'defaultDescriptionEn',
         ));
     }
 
