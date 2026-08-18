@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('products', ProductController::class)->except('show');
     Route::post('/products/{product}/workflow-action', [ProductController::class, 'workflowAction'])
         ->name('products.workflow.action');
+    Route::post('/products/workflow/online/finish', [ProductController::class, 'bulkFinishOnlineProducts'])
+        ->name('products.workflow.online.finish');
     Route::get('/productsstatus', [ProductController::class, 'changestatus']);
 
     Route::post('/products/batch-print', [ProductController::class, 'batchPrint'])

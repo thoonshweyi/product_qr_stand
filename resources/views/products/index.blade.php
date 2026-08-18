@@ -59,13 +59,19 @@
 
         <div class="flex flex-wrap items-center gap-2">
             @if ($workflowChannel === 'online')
+                <button type="submit" form="product-batch-action-form" id="batch-finish-button" disabled
+                    class="inline-flex w-fit items-center justify-center rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
+                    <i class="fas fa-circle-check mr-2"></i>
+                    Finish selected
+                    <span id="selected-finish-count" class="ml-1">(0)</span>
+                </button>
                 <a href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month'])) }}" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
                     Export products
                 </a>
             @endif
             @if($workflowChannel === 'stand')
-            <button type="submit" form="product-batch-print-form" id="batch-print-button" disabled
+            <button type="submit" form="product-batch-action-form" id="batch-print-button" disabled
                 class="inline-flex w-fit items-center justify-center rounded-lg border border-primary-700 bg-white px-4 py-2.5 text-sm font-medium text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white">
                 <i class="fas fa-print mr-2"></i>
                 Print selected
@@ -82,6 +88,12 @@
         </div>
     </div>
 </div>
+
+@if (session('success'))
+    <div class="border-b border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300">
+        {{ session('success') }}
+    </div>
+@endif
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
@@ -133,7 +145,7 @@
         </form>
     </div>
 
-    <form id="product-batch-print-form" action="{{ route('products.batch-print') }}" method="POST" target="_blank">
+    <form id="product-batch-action-form" action="{{ $workflowChannel === 'online' ? route('products.workflow.online.finish') : route('products.batch-print') }}" method="POST" @if($workflowChannel !== 'online') target="_blank" @endif>
         @csrf
     <div class="freeze-table-header" style="--freeze-table-max-height: calc(100vh - 18rem);">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
@@ -172,8 +184,8 @@
                     <tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700/60">
                         <td class="w-12 p-4">
                             <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
-                                class="product-print-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
-                                aria-label="Select {{ $product->name }} for printing">
+                                class="product-action-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                                aria-label="Select {{ $product->name }}">
                         </td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }}</td>
                         <td class="whitespace-nowrap p-4">
@@ -337,18 +349,38 @@
             });
         }
 
-        const $productCheckboxes = $('.product-print-checkbox');
+        const isOnlineWorkflowList = @js($workflowChannel === 'online');
+        const $productCheckboxes = $('.product-action-checkbox');
         const $selectAll = $('#select-all-products');
         const $batchPrintButton = $('#batch-print-button');
+        const $batchFinishButton = $('#batch-finish-button');
         const $selectedCount = $('#selected-product-count');
+        const $selectedFinishCount = $('#selected-finish-count');
 
         function updateBatchPrintSelection() {
             const selected = $productCheckboxes.filter(':checked').length;
             $selectedCount.text(`(${selected})`);
+            $selectedFinishCount.text(`(${selected})`);
             $batchPrintButton.prop('disabled', selected === 0);
+            $batchFinishButton.prop('disabled', selected === 0);
             $selectAll.prop('checked', selected > 0 && selected === $productCheckboxes.length);
             $selectAll.prop('indeterminate', selected > 0 && selected < $productCheckboxes.length);
         }
+
+        $('#product-batch-action-form').on('submit', function (event) {
+            if (!isOnlineWorkflowList) return;
+
+            const selected = $productCheckboxes.filter(':checked').length;
+            if (selected === 0) {
+                event.preventDefault();
+
+                return;
+            }
+
+            if (!confirm(`Finish ${selected} selected product(s)?`)) {
+                event.preventDefault();
+            }
+        });
 
         $selectAll.on('change', function () {
             $productCheckboxes.prop('checked', this.checked);

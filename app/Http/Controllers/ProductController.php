@@ -711,6 +711,89 @@ class ProductController extends Controller
             ->with('success', 'Workflow action completed successfully.');
     }
 
+    public function bulkFinishOnlineProducts(Request $request)
+    {
+        $validated = $request->validate([
+            'product_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id'],
+        ]);
+
+        $finishedCount = 0;
+        $skippedCount = 0;
+
+        DB::transaction(function () use ($request, $validated, &$finishedCount, &$skippedCount) {
+            foreach ($validated['product_ids'] as $productId) {
+                $product = Product::findOrFail($productId);
+                $this->authorize('edit', $product);
+
+                $productWorkflow = ProductWorkflow::query()
+                    ->where('product_id', $product->id)
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $productWorkflow || $productWorkflow->status !== 'ongoing') {
+                    $skippedCount++;
+
+                    continue;
+                }
+
+                $currentStep = WorkflowStep::find($productWorkflow->current_step_id);
+                $isOnlineWorkflow = Workflow::query()
+                    ->whereKey($productWorkflow->workflow_id)
+                    ->where('slug', 'like', '%online%')
+                    ->exists();
+                $isFinishStep = in_array(Str::lower((string) $currentStep?->action), ['finish', 'finished'], true);
+                $isAdmin = $request->user()->hasRoles(['Admin', 'Administrator']);
+                $hasStepRole = $currentStep
+                    && (
+                        ! $currentStep->role_id
+                        || $request->user()->roles()->whereKey($currentStep->role_id)->exists()
+                    );
+
+                if (! $isOnlineWorkflow || ! $isFinishStep || ! ($isAdmin || $hasStepRole)) {
+                    $skippedCount++;
+
+                    continue;
+                }
+
+                $actionLog = new ProductWorkflowAction;
+                $actionLog->product_id = $product->id;
+                $actionLog->product_workflow_id = $productWorkflow->id;
+                $actionLog->workflow_step_id = $currentStep->id;
+                $actionLog->user_id = $request->user()->id;
+                $actionLog->action = $currentStep->action;
+                $actionLog->comment = $request->input('comment');
+                $actionLog->save();
+
+                $nextStep = WorkflowStep::query()
+                    ->where('workflow_id', $productWorkflow->workflow_id)
+                    ->where('step_no', '>', $currentStep->step_no)
+                    ->orderBy('step_no')
+                    ->orderBy('id')
+                    ->first();
+
+                $product->stage = $currentStep->action;
+                $product->save();
+
+                $productWorkflow->current_step_id = $nextStep?->id;
+                $productWorkflow->status = $nextStep ? 'ongoing' : 'completed';
+                $productWorkflow->save();
+
+                $finishedCount++;
+            }
+        });
+
+        $message = "{$finishedCount} product(s) finished successfully.";
+        if ($skippedCount > 0) {
+            $message .= " {$skippedCount} product(s) were skipped.";
+        }
+
+        return redirect()
+            ->route('products.workflow.index', 'online')
+            ->with('success', $message);
+    }
+
     /**
      * Update the specified resource in storage.
      */
