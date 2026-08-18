@@ -181,11 +181,18 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
                 $sheet = $event->sheet->getDelegate();
 
                 // Set the row height for the first row (header row)
-                foreach (range(1, 1) as $row) {
+                // dd(count($this->preproducts));
+                foreach (range(1, count($this->preproducts)+1) as $row) {
                     $rowHeightPx = 80;
                     $rowHeight = $rowHeightPx * 0.75; // Convert pixels to Excel row height scale
                     $sheet->getRowDimension($row)->setRowHeight($rowHeight);
                 }
+
+
+                $sheet->getStyle('A1:AY' . count($this->preproducts) + 1)
+                ->getAlignment()
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // **Style Heading Row (Row 1)**
                 $sheet->getStyle('A1:AY1')->applyFromArray([
@@ -210,16 +217,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
                     ],
                 ]);
 
-                $lastRow = $sheet->getHighestRow();
-                if ($lastRow >= 2) {
-                    $sheet->getStyle("K2:K{$lastRow}")->getAlignment()->setWrapText(true);
-                    $sheet->getColumnDimension('K')->setAutoSize(false);
-                    $sheet->getColumnDimension('K')->setWidth(80);
-
-                    for ($row = 2; $row <= $lastRow; $row++) {
-                        $sheet->getRowDimension($row)->setRowHeight(-1);
-                    }
-                }
+            
 
             },
         ];
