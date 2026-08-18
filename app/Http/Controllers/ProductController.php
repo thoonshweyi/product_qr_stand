@@ -61,6 +61,12 @@ class ProductController extends Controller
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
         $onlineMonth = trim((string) $request->query('online_month', ''));
+        $hasSearchFilters = $keyword !== ''
+            || filled($statusId)
+            || $brand !== ''
+            || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth));
+        $isAdmin = $request->user()->hasRoles(['Admin', 'Administrator']);
+        $userRoleIds = $request->user()->roles()->pluck('roles.id')->all();
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
         $productListTitle = match ($workflowChannel) {
@@ -77,6 +83,28 @@ class ProductController extends Controller
                         ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
                         ->whereColumn('product_workflows.product_id', 'products.id')
                         ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
+                });
+            })
+            ->when($workflowChannel && ! $hasSearchFilters, function ($query) use ($workflowChannel, $isAdmin, $userRoleIds) {
+                $query->whereExists(function ($query) use ($workflowChannel, $isAdmin, $userRoleIds) {
+                    $query->selectRaw('1')
+                        ->from('product_workflows')
+                        ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
+                        ->join('workflow_steps', 'workflow_steps.id', '=', 'product_workflows.current_step_id')
+                        ->whereColumn('product_workflows.product_id', 'products.id')
+                        ->where('workflows.slug', 'like', '%'.$workflowChannel.'%')
+                        ->where('product_workflows.status', 'ongoing')
+                        ->whereRaw('product_workflows.id = (select max(pw_latest.id) from product_workflows pw_latest where pw_latest.product_id = products.id)');
+
+                    if (! $isAdmin) {
+                        $query->where(function ($query) use ($userRoleIds) {
+                            $query->whereNull('workflow_steps.role_id');
+
+                            if ($userRoleIds !== []) {
+                                $query->orWhereIn('workflow_steps.role_id', $userRoleIds);
+                            }
+                        });
+                    }
                 });
             })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
