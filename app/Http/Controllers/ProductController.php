@@ -789,9 +789,12 @@ class ProductController extends Controller
             $message .= " {$skippedCount} product(s) were skipped.";
         }
 
-        return redirect()
-            ->route('products.workflow.index', 'online')
-            ->with('success', $message);
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'finished_count' => $finishedCount,
+            'skipped_count' => $skippedCount,
+        ]);
     }
 
     /**

@@ -369,17 +369,49 @@
 
         $('#product-batch-action-form').on('submit', function (event) {
             if (!isOnlineWorkflowList) return;
+            event.preventDefault();
 
             const selected = $productCheckboxes.filter(':checked').length;
             if (selected === 0) {
-                event.preventDefault();
-
                 return;
             }
 
-            if (!confirm(`Finish ${selected} selected product(s)?`)) {
-                event.preventDefault();
-            }
+            Swal.fire({
+                icon: 'question',
+                title: 'Finish selected products?',
+                text: `Finish ${selected} selected product(s)?`,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, finish',
+                confirmButtonColor: '#15803d',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                $batchFinishButton.prop('disabled', true);
+
+                $.ajax({
+                    url: this.action,
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    headers: { Accept: 'application/json' }
+                }).done(response => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Finished',
+                        text: response.message || 'Selected products were finished successfully.'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                }).fail(xhr => {
+                    $batchFinishButton.prop('disabled', false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unable to finish',
+                        text: xhr.responseJSON?.message || 'Something went wrong. Please try again.'
+                    });
+                });
+            });
         });
 
         $selectAll.on('change', function () {
