@@ -112,6 +112,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             ->when(
                 filled($product->description),
                 fn ($lines) => $lines->push(trim($product->description)),
+                fn ($lines) => $lines->push(self::DEFAULT_DESCRIPTION_MM)
             )
             ->filter(fn ($line) => filled(trim((string) $line)))->implode("\n");
 
@@ -119,6 +120,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             ->when(
                 filled($product->description_en),
                 fn ($lines) => $lines->push(trim($product->description_en)),
+                fn ($lines) => $lines->push(self::DEFAULT_DESCRIPTION_EN)
             )
             ->filter(fn ($line) => filled(trim((string) $line)))->implode("\n");
 
@@ -163,11 +165,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             $product->model,
             $product->country?->name ?? '',
             '', // product_custom_product_type:
-            $specifications->get('weight', ''), // product_weight:
-            $specifications->get('length', ''), // product_length:
-            $specifications->get('width', ''), // product_width:
-            $specifications->get('height', ''), // product_height:
-            $specifications->get('size', ''), // product_size:
+            '', //$specifications->get('weight', ''), // product_weight:
+            '', //$specifications->get('length', ''), // product_length:
+            '', //$specifications->get('width', ''), // product_width:
+            '', //$specifications->get('height', ''), // product_height:
+            '', //$specifications->get('size', ''), // product_size:
             '', // additional_info_1:
             '', // additional_info_2:
             '', // additional_info_3:
