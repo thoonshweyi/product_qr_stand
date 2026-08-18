@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Branch;
 use App\Models\Product;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -88,6 +89,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
     {
         $product = $preproducts['product'];
         $onlinedata = $preproducts['onlinedata'];
+        $specifications = $product->specificationValues->mapWithKeys(
+            fn ($value) => [
+                Str::lower(Str::squish((string) $value->specification?->name)) => $value->value,
+            ],
+        );
 
         $descriptionLines = collect([
             'Brand: '.$product->brand,
@@ -104,11 +110,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         )->push(self::COMPANY_MESSAGE);
 
         $branchCodes = Branch::query()
-                        ->orderBy('branch_code','asc')
-                        ->where('status_id', '3')
-                        ->pluck('branch_code')
-                        ->filter((fn ($code) => filled($code) && !in_array($code, ['MM-001','MM-112', 'MM-201', 'MM-205'])))
-                        ->values();
+            ->orderBy('branch_code', 'asc')
+            ->where('status_id', '3')
+            ->pluck('branch_code')
+            ->filter((fn ($code) => filled($code) && ! in_array($code, ['MM-001', 'MM-112', 'MM-201', 'MM-205'])))
+            ->values();
         $branchCodesString = $branchCodes->implode(',');
         // dd($branchCodesString);
         // MM-101,MM-102,MM-103,MM-104,MM-105,MM-106,MM-107,MM-108,MM-109,MM-110,MM-113,MM-114,MM-115
@@ -135,36 +141,36 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             $onlinedata->item_member_price, // item_member_price: online data
             $onlinedata->item_code.'.jpg', // image_name: online data
             $branchCodesString, // branch_code_list: online data
-            'Yes', // product_feature: 
-            'Active', // status: 
-            '0', // product_low_stock_qty: 
-            '', // product_custom_order: 
-            '', // product_custom_order_note: 
-            '-', // upsell_list: 
+            'Yes', // product_feature:
+            'Active', // status:
+            '0', // product_low_stock_qty:
+            '', // product_custom_order:
+            '', // product_custom_order_note:
+            '-', // upsell_list:
             $product->model,
             $product->country?->name ?? '',
-            '', // product_custom_product_type: 
-            '', // product_weight: 
-            '', // product_length: 
-            '', // product_width: 
-            '', // product_height: 
-            '', // product_size: 
-            '', // additional_info_1: 
-            '', // additional_info_2: 
-            '', // additional_info_3: 
-            '', // additional_info_4: 
-            '', // additional_info_5: 
-            '', // product_shipping_class: 
-            '', // product_tax: 
-            '', // layer_1: 
-            '', // layer_2: 
-            '', // layer_3: 
-            '', // layer_4: 
-            '', // layer_5: 
-            '', // layer_6: 
-            '', // layer_7: 
-            '', // layer_8: 
-            '', // foc_status: 
+            '', // product_custom_product_type:
+            $specifications->get('weight', ''), // product_weight:
+            $specifications->get('length', ''), // product_length:
+            $specifications->get('width', ''), // product_width:
+            $specifications->get('height', ''), // product_height:
+            $specifications->get('size', ''), // product_size:
+            '', // additional_info_1:
+            '', // additional_info_2:
+            '', // additional_info_3:
+            '', // additional_info_4:
+            '', // additional_info_5:
+            '', // product_shipping_class:
+            '', // product_tax:
+            '', // layer_1:
+            '', // layer_2:
+            '', // layer_3:
+            '', // layer_4:
+            '', // layer_5:
+            '', // layer_6:
+            '', // layer_7:
+            '', // layer_8:
+            '', // foc_status:
         ];
     }
 
