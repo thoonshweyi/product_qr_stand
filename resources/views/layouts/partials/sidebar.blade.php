@@ -21,7 +21,7 @@
                                 <span class="ml-3" sidebar-toggle-item>Dashboard</span>
                             </a>
                         </li>
-                        @if(auth()->user()->hasRoles(['Administrator','Editor','Viewer']))
+                        @if(auth()->user()->hasRoles(['Administrator','Editor','Viewer','Ecommerce Admin','Checker']))
                         <li>
                             <button type="button" class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700" aria-controls="dropdown-products" data-collapse-toggle="dropdown-products">
                                 <i class="fa-solid fa-barcode flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"></i>

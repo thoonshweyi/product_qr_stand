@@ -170,7 +170,7 @@
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Model</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Country</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stage</th>
-                    @if(auth()->user()->hasRoles(['Administrator','Editor']))
+                    @if(auth()->user()->hasRoles(['Administrator','Editor','Checker']))
                         <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                             Status
                         </th>

@@ -21,7 +21,7 @@ class ProductPol
     public function viewany(User $user)
     {
         // check if the user has the 'Admin' role
-        return $user->hasRoles(['Admin', 'Administrator', 'Editor']);
+        return $user->hasRoles(['Admin', 'Administrator', 'Editor', 'Checker']);
     }
 
     // Users can view their own leave datas
@@ -33,13 +33,13 @@ class ProductPol
 
     public function create(User $user)
     {
-        return $user->hasRoles(['Administrator', 'Editor']);
+        return $user->hasRoles(['Administrator', 'Editor', 'Checker']);
     }
 
     public function edit(User $user, Product $product)
     {
         // allow Admin, Teacher to edit all leave records
-        if ($user->hasRoles(['Admin', 'Administrator', 'Editor'])) {
+        if ($user->hasRoles(['Admin', 'Administrator', 'Editor', 'Checker'])) {
             return true;
         }
         $productWorkflow = ProductWorkflow::where('product_id', $product->id)
@@ -59,7 +59,7 @@ class ProductPol
 
     public function update(User $user, Product $product)
     {
-        if ($user->hasRoles(['Administrator', 'Editor'])) {
+        if ($user->hasRoles(['Administrator', 'Editor', 'Checker'])) {
             return true;
         }
 
