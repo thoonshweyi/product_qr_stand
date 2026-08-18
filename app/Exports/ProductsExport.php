@@ -8,13 +8,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping
+class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths
 {
     private const COMPANY_MESSAGE = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
     private const DEFAULT_DESCRIPTION_MM = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
@@ -235,6 +236,16 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             
 
             },
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        $columnWidthPx = 300;
+        $columnWidth = $columnWidthPx / 7;
+        return [
+            'K' => $columnWidth,
+            'L' => $columnWidth,
         ];
     }
 }
