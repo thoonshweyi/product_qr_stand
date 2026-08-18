@@ -15,4 +15,9 @@ class ProductWorkflow extends Model
         'current_step_id',
         'status',
     ];
+    
+    public function currentStep()
+    {
+        return $this->belongsTo(WorkflowStep::class, 'current_step_id');
+    }
 }

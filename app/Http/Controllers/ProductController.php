@@ -86,26 +86,7 @@ class ProductController extends Controller
                 });
             })
             ->when($workflowChannel && ! $hasSearchFilters, function ($query) use ($workflowChannel, $isAdmin, $userRoleIds) {
-                $query->whereExists(function ($query) use ($workflowChannel, $isAdmin, $userRoleIds) {
-                    $query->selectRaw('1')
-                        ->from('product_workflows')
-                        ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
-                        ->join('workflow_steps', 'workflow_steps.id', '=', 'product_workflows.current_step_id')
-                        ->whereColumn('product_workflows.product_id', 'products.id')
-                        ->where('workflows.slug', 'like', '%'.$workflowChannel.'%')
-                        ->where('product_workflows.status', 'ongoing')
-                        ->whereRaw('product_workflows.id = (select max(pw_latest.id) from product_workflows pw_latest where pw_latest.product_id = products.id)');
-
-                    if (! $isAdmin) {
-                        $query->where(function ($query) use ($userRoleIds) {
-                            $query->whereNull('workflow_steps.role_id');
-
-                            if ($userRoleIds !== []) {
-                                $query->orWhereIn('workflow_steps.role_id', $userRoleIds);
-                            }
-                        });
-                    }
-                });
+                $query->whereCanAction();
             })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
                 $query->withMax([
@@ -589,6 +570,7 @@ class ProductController extends Controller
             ->orderBy('id')
             ->get(['id', 'name', 'slug']);
 
+        // Method 1 Can Action
         $currentWorkflowStep = $productWorkflow?->current_step_id
             ? WorkflowStep::find($productWorkflow->current_step_id)
             : null;

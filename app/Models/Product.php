@@ -39,6 +39,11 @@ class Product extends Model
         'online_date',
     ];
 
+    // Method 2 Can Action
+    protected $appends = [
+        'can_action',
+    ];
+
     public function specificationValues()
     {
         return $this->hasMany(ProductSpecificationValue::class);
@@ -82,5 +87,57 @@ class Product extends Model
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_of_origin', 'id');
+    }
+
+    // Method 2 Can Action
+    public function getCanActionAttribute()
+    {
+        $productWorkflow = ProductWorkflow::where('product_id', $this->id)
+                            ->latest('id')
+                            ->first();
+
+        $currentWorkflowStep = $productWorkflow?->current_step_id
+        ? WorkflowStep::find($productWorkflow->current_step_id)
+        : null;
+
+        $isAdmin = request()->user()->hasRoles(['Admin', 'Administrator']);
+        $hasStepRole = $currentWorkflowStep
+            && (
+                ! $currentWorkflowStep->role_id
+                || request()->user()->roles()->whereKey($currentWorkflowStep->role_id)->exists()
+            );
+
+        $canWorkflowAction = $currentWorkflowStep
+            && $productWorkflow->status === 'ongoing'
+            && ($isAdmin || $hasStepRole);
+
+        return $canWorkflowAction;
+    }
+
+    public function latestWorkflow()
+    {
+        return $this->hasOne(ProductWorkflow::class)->latestOfMany();
+    }
+
+
+    public function scopeWhereCanAction($query, $user = null)
+    {
+        $user = $user ?? request()->user();
+        $isAdmin = $user->hasRoles(['Admin', 'Administrator']);
+        $userRoleIds = $user->roles()->pluck('roles.id')->all();
+
+        return $query->whereHas('latestWorkflow', function ($q) use ($isAdmin, $userRoleIds) {
+            $q->where('status', 'ongoing')
+            ->whereHas('currentStep', function ($stepQuery) use ($isAdmin, $userRoleIds) {
+                if (! $isAdmin) {
+                    $stepQuery->where(function ($roleQuery) use ($userRoleIds) {
+                        $roleQuery->whereNull('role_id');
+                        if (! empty($userRoleIds)) {
+                            $roleQuery->orWhereIn('role_id', $userRoleIds);
+                        }
+                    });
+                }
+            });
+        });
     }
 }

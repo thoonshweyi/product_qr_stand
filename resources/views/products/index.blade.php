@@ -175,7 +175,7 @@
                             Status
                         </th>
                     @endif
-                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Updated by</th>
+                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Created by</th>
                     <th class="p-4 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
                 </tr>
             </thead>
