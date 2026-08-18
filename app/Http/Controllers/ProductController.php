@@ -33,6 +33,10 @@ class ProductController extends Controller
 {
     private const ONLINE_REQUIRED_SPECIFICATIONS = ['Weight', 'Length', 'Width', 'Height', 'Size'];
 
+    private const DEFAULT_DESCRIPTION_MM = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
+
+    private const DEFAULT_DESCRIPTION_EN = 'Shop for variety of high quality products with reasonable price at PRO 1 Global, leading provider for construction and home improvement products.';
+
     /**
      * Display a listing of the resource.
      */
@@ -209,6 +213,8 @@ class ProductController extends Controller
     public function create()
     {
         $this->authorize('create', Product::class);
+        $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
+        $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
         $categories = Category::where('status_id', 3)
             ->orderBy('name')
@@ -253,6 +259,8 @@ class ProductController extends Controller
             'specifications',
             'brands',
             'workflows',
+            'defaultDescriptionMm',
+            'defaultDescriptionEn',
         ));
     }
 
@@ -278,6 +286,7 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'description_en' => ['nullable', 'string', 'max:2000'],
             'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
@@ -328,6 +337,8 @@ class ProductController extends Controller
             ->orderBy('step_no')
             ->orderBy('id')
             ->firstOrFail();
+        $description = trim((string) $request->input('description', ''));
+        $descriptionEn = trim((string) $request->input('description_en', ''));
 
         $specificationRows = collect($request->input('specifications', []))
             ->map(function ($row) {
@@ -351,7 +362,8 @@ class ProductController extends Controller
                 'model' => $request['model'] ?? '',
                 'country_of_origin' => $request['country_of_origin'] ?? '',
                 'website_url' => $request['website_url'] ?? '',
-                'description' => $request['description'] ?? '',
+                'description' => filled($description) ? $description : self::DEFAULT_DESCRIPTION_MM,
+                'description_en' => filled($descriptionEn) ? $descriptionEn : self::DEFAULT_DESCRIPTION_EN,
                 'status_id' => $request['status_id'] ?? null,
                 'category_id' => $request['category_id'] ?? null,
                 'user_id' => $request->user()?->id,
@@ -530,6 +542,8 @@ class ProductController extends Controller
     {
         $product = Product::with('specificationValues.specification')->findOrFail($id);
         $this->authorize('edit', $product);
+        $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
+        $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
         $productWorkflow = ProductWorkflow::where('product_id', $product->id)
             ->latest('id')
@@ -685,6 +699,8 @@ class ProductController extends Controller
         $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
         $isStandOnly = $selectedWorkflowSlug === 'stand-only';
         $mainImageRule = $requiresMainImage && blank($product->image) ? 'required' : 'nullable';
+        $description = trim((string) $request->input('description', ''));
+        $descriptionEn = trim((string) $request->input('description_en', ''));
 
         $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code,'.$product->id],
@@ -697,6 +713,7 @@ class ProductController extends Controller
             'country_of_origin' => ['required', 'string', 'max:255'],
             'website_url' => ['nullable', 'url', 'max:2000'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'description_en' => ['nullable', 'string', 'max:2000'],
             'main_image' => [$mainImageRule, 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
@@ -751,7 +768,8 @@ class ProductController extends Controller
                 'model' => $request->model,
                 'country_of_origin' => $request->country_of_origin,
                 'website_url' => $request->website_url ?? '',
-                'description' => $request->description ?? '',
+                'description' => filled($description) ? $description : self::DEFAULT_DESCRIPTION_MM,
+                'description_en' => filled($descriptionEn) ? $descriptionEn : self::DEFAULT_DESCRIPTION_EN,
                 'status_id' => $request->status_id,
                 // 'category_id' => $request->category_id,
                 'user_id' => $request->user()?->id,
@@ -854,6 +872,7 @@ class ProductController extends Controller
             'category_id' => $product->category_id,
             'country_of_origin' => $product->country_of_origin,
             'description' => $product->description,
+            'description_en' => $product->description_en,
             'status_id' => $product->status_id,
             'main_image' => $product->image,
             'thumbnail_image' => $product->thumbnail,

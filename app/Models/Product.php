@@ -22,6 +22,7 @@ class Product extends Model
         'country_of_origin',
         'website_url',
         'description',
+        'description_en',
         'status_id',
         'user_id',
         'product_name',
