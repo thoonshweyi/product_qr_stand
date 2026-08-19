@@ -61,10 +61,14 @@ class ProductController extends Controller
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
         $onlineMonth = trim((string) $request->query('online_month', ''));
+        $categoryId = $request->query('category_id');
+
         $hasSearchFilters = $keyword !== ''
             || filled($statusId)
             || $brand !== ''
-            || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth));
+            || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth))
+            || $categoryId;
+
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
         $productListTitle = match ($workflowChannel) {
@@ -127,6 +131,7 @@ class ProductController extends Controller
                     ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
                     ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
             )
+            ->when(filled($categoryId), fn ($query) => $query->where('category_id', $categoryId))
             ->when(! auth()->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderByDesc('id');
 
@@ -138,8 +143,16 @@ class ProductController extends Controller
             ->orderBy('id')
             ->get(['id', 'name']);
 
+        $categories = Category::where('status_id', 3)
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
         if ($statuses->isEmpty()) {
             $statuses = Status::orderBy('id')->get(['id', 'name']);
+        }
+
+        if ($categories->isEmpty()) {
+            $categories = Category::orderBy('id')->get(['id', 'name']);
         }
 
         $brands = Product::query()
@@ -157,6 +170,7 @@ class ProductController extends Controller
             'currentBranchId',
             'workflowChannel',
             'productListTitle',
+            'categories'
         ));
     }
 
