@@ -192,12 +192,28 @@
             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 @forelse ($products as $index => $product)
                     <tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700/60">
+                        @php
+                            $canBulkAction = $workflowChannel === 'stand'
+                                ? in_array($product?->stage, ['checked', 'finished'])
+                                : $product?->stage === 'checked';
+                        @endphp
+                        @if($canBulkAction)
                         <td class="w-12 p-4">
                             <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
                                 class="product-action-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
                                 aria-label="Select {{ $product->name }}">
                         </td>
-                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }}</td>
+                        @else
+                        <td class="w-12 p-4 text-center">
+                            <span
+                                class="inline-flex h-4 w-4 cursor-not-allowed items-center justify-center text-gray-400"
+                                title="This product cannot be printed"
+                            >
+                                <i class="fa-solid fa-ban"></i>
+                            </span>
+                        </td>
+                        @endif
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }} {{ $product->can_action }}</td>
                         <td class="whitespace-nowrap p-4">
                             <div class="flex items-center gap-3">
                                 @if (filled($product->thumbnail) || filled($product->image))
@@ -214,7 +230,7 @@
                             </div>
                         </td>
 
-                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
+                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer','Administrator']))
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
