@@ -120,7 +120,7 @@ class Product extends Model
     }
 
 
-    public function scopeWhereCanAction($query, $user = null)
+    public function scopeCanAction($query, $user = null)
     {
         $user = $user ?? request()->user();
         $isAdmin = $user->hasRoles(['Admin', 'Administrator']);
