@@ -21,7 +21,7 @@ class ProductPol
     public function viewany(User $user)
     {
         // check if the user has the 'Admin' role
-        return $user->hasRoles(['Admin', 'Administrator', 'Editor', 'Checker']);
+        return $user->hasRoles(['Admin', 'Administrator', 'Checker']);
     }
 
     // Users can view their own leave datas
@@ -39,27 +39,16 @@ class ProductPol
     public function edit(User $user, Product $product)
     {
         // allow Admin, Teacher to edit all leave records
-        if ($user->hasRoles(['Admin', 'Administrator', 'Editor', 'Checker'])) {
+        if ($user->hasRoles(['Admin', 'Administrator', 'Checker'])) {
             return true;
         }
-        $productWorkflow = ProductWorkflow::where('product_id', $product->id)
-            ->where('status', 'ongoing')
-            ->latest('id')
-            ->first();
-        $currentStepRoleId = $productWorkflow?->current_step_id
-            ? WorkflowStep::whereKey($productWorkflow->current_step_id)->value('role_id')
-            : null;
-        if ($currentStepRoleId && $user->roles()->whereKey($currentStepRoleId)->exists()) {
-            return true;
-        }
-
-        // allow users to edit their own leave records
-        return $product->user_id == $user->id;
+        return false;
+        // return $product->user_id == $user->id;
     }
 
     public function update(User $user, Product $product)
     {
-        if ($user->hasRoles(['Administrator', 'Editor', 'Checker'])) {
+        if ($user->hasRoles(['Administrator', 'Checker'])) {
             return true;
         }
 
@@ -71,7 +60,7 @@ class ProductPol
         if ($user->hasRoles(['Administrator'])) {
             return true;
         }
-
-        return $user->hasPermission('delete_resource') || $user->isOwner($product);
+        return false;
+        // return $user->hasPermission('delete_resource') || $user->isOwner($product);
     }
 }

@@ -158,7 +158,7 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
-                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
+                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer','Administrator']))
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
@@ -166,11 +166,10 @@
                         @endif
                     </th>
                     @endif
+                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Category</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
-                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Model</th>
-                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Country</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stage</th>
-                    @if(auth()->user()->hasRoles(['Administrator','Editor','Checker']))
+                    @if(auth()->user()->hasRoles(['Administrator','Checker']))
                         <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                             Status
                         </th>
@@ -231,10 +230,8 @@
                             @endif
                         </td>
                         @endif
-
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->category->name }}</td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->brand }}</td>
-                        <td class="max-w-xs truncate p-4 text-sm text-gray-600 dark:text-gray-300" title="{{ $product->model }}">{{ $product->model }}</td>
-                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->country?->name ?? '—' }}</td>
                         <td class="whitespace-nowrap p-4">
                             @php
                                 $productStage = strtolower($product->stage ?: 'ongoing');
@@ -256,6 +253,7 @@
                             </span>
                         </td>
 
+                        @if(auth()->user()->hasRoles(['Administrator','Checker']))
                         @can('edit', $product)
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             <label class="relative inline-flex cursor-pointer items-center">
@@ -274,6 +272,7 @@
                             </label>
                         </td>
                         @endcan
+                        @endif
 
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->user?->name ?? 'Unknown' }}</td>
                         

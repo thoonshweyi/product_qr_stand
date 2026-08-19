@@ -712,7 +712,7 @@ class ProductController extends Controller
         DB::transaction(function () use ($request, $validated, &$finishedCount, &$skippedCount) {
             foreach ($validated['product_ids'] as $productId) {
                 $product = Product::findOrFail($productId);
-                $this->authorize('edit', $product);
+                // $this->authorize('edit', $product);
 
                 $productWorkflow = ProductWorkflow::query()
                     ->where('product_id', $product->id)
