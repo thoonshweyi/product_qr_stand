@@ -93,8 +93,8 @@ class Product extends Model
     public function getCanActionAttribute()
     {
         $productWorkflow = ProductWorkflow::where('product_id', $this->id)
-                            ->latest('id')
-                            ->first();
+            ->latest('id')
+            ->first();
 
         $currentWorkflowStep = $productWorkflow?->current_step_id
         ? WorkflowStep::find($productWorkflow->current_step_id)
@@ -119,7 +119,6 @@ class Product extends Model
         return $this->hasOne(ProductWorkflow::class)->latestOfMany();
     }
 
-
     public function scopeCanAction($query, $user = null)
     {
         $user = $user ?? request()->user();
@@ -128,16 +127,27 @@ class Product extends Model
 
         return $query->whereHas('latestWorkflow', function ($q) use ($isAdmin, $userRoleIds) {
             $q->where('status', 'ongoing')
-            ->whereHas('currentStep', function ($stepQuery) use ($isAdmin, $userRoleIds) {
-                if (! $isAdmin) {
-                    $stepQuery->where(function ($roleQuery) use ($userRoleIds) {
-                        $roleQuery->whereNull('role_id');
-                        if (! empty($userRoleIds)) {
-                            $roleQuery->orWhereIn('role_id', $userRoleIds);
-                        }
-                    });
-                }
-            });
+                ->whereHas('currentStep', function ($stepQuery) use ($isAdmin, $userRoleIds) {
+                    if (! $isAdmin) {
+                        $stepQuery->where(function ($roleQuery) use ($userRoleIds) {
+                            $roleQuery->whereNull('role_id');
+                            if (! empty($userRoleIds)) {
+                                $roleQuery->orWhereIn('role_id', $userRoleIds);
+                            }
+                        });
+                    }
+                });
         });
+    }
+
+    public function scopeVisibleToStandViewerAfterChecked($query, $user = null)
+    {
+        $user = $user ?? request()->user();
+
+        if (! $user?->hasRoles(['Viewer'])) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where('stage', 'checked');
     }
 }

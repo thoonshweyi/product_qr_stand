@@ -65,8 +65,6 @@ class ProductController extends Controller
             || filled($statusId)
             || $brand !== ''
             || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth));
-        $isAdmin = $request->user()->hasRoles(['Admin', 'Administrator']);
-        $userRoleIds = $request->user()->roles()->pluck('roles.id')->all();
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
         $productListTitle = match ($workflowChannel) {
@@ -97,7 +95,9 @@ class ProductController extends Controller
                         });
 
                     if ($isStandViewer) {
-                        $query->orWhere('stage', 'checked');
+                        $query->orWhere(function ($query) {
+                            $query->visibleToStandViewerAfterChecked();
+                        });
                     }
                 });
             })
