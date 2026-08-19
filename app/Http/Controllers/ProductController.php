@@ -85,13 +85,20 @@ class ProductController extends Controller
                         ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
                 });
             })
-            ->when($workflowChannel && ! $hasSearchFilters, function ($query) {
+            ->when($workflowChannel && ! $hasSearchFilters, function ($query) use ($workflowChannel, $request) {
                 $userId = auth()->id();
-                $query->where(function ($query) use ($userId) {
+                $isStandViewer = $workflowChannel === 'stand'
+                    && $request->user()->hasRoles(['Viewer']);
+
+                $query->where(function ($query) use ($userId, $isStandViewer) {
                     $query->where('user_id', $userId)
-                    ->orWhere(function ($query) {
-                        $query->canAction();
-                    });
+                        ->orWhere(function ($query) {
+                            $query->canAction();
+                        });
+
+                    if ($isStandViewer) {
+                        $query->orWhere('stage', 'checked');
+                    }
                 });
             })
             ->when($currentBranchId, function ($query) use ($currentBranchId) {
