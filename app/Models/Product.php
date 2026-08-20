@@ -148,6 +148,6 @@ class Product extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->where('stage', 'checked');
+        return $query->whereIn('stage', ['checked','finished']);
     }
 }
