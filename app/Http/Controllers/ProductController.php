@@ -55,8 +55,10 @@ class ProductController extends Controller
         return $this->productList($request, $channel);
     }
 
-    private function productList(Request $request, ?string $workflowChannel = null)
-    {
+    private function productList(Request $request, ?string $workflowChannel = null,  ?OnlineProductExportDataService $exportDataService = null)
+    {   
+        $exportDataService ??= app(OnlineProductExportDataService::class);
+
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
@@ -138,6 +140,16 @@ class ProductController extends Controller
         $products = $productsQuery
             ->paginate(15)
             ->withQueryString();
+
+        if ($request->document_search == 'Export') {
+            $products = $productsQuery->get();
+            $preproducts = $exportDataService->prepare($products);
+
+            return Excel::download(
+                new ProductsExport($preproducts),
+                'online-products-'.now()->format('Y-m-d').'.xlsx'
+            );
+        }
 
         $statuses = Status::whereIn('id', [1, 2])
             ->orderBy('id')
@@ -1223,6 +1235,7 @@ class ProductController extends Controller
 
     public function exportOnlineProducts(Request $request, OnlineProductExportDataService $exportDataService)
     {
+        // dd($request);
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));

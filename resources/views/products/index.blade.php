@@ -65,10 +65,12 @@
                     Finish selected
                     <span id="selected-finish-count" class="ml-1">(0)</span>
                 </button>
-                <a href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month','category_id'])) }}" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
+                @if(auth()->user()->hasRoles(['Ecommerce Admin']))
+                <button type="button" href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month','category_id'])) }}" id="export-btn" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
                     Export products
-                </a>
+                </button>
+                @endif
             @endif
             @if($workflowChannel === 'stand')
             <button type="submit" form="product-batch-action-form" id="batch-print-button" disabled
@@ -97,7 +99,7 @@
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full {{ $workflowChannel === 'online' ? 'max-w-6xl' : 'max-w-4xl' }} grid-cols-12 items-end gap-3">
+        <form id="search_form" action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full {{ $workflowChannel === 'online' ? 'max-w-6xl' : 'max-w-4xl' }} grid-cols-12 items-end gap-3">
             <div class="col-span-12 sm:col-span-6 {{ $workflowChannel === 'online' ? 'lg:col-span-3' : 'lg:col-span-4' }}">
                 <label for="product-keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                 <input type="search" name="keyword" id="product-keyword" value="{{ request('keyword') }}"
@@ -522,6 +524,73 @@
             });
         });
         // End change btn
+
+
+        // Start export btn
+        $('#export-btn').click(function(){
+            console.log($('#search_form').serialize())
+            Swal.fire({
+                title: "Processing...",
+                text: "Please wait while we generate the Online Product Excel file.",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('products.workflow.index','online') }}",
+                type: "GET",
+                // dataType:"json",
+                data: $('#search_form').serialize() + '&document_search=Export',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (blob, status, xhr) {
+                   
+                    let filename = "online_products.xlsx";
+                    const disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.includes('filename=')) {
+                        filename = disposition.split('filename=')[1].replace(/"/g, '');
+                    }
+
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+
+                    Swal.close();
+                },
+                error:function(response){
+                    console.log("Error:",response);
+                    Swal.close(); // Close the modal
+
+                    console.log(response.responseJSON.message);
+                    if(response.responseJSON.message == "Maximum execution time of 60 seconds exceeded"){
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops.... The Excel export took too long and was stopped.",
+                            text: "Please Try Again",
+                            {{-- footer: '<a href="#">Why do I have this issue?</a>' --}}
+                        });
+                    }else{
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Something went wrong!",
+                            footer: '<a href="#">Why do I have this issue?</a>'
+                          });
+                    }
+                },
+                complete: function(){
+                }
+            });
+        });
+        // End export btn
     });
 </script>
 @endsection
