@@ -506,6 +506,34 @@
                  
             </aside>
 
+            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-12">
+                <div class="grid gap-6 px-5 py-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($workflowActionTimeline as $timelineItem)
+                        @php
+                            $timelineUser = $timelineItem['user'];
+                            $timelineCompleted = $timelineItem['completed'] && $timelineUser;
+                            $timelineDepartment = $timelineUser?->department?->name;
+                        @endphp
+                        <div class="{{ $timelineCompleted ? 'text-blue-900 dark:text-blue-200' : 'text-gray-300 dark:text-gray-600' }}">
+                            <p class="text-sm font-medium {{ $timelineCompleted ? 'text-gray-700 dark:text-gray-300' : 'text-gray-300 dark:text-gray-600' }}">
+                                {{ $timelineItem['label'] }}
+                            </p>
+                            @if ($timelineCompleted)
+                                <p class="mt-4 text-sm font-bold">{{ $timelineUser->name }}</p>
+                                <p class="mt-4 text-sm font-bold">({{ $timelineDepartment ?: '—' }})</p>
+                                <p class="mt-4 text-sm font-bold">{{ $timelineItem['acted_at']?->format('Y-m-d H:i:s') }}</p>
+                            @else
+                                <div class="mt-4 space-y-4">
+                                    <p class="h-4 w-32 rounded bg-gray-100 dark:bg-gray-700"></p>
+                                    <p class="h-4 w-24 rounded bg-gray-100 dark:bg-gray-700"></p>
+                                    <p class="h-4 w-36 rounded bg-gray-100 dark:bg-gray-700"></p>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
         
         </div>
     </form>

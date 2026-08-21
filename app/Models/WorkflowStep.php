@@ -17,4 +17,9 @@ class WorkflowStep extends Model
         'role_id',
         'status_id',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }

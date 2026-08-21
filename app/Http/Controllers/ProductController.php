@@ -55,8 +55,8 @@ class ProductController extends Controller
         return $this->productList($request, $channel);
     }
 
-    private function productList(Request $request, ?string $workflowChannel = null,  ?OnlineProductExportDataService $exportDataService = null)
-    {   
+    private function productList(Request $request, ?string $workflowChannel = null, ?OnlineProductExportDataService $exportDataService = null)
+    {
         $exportDataService ??= app(OnlineProductExportDataService::class);
 
         $keyword = trim((string) $request->query('keyword', ''));
@@ -588,7 +588,10 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::with('specificationValues.specification')->findOrFail($id);
+        $product = Product::with([
+            'specificationValues.specification',
+            'user.department',
+        ])->findOrFail($id);
         $this->authorize('edit', $product);
         $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
         $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
@@ -662,6 +665,44 @@ class ProductController extends Controller
             ->values()
             ->all();
 
+        $workflowActionLogs = $productWorkflow
+            ? ProductWorkflowAction::query()
+                ->with(['user.department', 'workflowStep.role'])
+                ->where('product_workflow_id', $productWorkflow->id)
+                ->orderBy('created_at')
+                ->get()
+                ->keyBy('workflow_step_id')
+            : collect();
+
+        $workflowActionTimeline = collect([
+            [
+                'label' => 'Prepared By',
+                'completed' => true,
+                'user' => $product->user,
+                'acted_at' => $product->created_at,
+            ],
+        ])->merge(
+            $selectedWorkflow
+                ? WorkflowStep::query()
+                    ->with('role')
+                    ->where('workflow_id', $selectedWorkflow->id)
+                    ->orderBy('step_no')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(function ($step) use ($workflowActionLogs) {
+                        $actionLog = $workflowActionLogs->get($step->id);
+                        $roleName = $step->role?->name;
+
+                        return [
+                            'label' => trim($step->name.' By '.($roleName ?: '')),
+                            'completed' => filled($actionLog),
+                            'user' => $actionLog?->user,
+                            'acted_at' => $actionLog?->created_at,
+                        ];
+                    })
+                : collect(),
+        );
+
         return view('products.edit', compact(
             'product',
             'categories',
@@ -677,6 +718,7 @@ class ProductController extends Controller
             'canWorkflowAction',
             'defaultDescriptionMm',
             'defaultDescriptionEn',
+            'workflowActionTimeline',
         ));
     }
 
