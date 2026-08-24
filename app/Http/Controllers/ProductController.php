@@ -322,6 +322,7 @@ class ProductController extends Controller
         $selectedWorkflowSlug = Workflow::whereKey($request->input('workflow_id'))->value('slug');
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
         $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
+        $minimumOnlineDate = now()->startOfMonth()->toDateString();
 
         $validated = $request->validate([
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
@@ -338,7 +339,7 @@ class ProductController extends Controller
             'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d'],
+            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:'.$minimumOnlineDate],
             'specifications' => [
                 'required',
                 'array',
@@ -878,6 +879,7 @@ class ProductController extends Controller
         $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
         $isStandOnly = $selectedWorkflowSlug === 'stand-only';
         $mainImageRule = $requiresMainImage && blank($product->image) ? 'required' : 'nullable';
+        $minimumOnlineDate = now()->startOfMonth()->toDateString();
         $description = trim((string) $request->input('description', ''));
         $descriptionEn = trim((string) $request->input('description_en', ''));
 
@@ -896,7 +898,7 @@ class ProductController extends Controller
             'main_image' => [$mainImageRule, 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d'],
+            'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:'.$minimumOnlineDate],
             'specifications' => [
                 'required',
                 'array',

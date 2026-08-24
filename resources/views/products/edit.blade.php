@@ -6,6 +6,9 @@
 @endsection
 
 @section('content')
+@php
+$minimumOnlineDate = now()->startOfMonth()->toDateString()
+@endphp
 <div id="product-edit-page" class="min-h-screen">
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
         <nav class="mb-4 flex" aria-label="Breadcrumb">
@@ -149,7 +152,7 @@
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 2v3m8-3v3M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"/></svg>
                                 </div>
-                                <input type="text" name="online_date" id="online_date" value="{{ old('online_date', $product->online_date?->format('Y-m-d')) }}" autocomplete="off" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Choose month and year" @required($workflowHasOnline)>
+                                <input type="text" name="online_date" id="online_date" value="{{ old('online_date', $product->online_date?->format('Y-m-d')) }}" min="{{ $minimumOnlineDate }}" autocomplete="off" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Choose month and year" @required($workflowHasOnline)>
                             </div>
                             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">The first day of the selected month will be saved.</p>
                         </div>
@@ -836,9 +839,11 @@
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
         $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
+        const minimumOnlineDate = @js($minimumOnlineDate);
         flatpickr('#online_date', {
             allowInput: false,
             altInput: true,
+            minDate: minimumOnlineDate,
             dateFormat: 'Y-m-d',
             plugins: [new monthSelectPlugin({
                 shorthand: false,
