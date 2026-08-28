@@ -59,13 +59,14 @@
 
         <div class="flex flex-wrap items-center gap-2">
             @if ($workflowChannel === 'online')
+                @if(auth()->user()->hasRoles(['Administrator','Ecommerce Admin']))
                 <button type="submit" form="product-batch-action-form" id="batch-finish-button" disabled
                     class="inline-flex w-fit items-center justify-center rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                     <i class="fas fa-circle-check mr-2"></i>
                     Finish selected
                     <span id="selected-finish-count" class="ml-1">(0)</span>
                 </button>
-                @if(auth()->user()->hasRoles(['Ecommerce Admin']))
+                
                 <button type="button" href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month','category_id'])) }}" id="export-btn" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
                     Export products
@@ -169,6 +170,9 @@
                             class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
                             aria-label="Select all products on this page">
                     </th>
+                   <th class="w-0 whitespace-nowrap p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                        Actions
+                    </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
                     @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer','Administrator']))
@@ -188,7 +192,6 @@
                         </th>
                     @endif
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Created by</th>
-                    <th class="p-4 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -215,7 +218,43 @@
                             </span>
                         </td>
                         @endif
-                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }} {{ $product->can_action }}</td>
+                             
+                        <td class="whitespace-nowrap p-4 text-left">
+                            <div class="flex items-center justify-start gap-2">
+                                <a href="{{ route('products.print-history', $product) }}"
+                                    class="inline-flex items-center rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600"
+                                    aria-label="Print history for {{ $product->name }}"
+                                    title="Branch print history">
+                                    <i class="fas fa-clock-rotate-left h-4 w-4"></i>
+                                </a>
+
+                                <a href="{{ route('products.show', $product) }}" target="_blank"
+                                    class="inline-flex items-center rounded-lg bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800"
+                                    aria-label="View {{ $product->name }}">
+                                    <i class="fas fa-eye h-4 w-4"></i>
+                                </a>
+
+                                @can('edit', $product)
+                                    <a href="{{ route('products.edit', $product) }}"
+                                        class="inline-flex items-center rounded-lg bg-primary-700 px-3 py-2 text-sm font-medium text-white hover:bg-primary-800"
+                                        aria-label="Edit {{ $product->name }}">
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.414 2.586a2 2 0 0 0-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 0 0 0-2.828Z"/><path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h4a1 1 0 0 1 0 2H4v10h10v-4a1 1 0 1 1 2 0v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" clip-rule="evenodd"/></svg>
+                                    </a>
+                                @endcan
+
+                                @can('delete', $product)
+                                    <button type="button"
+                                        class="delete-product-button inline-flex items-center rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                        data-product-id="{{ $product->id }}"
+                                        data-product-name="{{ $product->name }}"
+                                        data-delete-url="{{ route('products.destroy', $product) }}"
+                                        aria-label="Delete {{ $product->name }}">
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M9 2a1 1 0 0 0-.894.553L7.382 4H4a1 1 0 0 0 0 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6a1 1 0 1 0 0-2h-3.382l-.724-1.447A1 1 0 0 0 11 2H9ZM7 8a1 1 0 0 1 2 0v6a1 1 0 1 1-2 0V8Zm5-1a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1Z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                @endcan
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $products->firstItem() + $index }}</td>
                         <td class="whitespace-nowrap p-4">
                             <div class="flex items-center gap-3">
                                 @if (filled($product->thumbnail) || filled($product->image))
@@ -304,42 +343,7 @@
                         @endif
 
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->user?->name ?? 'Unknown' }}</td>
-                        
-                        <td class="whitespace-nowrap p-4 text-right">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('products.print-history', $product) }}"
-                                    class="inline-flex items-center rounded-lg bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600"
-                                    aria-label="Print history for {{ $product->name }}"
-                                    title="Branch print history">
-                                    <i class="fas fa-clock-rotate-left h-4 w-4"></i>
-                                </a>
-
-                                <a href="{{ route('products.show', $product) }}" target="_blank"
-                                    class="inline-flex items-center rounded-lg bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800"
-                                    aria-label="View {{ $product->name }}">
-                                    <i class="fas fa-eye h-4 w-4"></i>
-                                </a>
-
-                                @can('edit', $product)
-                                    <a href="{{ route('products.edit', $product) }}"
-                                        class="inline-flex items-center rounded-lg bg-primary-700 px-3 py-2 text-sm font-medium text-white hover:bg-primary-800"
-                                        aria-label="Edit {{ $product->name }}">
-                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.414 2.586a2 2 0 0 0-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 0 0 0-2.828Z"/><path fill-rule="evenodd" d="M2 6a2 2 0 0 1 2-2h4a1 1 0 0 1 0 2H4v10h10v-4a1 1 0 1 1 2 0v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" clip-rule="evenodd"/></svg>
-                                    </a>
-                                @endcan
-
-                                @can('delete', $product)
-                                    <button type="button"
-                                        class="delete-product-button inline-flex items-center rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-                                        data-product-id="{{ $product->id }}"
-                                        data-product-name="{{ $product->name }}"
-                                        data-delete-url="{{ route('products.destroy', $product) }}"
-                                        aria-label="Delete {{ $product->name }}">
-                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M9 2a1 1 0 0 0-.894.553L7.382 4H4a1 1 0 0 0 0 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6a1 1 0 1 0 0-2h-3.382l-.724-1.447A1 1 0 0 0 11 2H9ZM7 8a1 1 0 0 1 2 0v6a1 1 0 1 1-2 0V8Zm5-1a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1Z" clip-rule="evenodd"/></svg>
-                                    </button>
-                                @endcan
-                            </div>
-                        </td>
+                   
                     </tr>
                 @empty
                     <tr>

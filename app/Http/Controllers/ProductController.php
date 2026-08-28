@@ -142,7 +142,8 @@ class ProductController extends Controller
             ->withQueryString();
 
         if ($request->document_search == 'Export') {
-            $products = $productsQuery->get();
+            $products = $productsQuery->where('stage','checked')
+            ->get();
             $preproducts = $exportDataService->prepare($products);
 
             return Excel::download(
