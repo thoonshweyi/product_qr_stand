@@ -142,8 +142,8 @@ class ProductController extends Controller
             ->withQueryString();
 
         if ($request->document_search == 'Export') {
-            $products = $productsQuery->where('stage','checked')
-            ->get();
+            $products = $productsQuery->where('stage', 'checked')
+                ->get();
             $preproducts = $exportDataService->prepare($products);
 
             return Excel::download(
@@ -879,7 +879,8 @@ class ProductController extends Controller
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
         $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
         $isStandOnly = $selectedWorkflowSlug === 'stand-only';
-        $mainImageRule = $requiresMainImage && blank($product->image) ? 'required' : 'nullable';
+        $removesMainImage = $request->boolean('remove_main_image');
+        $mainImageRule = $requiresMainImage && (blank($product->image) || $removesMainImage) ? 'required' : 'nullable';
         $minimumOnlineDate = now()->startOfMonth()->toDateString();
         $description = trim((string) $request->input('description', ''));
         $descriptionEn = trim((string) $request->input('description_en', ''));
@@ -899,6 +900,9 @@ class ProductController extends Controller
             'main_image' => [$mainImageRule, 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'remove_main_image' => ['nullable', 'boolean'],
+            'remove_thumbnail_image' => ['nullable', 'boolean'],
+            'remove_brand_icon' => ['nullable', 'boolean'],
             'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:'.$minimumOnlineDate],
             'specifications' => [
                 'required',
@@ -981,7 +985,23 @@ class ProductController extends Controller
                 ]);
             }
 
-            foreach (['main_image' => 'image', 'thumbnail_image' => 'thumbnail', 'brand_icon' => 'brand_icon'] as $input => $column) {
+            foreach ([
+                'main_image' => ['column' => 'image', 'remove' => 'remove_main_image'],
+                'thumbnail_image' => ['column' => 'thumbnail', 'remove' => 'remove_thumbnail_image'],
+                'brand_icon' => ['column' => 'brand_icon', 'remove' => 'remove_brand_icon'],
+            ] as $input => $config) {
+                $column = $config['column'];
+
+                if ($request->boolean($config['remove']) && ! $request->hasFile($input)) {
+                    if ($product->{$column}) {
+                        File::delete(public_path($product->{$column}));
+                    }
+
+                    $product->{$column} = null;
+
+                    continue;
+                }
+
                 if (! $request->hasFile($input)) {
                     continue;
                 }

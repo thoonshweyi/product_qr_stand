@@ -373,7 +373,11 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                         </span>
                                         <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Upload main image</p>
                                     </div>
+                                    <button type="button" id="main-image-remove" data-input="main_image" data-remove-input="remove_main_image" data-type="main" class="remove-selected-image absolute right-2 top-2 {{ $product->image ? 'flex' : 'hidden' }} h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/90 text-red-600 opacity-0 shadow-lg shadow-gray-900/15 backdrop-blur transition hover:scale-105 hover:bg-red-50 hover:text-red-700 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300 group-hover:opacity-100 dark:border-gray-700/80 dark:bg-gray-900/85 dark:text-red-400 dark:hover:bg-red-950/80" aria-label="Remove main image">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                                    </button>
                                     <span id="main-image-change" class="absolute bottom-2 right-2 {{ $product->image ? '' : 'hidden' }} rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input id="remove_main_image" name="remove_main_image" type="hidden" value="0">
                                     <input id="main_image" name="main_image" type="file" accept="image/png,image/jpeg" class="hidden">
                                 </label>
                             </div>
@@ -386,7 +390,11 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                         <svg class="mx-auto mb-1.5 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
                                         <p class="text-[11px] font-semibold leading-4 text-gray-700 dark:text-gray-200">Add thumbnail</p>
                                     </div>
+                                    <button type="button" id="thumbnail-image-remove" data-input="thumbnail_image" data-remove-input="remove_thumbnail_image" data-type="thumbnail" class="remove-selected-image absolute right-2 top-2 {{ $product->thumbnail ? 'flex' : 'hidden' }} h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/90 text-red-600 opacity-0 shadow-lg shadow-gray-900/15 backdrop-blur transition hover:scale-105 hover:bg-red-50 hover:text-red-700 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300 group-hover:opacity-100 dark:border-gray-700/80 dark:bg-gray-900/85 dark:text-red-400 dark:hover:bg-red-950/80" aria-label="Remove thumbnail image">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                                    </button>
                                     <span id="thumbnail-image-change" class="absolute bottom-2 right-2 {{ $product->thumbnail ? '' : 'hidden' }} rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                    <input id="remove_thumbnail_image" name="remove_thumbnail_image" type="hidden" value="0">
                                     <input id="thumbnail_image" name="thumbnail_image" type="file" accept="image/png,image/jpeg" class="hidden">
                                 </label>
                             </div>
@@ -464,7 +472,11 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                     <svg class="mx-auto mb-1.5 h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
                                     <p class="text-[11px] font-semibold leading-4 text-gray-700 dark:text-gray-200">Add brand icon</p>
                                 </div>
+                                <button type="button" id="brand-icon-image-remove" data-input="brand_icon" data-remove-input="remove_brand_icon" data-type="brand-icon" class="remove-selected-image absolute right-2 top-2 {{ $product->brand_icon ? 'flex' : 'hidden' }} h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-white/90 text-red-600 opacity-0 shadow-lg shadow-gray-900/15 backdrop-blur transition hover:scale-105 hover:bg-red-50 hover:text-red-700 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300 group-hover:opacity-100 dark:border-gray-700/80 dark:bg-gray-900/85 dark:text-red-400 dark:hover:bg-red-950/80" aria-label="Remove brand icon">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+                                </button>
                                 <span id="brand-icon-image-change" class="absolute bottom-2 right-2 {{ $product->brand_icon ? '' : 'hidden' }} rounded-md bg-gray-900/75 px-2 py-1 text-[11px] font-medium text-white">Change</span>
+                                <input id="remove_brand_icon" name="remove_brand_icon" type="hidden" value="0">
                                 <input id="brand_icon" name="brand_icon" type="file" accept="image/png,image/jpeg" class="hidden">
                             </label>
                         </div>
@@ -758,13 +770,25 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
         function previewImage(input, type) {
             const file = input.files && input.files[0];
             if (!file) return;
+            const removeInputId = $(`#${type}-image-remove`).data('remove-input');
+            if (removeInputId) $(`#${removeInputId}`).val('0');
             const reader = new FileReader();
             reader.onload = event => {
                 $(`#${type}-image-preview`).attr('src', event.target.result).removeClass('hidden');
                 $(`#${type}-image-placeholder`).addClass('hidden');
                 $(`#${type}-image-change`).removeClass('hidden');
+                $(`#${type}-image-remove`).removeClass('hidden').addClass('flex');
             };
             reader.readAsDataURL(file);
+        }
+
+        function clearSelectedImage(inputId, type, removeInputId = null) {
+            $(`#${inputId}`).val('');
+            if (removeInputId) $(`#${removeInputId}`).val('1');
+            $(`#${type}-image-preview`).removeAttr('src').addClass('hidden');
+            $(`#${type}-image-placeholder`).removeClass('hidden');
+            $(`#${type}-image-change`).addClass('hidden');
+            $(`#${type}-image-remove`).addClass('hidden').removeClass('flex');
         }
 
         function displayValidationErrors(errors) {
@@ -794,7 +818,8 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
             });
 
             const mainImage = document.getElementById('main_image').files[0];
-            if (requiresMainImage && !mainImage && !hasExistingMainImage) {
+            const mainImageRemoved = $('#remove_main_image').val() === '1';
+            if (requiresMainImage && !mainImage && (!hasExistingMainImage || mainImageRemoved)) {
                 errors.main_image = ['Main image is required for workflows that include Stand.'];
             }
 
@@ -839,6 +864,11 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
         $('#main_image').on('change', function () { previewImage(this, 'main'); });
         $('#thumbnail_image').on('change', function () { previewImage(this, 'thumbnail'); });
         $('#brand_icon').on('change', function () { previewImage(this, 'brand-icon'); });
+        $('.remove-selected-image').on('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            clearSelectedImage($(this).data('input'), $(this).data('type'), $(this).data('remove-input'));
+        });
         const minimumOnlineDate = @js($minimumOnlineDate);
         flatpickr('#online_date', {
             allowInput: false,
