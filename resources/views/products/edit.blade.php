@@ -486,6 +486,12 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                         <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                             <a href="{{ route('products.index') }}" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Cancel</a>
                             @if ($canWorkflowAction && $currentWorkflowStep)
+                                <button type="submit" id="update-product-button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span id="update-product-button-label">Update product</span>
+                                </button>
                                 @php
                                     $workflowButtonLabel = match (strtolower($currentWorkflowStep->action)) {
                                         'checked' => 'Check',
@@ -493,19 +499,14 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                         default => $currentWorkflowStep->name,
                                     };
                                 @endphp
-                                <button type="submit" form="workflow-action-form" class="inline-flex flex-1 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-900">
+                                <button type="button" id="workflow-action-button" data-action-label="{{ $workflowButtonLabel }}" class="inline-flex flex-1 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-900">
                                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
                                     </svg>
                                     {{ $workflowButtonLabel }}
                                 </button>
                             @endif
-                            <button type="submit" id="update-product-button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <span id="update-product-button-label">Update product</span>
-                            </button>
+
                         </div>
                         <p class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Changes will update this product and its specifications.</p>
 
@@ -868,6 +869,25 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
             event.preventDefault();
             event.stopPropagation();
             clearSelectedImage($(this).data('input'), $(this).data('type'), $(this).data('remove-input'));
+        });
+        $('#workflow-action-button').on('click', function () {
+            const $button = $(this);
+            const actionLabel = $button.data('action-label') || 'complete this action';
+
+            Swal.fire({
+                icon: 'question',
+                title: `Are you sure to ${actionLabel}?`,
+                text: 'This workflow action will be recorded for this product.',
+                showCancelButton: true,
+                confirmButtonText: actionLabel,
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#059669',
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                $button.prop('disabled', true).addClass('cursor-not-allowed opacity-70');
+                document.getElementById('workflow-action-form')?.submit();
+            });
         });
         const minimumOnlineDate = @js($minimumOnlineDate);
         flatpickr('#online_date', {

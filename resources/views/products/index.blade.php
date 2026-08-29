@@ -165,12 +165,14 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
+                    @if($workflowChannel)
                     <th class="w-12 p-4 text-left">
                         <input type="checkbox" id="select-all-products"
                             class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
                             aria-label="Select all products on this page">
                     </th>
-                   <th class="w-0 whitespace-nowrap p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                    @endif
+                    <th class="w-0 whitespace-nowrap p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Actions
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
@@ -202,6 +204,8 @@
                                 ? in_array($product?->stage, ['checked', 'finished'])
                                 : $product?->stage === 'checked';
                         @endphp
+
+                        @if($workflowChannel)
                         @if($canBulkAction)
                         <td class="w-12 p-4">
                             <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
@@ -217,6 +221,7 @@
                                 <i class="fa-solid fa-ban"></i>
                             </span>
                         </td>
+                        @endif
                         @endif
                              
                         <td class="whitespace-nowrap p-4 text-left">
@@ -265,7 +270,7 @@
                                     </span>
                                 @endif
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{Str::limit($product->name,50)}}</p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{Str::limit($product->product_name,50)}}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $product->product_code }}</p>
                                 </div>
                             </div>
