@@ -135,6 +135,15 @@ class ProductController extends Controller
                     'all_branch_printed_count'
                 );
             })
+            ->when($workflowChannel === 'online', function ($query) {
+                $query->selectSub(
+                    DB::table('product_workflow_actions')
+                        ->selectRaw('MAX(created_at)')
+                        ->whereColumn('product_workflow_actions.product_id', 'products.id')
+                        ->whereIn('product_workflow_actions.action', ['export', 'exported']),
+                    'exported_at'
+                );
+            })
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $query->where('product_code', 'like', '%'.$keyword.'%')

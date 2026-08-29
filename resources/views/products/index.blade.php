@@ -18,6 +18,7 @@
         + ($canSeeBulkActionColumn ? 1 : 0)
         + ($canSeeCurrentBranchPrintStatus ? 1 : 0)
         + ($canSeeAllBranchPrintStatus ? 1 : 0)
+        + ($workflowChannel === 'online' ? 1 : 0)
         + ($canSeeProductStatusColumn ? 1 : 0);
 @endphp
 <div class="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 lg:mt-1.5">
@@ -205,6 +206,9 @@
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Category</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stage</th>
+                    @if($workflowChannel === 'online')
+                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Exported At</th>
+                    @endif
                     @if($canSeeProductStatusColumn)
                         <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                             Status
@@ -378,6 +382,19 @@
                                 {{ $stageLabel }}
                             </span>
                         </td>
+                        @if($workflowChannel === 'online')
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">
+                            @if ($product->exported_at)
+                                <!-- <span class="inline-flex flex-col">
+                                    <span class="font-medium text-gray-800 dark:text-gray-100">{{ \Carbon\Carbon::parse($product->exported_at)->format('Y-m-d') }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($product->exported_at)->format('h:i A') }}</span>
+                                </span> -->
+                                {{ \Carbon\Carbon::parse($product->exported_at)->format('Y-m-d H:i:s') }}
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        @endif
 
                         @if($canSeeProductStatusColumn)
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -627,7 +644,13 @@
                     a.remove();
                     window.URL.revokeObjectURL(url);
 
-                    Swal.close();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Exported!",
+                        text: "Workflow actions were recorded. Please click 'Finish' once you have uploaded it online.",
+                    }).then(() => {
+                        window.location.reload();
+                    });
                 },
                 error:function(response){
                     console.log("Error:",response);
