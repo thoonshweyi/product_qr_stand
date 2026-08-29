@@ -55,32 +55,42 @@ class AppServiceProvider extends ServiceProvider
     {
         return Product::query()
             ->when($workflowChannel, function ($query) use ($workflowChannel) {
-                $query->whereExists(function ($query) use ($workflowChannel) {
-                    $query->selectRaw('1')
-                        ->from('product_workflows')
-                        ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
-                        ->whereColumn('product_workflows.product_id', 'products.id')
-                        ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
-                });
+                $this->filterByWorkflowChannel($query, $workflowChannel);
             })
-            ->when($workflowChannel, function ($query) use ($workflowChannel, $user) {
-                $isStandViewer = $workflowChannel === 'stand'
-                    && $user->hasRoles(['Viewer']);
-
-                $query->where(function ($query) use ($user, $isStandViewer) {
-                    $query->where('user_id', $user->id)
-                        ->orWhere(function ($query) use ($user) {
-                            $query->canAction($user);
-                        });
-
-                    if ($isStandViewer) {
-                        $query->orWhere(function ($query) use ($user) {
-                            $query->visibleToStandViewerAfterChecked($user);
-                        });
-                    }
+            ->where(function ($query) use ($workflowChannel, $user) {
+                $query->where(function ($query) use ($user) {
+                    $query->canAction($user);
                 });
+
+                if ($workflowChannel !== 'online' && $user->hasRoles(['Viewer']) && filled($user->branch_id)) {
+                    $query->orWhere(function ($query) use ($user) {
+                        $this->filterByWorkflowChannel($query, 'stand');
+                        $this->filterByStandPrintPending($query, $user->branch_id);
+                    });
+                }
             })
             ->when(! $user->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->count();
+    }
+
+    private function filterByWorkflowChannel($query, string $workflowChannel): void
+    {
+        $query->whereExists(function ($query) use ($workflowChannel) {
+            $query->selectRaw('1')
+                ->from('product_workflows')
+                ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
+                ->whereColumn('product_workflows.product_id', 'products.id')
+                ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
+        });
+    }
+
+    private function filterByStandPrintPending($query, int $branchId): void
+    {
+        $query->whereIn('stage', ['checked', 'finished'])
+            ->whereDoesntHave('printRecords', function ($query) use ($branchId) {
+                $query->where('branch_id', $branchId)
+                    ->where('status', 'printed')
+                    ->whereColumn('product_print_records.product_version', 'products.print_version');
+            });
     }
 }

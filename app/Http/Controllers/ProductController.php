@@ -62,12 +62,15 @@ class ProductController extends Controller
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
+        $stage = trim((string) $request->query('stage', ''));
         $onlineMonth = trim((string) $request->query('online_month', ''));
         $categoryId = $request->query('category_id');
+        $allowedStages = ['ongoing', 'checked', 'exported', 'finished'];
 
         $hasSearchFilters = $keyword !== ''
             || filled($statusId)
             || $brand !== ''
+            || in_array($stage, $allowedStages, true)
             || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth))
             || $categoryId;
 
@@ -152,6 +155,10 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(
+                in_array($stage, $allowedStages, true),
+                fn ($query) => $query->where('stage', $stage)
+            )
             ->when(
                 $workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
                 fn ($query) => $query
@@ -1333,7 +1340,9 @@ class ProductController extends Controller
         $keyword = trim((string) $request->query('keyword', ''));
         $statusId = $request->query('status_id');
         $brand = trim((string) $request->query('brand', ''));
+        $stage = trim((string) $request->query('stage', ''));
         $onlineMonth = trim((string) $request->query('online_month', ''));
+        $allowedStages = ['ongoing', 'checked', 'exported', 'finished'];
 
         $products = Product::query()
             ->with([
@@ -1357,6 +1366,10 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(
+                in_array($stage, $allowedStages, true),
+                fn ($query) => $query->where('stage', $stage)
+            )
             ->where('stage', 'checked')
             ->when(
                 preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
