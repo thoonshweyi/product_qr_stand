@@ -29,18 +29,27 @@
                             </button>
                             <ul id="dropdown-products" class="hidden py-2 space-y-2">
                             <li>
-                                <a href="{{ route('products.index') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">All Products</a>
+                                <a href="{{ route('products.index') }}" class="flex items-center justify-between gap-2 p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <span>All Products</span>
+                                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{{ $sidebarProductCounts['all'] ?? 0 }}</span>
+                                </a>
                             </li>
 
                             @if(auth()->user()->hasRoles(['Administrator', 'Editor', 'Checker','Viewer']))
                             <li>
-                                <a href="{{ route('products.workflow.index', 'stand') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Stand Products</a>
+                                <a href="{{ route('products.workflow.index', 'stand') }}" class="flex items-center justify-between gap-2 p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <span>Stand Products</span>
+                                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{{ $sidebarProductCounts['stand'] ?? 0 }}</span>
+                                </a>
                             </li>
                             @endif
 
                             @if(auth()->user()->hasRoles(['Administrator', 'Editor', 'Checker', 'Ecommerce Admin']))
                             <li>
-                                <a href="{{ route('products.workflow.index', 'online') }}" class="flex items-center p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Online Products</a>
+                                <a href="{{ route('products.workflow.index', 'online') }}" class="flex items-center justify-between gap-2 p-2 text-base text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <span>Online Products</span>
+                                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{{ $sidebarProductCounts['online'] ?? 0 }}</span>
+                                </a>
                             </li>
                             @endif
                             
