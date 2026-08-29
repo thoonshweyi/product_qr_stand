@@ -6,6 +6,20 @@
 @endsection
 
 @section('content')
+@php
+    $currentUser = auth()->user();
+    $canUseStandBulkActions = $workflowChannel === 'stand' && $currentUser?->hasRoles(['Editor', 'Checker', 'Viewer','Administrator']);
+    $canUseOnlineBulkActions = $workflowChannel === 'online' && $currentUser?->hasRoles(['Ecommerce Admin','Administrator']);
+    $canSeeBulkActionColumn = $canUseStandBulkActions || $canUseOnlineBulkActions;
+    $canSeeCurrentBranchPrintStatus = $workflowChannel === 'stand' && $currentUser?->hasRoles(['Viewer']);
+    $canSeeAllBranchPrintStatus = $workflowChannel === 'stand' && $currentUser?->hasRoles(['Administrator', 'Editor', 'Checker']);
+    $canSeeProductStatusColumn = $currentUser?->hasRoles(['Administrator', 'Checker']);
+    $productTableColumnCount = 7
+        + ($canSeeBulkActionColumn ? 1 : 0)
+        + ($canSeeCurrentBranchPrintStatus ? 1 : 0)
+        + ($canSeeAllBranchPrintStatus ? 1 : 0)
+        + ($canSeeProductStatusColumn ? 1 : 0);
+@endphp
 <div class="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 lg:mt-1.5">
     <nav class="mb-5 flex" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
@@ -58,8 +72,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            @if ($workflowChannel === 'online')
-                @if(auth()->user()->hasRoles(['Administrator','Ecommerce Admin']))
+            @if ($canUseOnlineBulkActions)
                 <button type="submit" form="product-batch-action-form" id="batch-finish-button" disabled
                     class="inline-flex w-fit items-center justify-center rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                     <i class="fas fa-circle-check mr-2"></i>
@@ -71,9 +84,8 @@
                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
                     Export products
                 </button>
-                @endif
             @endif
-            @if($workflowChannel === 'stand')
+            @if($canUseStandBulkActions)
             <button type="submit" form="product-batch-action-form" id="batch-print-button" disabled
                 class="inline-flex w-fit items-center justify-center rounded-lg border border-primary-700 bg-white px-4 py-2.5 text-sm font-medium text-primary-700 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-white">
                 <i class="fas fa-print mr-2"></i>
@@ -165,7 +177,7 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
             <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
-                    @if($workflowChannel)
+                    @if($canSeeBulkActionColumn)
                     <th class="w-12 p-4 text-left">
                         <input type="checkbox" id="select-all-products"
                             class="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
@@ -177,7 +189,7 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
-                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
+                    @if($canSeeCurrentBranchPrintStatus)
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
@@ -185,7 +197,7 @@
                         @endif
                     </th>
                     @endif
-                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Administrator','Editor','Checker']))
+                    @if($canSeeAllBranchPrintStatus)
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         All Branch Print Status
                     </th>
@@ -193,7 +205,7 @@
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Category</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Brand</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stage</th>
-                    @if(auth()->user()->hasRoles(['Administrator','Checker']))
+                    @if($canSeeProductStatusColumn)
                         <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                             Status
                         </th>
@@ -205,13 +217,15 @@
                 @forelse ($products as $index => $product)
                     <tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700/60">
                         @php
-                            $canBulkAction = $workflowChannel === 'stand'
-                                ? in_array($product?->stage, ['checked', 'finished'])
-                                : $product?->stage === 'checked';
+                            $isProductReadyForBulkAction = match ($workflowChannel) {
+                                'stand' => in_array($product?->stage, ['checked', 'finished'], true),
+                                'online' => $product?->stage === 'checked',
+                                default => false,
+                            };
                         @endphp
 
-                        @if($workflowChannel)
-                        @if($canBulkAction)
+                        @if($canSeeBulkActionColumn)
+                        @if($isProductReadyForBulkAction)
                         <td class="w-12 p-4">
                             <input type="checkbox" name="product_ids[]" value="{{ $product->id }}"
                                 class="product-action-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500"
@@ -221,7 +235,7 @@
                         <td class="w-12 p-4 text-center">
                             <span
                                 class="inline-flex h-4 w-4 cursor-not-allowed items-center justify-center text-gray-400"
-                                title="This product cannot be printed"
+                                title="This product is not ready for bulk action"
                             >
                                 <i class="fa-solid fa-ban"></i>
                             </span>
@@ -281,7 +295,7 @@
                             </div>
                         </td>
 
-                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
+                        @if($canSeeCurrentBranchPrintStatus)
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -308,7 +322,7 @@
                             @endif
                         </td>
                         @endif
-                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Administrator','Editor','Checker']))
+                        @if($canSeeAllBranchPrintStatus)
                         <td class="whitespace-nowrap p-4">
                             @php
                                 $allBranchPrintedCount = (int) ($product->all_branch_printed_count ?? 0);
@@ -363,9 +377,9 @@
                             </span>
                         </td>
 
-                        @if(auth()->user()->hasRoles(['Administrator','Checker']))
-                        @can('edit', $product)
+                        @if($canSeeProductStatusColumn)
                         <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            @can('edit', $product)
                             <label class="relative inline-flex cursor-pointer items-center">
                                 <input
                                     type="checkbox"
@@ -380,8 +394,10 @@
                                         peer-checked:bg-blue-600 peer-checked:after:translate-x-4">
                                 </div>
                             </label>
+                            @else
+                                <span class="text-sm text-gray-400">—</span>
+                            @endcan
                         </td>
-                        @endcan
                         @endif
 
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->user?->name ?? 'Unknown' }}</td>
@@ -389,7 +405,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="11" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
+                        <td colspan="{{ $productTableColumnCount }}" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">No products found.</td>
                     </tr>
                 @endforelse
             </tbody>

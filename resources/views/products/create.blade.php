@@ -285,12 +285,12 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                 <label for="description" class="block text-sm font-medium text-gray-900 dark:text-white">Product description</label>
                                 <span class="text-xs text-gray-500 dark:text-gray-400"><span id="description-count">0</span> / 2,000</span>
                             </div>
-                            <textarea name="description" id="description" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Describe benefits, usage and care instructions">{{ old('description', $defaultDescriptionMm) }}</textarea>
+                            <textarea name="description" id="description" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="{{ $defaultDescriptionMm }}" >{{ old('description') }}</textarea>
                         </div>
 
                         <div>
                             <label for="description_en" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product description (English)</label>
-                            <textarea name="description_en" id="description_en" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="Describe benefits, usage and care instructions in English">{{ old('description_en', $defaultDescriptionEn) }}</textarea>
+                            <textarea name="description_en" id="description_en" rows="6" maxlength="2000" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm leading-6 text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="{{ $defaultDescriptionEn }}">{{ old('description_en') }}</textarea>
                         </div>
 
                         <div>

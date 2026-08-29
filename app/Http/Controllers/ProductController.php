@@ -336,6 +336,8 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Product::class);
+        $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
+        $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
         $selectedWorkflowSlug = Workflow::whereKey($request->input('workflow_id'))->value('slug');
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
@@ -404,8 +406,8 @@ class ProductController extends Controller
             ->orderBy('step_no')
             ->orderBy('id')
             ->firstOrFail();
-        $description = trim((string) $request->input('description', ''));
-        $descriptionEn = trim((string) $request->input('description_en', ''));
+        $description = trim((string) $request->input('description', '')).$defaultDescriptionMm;
+        $descriptionEn = trim((string) $request->input('description_en', '')).$defaultDescriptionEn;
 
         $specificationRows = collect($request->input('specifications', []))
             ->map(function ($row) {
