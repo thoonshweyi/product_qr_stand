@@ -73,16 +73,16 @@
 
         <div class="flex flex-wrap items-center gap-2">
             @if ($canUseOnlineBulkActions)
+                <button type="button" href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month','category_id'])) }}" id="export-btn" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
+                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+                    Export products
+                </button>
+
                 <button type="submit" form="product-batch-action-form" id="batch-finish-button" disabled
                     class="inline-flex w-fit items-center justify-center rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
                     <i class="fas fa-circle-check mr-2"></i>
                     Finish selected
                     <span id="selected-finish-count" class="ml-1">(0)</span>
-                </button>
-                
-                <button type="button" href="{{ route('products.online.export', request()->only(['keyword', 'status_id', 'brand', 'online_month','category_id'])) }}" id="export-btn" class="inline-flex w-fit items-center justify-center rounded-lg border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
-                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
-                    Export products
                 </button>
             @endif
             @if($canUseStandBulkActions)
@@ -219,7 +219,7 @@
                         @php
                             $isProductReadyForBulkAction = match ($workflowChannel) {
                                 'stand' => in_array($product?->stage, ['checked', 'finished'], true),
-                                'online' => $product?->stage === 'checked',
+                                'online' => $product?->stage === 'exported',
                                 default => false,
                             };
                         @endphp
@@ -362,11 +362,13 @@
                                 $stageLabel = ucfirst(str_replace(['_', '-'], ' ', $productStage));
                                 $stageClasses = match ($productStage) {
                                     'finished', 'completed' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+                                    'exported' => 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300',
                                     'checked' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
                                     default => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
                                 };
                                 $stageDotClasses = match ($productStage) {
                                     'finished', 'completed' => 'bg-green-500',
+                                    'exported' => 'bg-sky-500',
                                     'checked' => 'bg-yellow-500',
                                     default => 'bg-blue-500',
                                 };

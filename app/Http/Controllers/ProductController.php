@@ -161,6 +161,7 @@ class ProductController extends Controller
             $products = $productsQuery->where('stage', 'checked')
                 ->get();
             $preproducts = $exportDataService->prepare($products);
+            $this->recordOnlineExportWorkflowActions($request, $products);
 
             return Excel::download(
                 new ProductsExport($preproducts),
@@ -1347,6 +1348,7 @@ class ProductController extends Controller
             })
             ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
             ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->where('stage', 'checked')
             ->when(
                 preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
                 fn ($query) => $query
@@ -1358,11 +1360,70 @@ class ProductController extends Controller
             ->get();
 
         $preproducts = $exportDataService->prepare($products);
+        $this->recordOnlineExportWorkflowActions($request, $products);
 
         return Excel::download(
             new ProductsExport($preproducts),
             'online-products-'.now()->format('Y-m-d').'.xlsx'
         );
+    }
+
+    private function recordOnlineExportWorkflowActions(Request $request, $products): void
+    {
+        abort_unless($request->user()?->hasRoles(['Ecommerce Admin']), 403, 'Only Ecommerce Admin can export online products.');
+
+        DB::transaction(function () use ($request, $products) {
+            foreach ($products as $product) {
+                $productWorkflow = ProductWorkflow::query()
+                    ->where('product_id', $product->id)
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $productWorkflow || $productWorkflow->status !== 'ongoing') {
+                    continue;
+                }
+
+                $currentStep = WorkflowStep::find($productWorkflow->current_step_id);
+                $isOnlineWorkflow = Workflow::query()
+                    ->whereKey($productWorkflow->workflow_id)
+                    ->where('slug', 'like', '%online%')
+                    ->exists();
+                $isExportStep = in_array(Str::lower((string) $currentStep?->action), ['export', 'exported'], true);
+                $hasStepRole = $currentStep
+                    && (
+                        ! $currentStep->role_id
+                        || $request->user()->roles()->whereKey($currentStep->role_id)->exists()
+                    );
+
+                if (! $isOnlineWorkflow || ! $isExportStep || ! $hasStepRole) {
+                    continue;
+                }
+
+                $actionLog = new ProductWorkflowAction;
+                $actionLog->product_id = $product->id;
+                $actionLog->product_workflow_id = $productWorkflow->id;
+                $actionLog->workflow_step_id = $currentStep->id;
+                $actionLog->user_id = $request->user()->id;
+                $actionLog->action = $currentStep->action;
+                $actionLog->comment = 'Exported with Online Product Excel export.';
+                $actionLog->save();
+
+                $nextStep = WorkflowStep::query()
+                    ->where('workflow_id', $productWorkflow->workflow_id)
+                    ->where('step_no', '>', $currentStep->step_no)
+                    ->orderBy('step_no')
+                    ->orderBy('id')
+                    ->first();
+
+                $product->stage = $currentStep->action;
+                $product->save();
+
+                $productWorkflow->current_step_id = $nextStep?->id;
+                $productWorkflow->status = $nextStep ? 'ongoing' : 'completed';
+                $productWorkflow->save();
+            }
+        });
     }
 }
 

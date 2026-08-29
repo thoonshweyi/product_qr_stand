@@ -212,6 +212,7 @@ $(function () {
                         <select name="steps[${index}][name]" class="step-field block h-9 w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" data-field="name">
                             <option value="">Choose step</option>
                             <option value="Checked" ${step.name === 'Checked' ? 'selected' : ''}>Checked</option>
+                            <option value="Exported" ${step.name === 'Exported' ? 'selected' : ''}>Exported</option>
                             <option value="Finished" ${step.name === 'Finished' ? 'selected' : ''}>Finished</option>
                         </select>
                     </div>

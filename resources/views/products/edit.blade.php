@@ -165,11 +165,13 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                     $stageLabel = ucfirst(str_replace(['_', '-'], ' ', $productStage));
                                     $stageClasses = match ($productStage) {
                                         'finished', 'completed' => 'bg-green-100 text-green-700 ring-green-200 dark:bg-green-900/40 dark:text-green-300 dark:ring-green-800',
+                                        'exported' => 'bg-sky-100 text-sky-700 ring-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:ring-sky-800',
                                         'checked' => 'bg-yellow-100 text-yellow-800 ring-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:ring-yellow-800',
                                         default => 'bg-blue-100 text-blue-700 ring-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:ring-blue-800',
                                     };
                                     $stageDotClasses = match ($productStage) {
                                         'finished', 'completed' => 'bg-green-500',
+                                        'exported' => 'bg-sky-500',
                                         'checked' => 'bg-yellow-500',
                                         default => 'bg-blue-500',
                                     };
@@ -495,6 +497,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                 @php
                                     $workflowButtonLabel = match (strtolower($currentWorkflowStep->action)) {
                                         'checked' => 'Check',
+                                        'exported' => 'Export',
                                         'finished' => 'Finish',
                                         default => $currentWorkflowStep->name,
                                     };
