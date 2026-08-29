@@ -33,6 +33,8 @@ class ProductController extends Controller
 {
     private const ONLINE_REQUIRED_SPECIFICATIONS = ['Weight', 'Length', 'Width', 'Height', 'Size'];
 
+    private const STAND_REQUIRED_SPECIFICATIONS = ['Weight'];
+
     private const DEFAULT_DESCRIPTION_MM = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
 
     private const DEFAULT_DESCRIPTION_EN = 'Shop for variety of high quality products with reasonable price at PRO 1 Global, leading provider for construction and home improvement products.';
@@ -381,7 +383,7 @@ class ProductController extends Controller
                 'required',
                 'array',
                 'min:1',
-                function (string $attribute, mixed $value, \Closure $fail) use ($request, $requiresOnlineDate) {
+                function (string $attribute, mixed $value, \Closure $fail) use ($request, $requiresMainImage, $requiresOnlineDate) {
                     $isStandOnly = Workflow::whereKey($request->input('workflow_id'))
                         ->where('slug', 'stand-only')
                         ->exists();
@@ -390,15 +392,18 @@ class ProductController extends Controller
                         $fail('Stand Only workflow allows a maximum of 10 specifications.');
                     }
 
-                    if ($requiresOnlineDate && is_array($value)) {
+                    if (($requiresMainImage || $requiresOnlineDate) && is_array($value)) {
                         $submittedNames = collect($value)
                             ->pluck('name')
                             ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
-                        $missing = collect(self::ONLINE_REQUIRED_SPECIFICATIONS)
+                        $requiredSpecifications = collect($requiresOnlineDate ? self::ONLINE_REQUIRED_SPECIFICATIONS : [])
+                            ->merge($requiresMainImage ? self::STAND_REQUIRED_SPECIFICATIONS : [])
+                            ->unique();
+                        $missing = $requiredSpecifications
                             ->reject(fn ($name) => $submittedNames->contains(Str::lower($name)));
 
                         if ($missing->isNotEmpty()) {
-                            $fail('Online workflows require these specifications: '.$missing->implode(', ').'.');
+                            $fail('This workflow requires these specifications: '.$missing->implode(', ').'.');
                         }
                     }
                 },
@@ -944,20 +949,23 @@ class ProductController extends Controller
                 'required',
                 'array',
                 'min:1',
-                function (string $attribute, mixed $value, \Closure $fail) use ($isStandOnly, $requiresOnlineDate) {
+                function (string $attribute, mixed $value, \Closure $fail) use ($isStandOnly, $requiresMainImage, $requiresOnlineDate) {
                     if ($isStandOnly && is_array($value) && count($value) > 10) {
                         $fail('Stand Only workflow allows a maximum of 10 specifications.');
                     }
 
-                    if ($requiresOnlineDate && is_array($value)) {
+                    if (($requiresMainImage || $requiresOnlineDate) && is_array($value)) {
                         $submittedNames = collect($value)
                             ->pluck('name')
                             ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
-                        $missing = collect(self::ONLINE_REQUIRED_SPECIFICATIONS)
+                        $requiredSpecifications = collect($requiresOnlineDate ? self::ONLINE_REQUIRED_SPECIFICATIONS : [])
+                            ->merge($requiresMainImage ? self::STAND_REQUIRED_SPECIFICATIONS : [])
+                            ->unique();
+                        $missing = $requiredSpecifications
                             ->reject(fn ($name) => $submittedNames->contains(Str::lower($name)));
 
                         if ($missing->isNotEmpty()) {
-                            $fail('Online workflows require these specifications: '.$missing->implode(', ').'.');
+                            $fail('This workflow requires these specifications: '.$missing->implode(', ').'.');
                         }
                     }
                 },

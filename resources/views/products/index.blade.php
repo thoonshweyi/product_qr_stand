@@ -312,7 +312,7 @@
                             </div>
                         </td>
 
-                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->name }}</td>
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{Str::limit($product->name,30)}}</td>
 
                         @if($canSeeCurrentBranchPrintStatus)
                         <td class="whitespace-nowrap p-4">

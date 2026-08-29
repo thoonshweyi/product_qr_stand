@@ -569,6 +569,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
 
         const maxSpecifications = 10;
         const fixedOnlineSpecifications = ['Weight', 'Length', 'Width', 'Height', 'Size'];
+        const fixedStandSpecifications = ['Weight'];
         const hasExistingMainImage = @js(filled($product->image));
         const selectedWorkflowSlug = @js($workflowSlug);
         const hasSpecificationLimit = selectedWorkflowSlug === 'stand-only';
@@ -584,18 +585,6 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
         let rows = (@js(old('specifications', $initialSpecifications)) || [])
             .filter(row => String(row.name || '').trim() || String(row.value || '').trim())
             .map(row => ({ id: nextId++, name: row.name || '', value: row.value || '' }));
-
-        if (requiresOnlineDate) {
-            fixedOnlineSpecifications.forEach(name => {
-                if (!availableSpecifications.some(item => normalize(item) === normalize(name))) {
-                    availableSpecifications.push(name);
-                }
-
-                if (!rows.some(row => normalize(row.name) === normalize(name))) {
-                    rows.push({ id: nextId++, name, value: '' });
-                }
-            });
-        }
 
         rows.forEach(row => {
             if (row.name && !availableSpecifications.some(name => normalize(name) === normalize(row.name))) {
@@ -620,8 +609,28 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
             return rows.some(row => row.id !== exceptId && normalize(row.name) === normalize(name));
         }
 
-        function isFixedOnlineSpecification(row) {
-            return requiresOnlineDate && fixedOnlineSpecifications.some(name => normalize(name) === normalize(row.name));
+        function fixedRequiredSpecifications() {
+            const names = [];
+            if (requiresOnlineDate) names.push(...fixedOnlineSpecifications);
+            if (requiresMainImage) names.push(...fixedStandSpecifications);
+
+            return [...new Set(names)];
+        }
+
+        function isFixedWorkflowSpecification(row) {
+            return fixedRequiredSpecifications().some(name => normalize(name) === normalize(row.name));
+        }
+
+        function ensureFixedWorkflowSpecifications() {
+            fixedRequiredSpecifications().forEach(name => {
+                if (!availableSpecifications.some(item => normalize(item) === normalize(name))) {
+                    availableSpecifications.push(name);
+                }
+
+                if (!rows.some(row => normalize(row.name) === normalize(name))) {
+                    rows.push({ id: nextId++, name, value: '' });
+                }
+            });
         }
 
         function entryName() {
@@ -670,7 +679,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
             ).join('');
 
             $('#specification-rows').html(rows.map((row, index) => {
-                const fixed = isFixedOnlineSpecification(row);
+                const fixed = isFixedWorkflowSpecification(row);
 
                 return `
                 <div class="grid gap-2 border-t border-gray-100 px-4 py-3 first:border-t-0 dark:border-gray-700 sm:grid-cols-12 sm:items-center" data-row-id="${row.id}">
@@ -685,7 +694,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                         <input value="${escapeHtml(row.value)}" name="specifications[${index}][value]" id="selected-specification-value-${row.id}" required class="specification-row-value block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" placeholder="e.g. 370W (0.5HP)">
                     </div>
                     <div class="flex justify-end sm:col-span-1">
-                        ${fixed ? `<span class="inline-flex h-8 w-8 items-center justify-center text-blue-400" title="Required for Online workflow"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-4 4h8a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Zm1-10V7a3 3 0 0 1 6 0v4"/></svg></span>` : `<button type="button" class="remove-specification inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
+                        ${fixed ? `<span class="inline-flex h-8 w-8 items-center justify-center text-blue-400" title="Required for selected workflow"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-4 4h8a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Zm1-10V7a3 3 0 0 1 6 0v4"/></svg></span>` : `<button type="button" class="remove-specification inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400" aria-label="Remove specification">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>`}
                     </div>
@@ -861,7 +870,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
         }).on('click', '.remove-specification', function () {
             const id = Number($(this).closest('[data-row-id]').data('row-id'));
             const row = rows.find(item => item.id === id);
-            if (row && isFixedOnlineSpecification(row)) return;
+            if (row && isFixedWorkflowSpecification(row)) return;
             rows = rows.filter(row => row.id !== id); showError(); renderRows();
         });
         $('#name, #brand, #model, #category, #status, #website_url, #description').on('input change', updateProductPreview);
@@ -961,6 +970,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
             });
         });
 
+        ensureFixedWorkflowSpecifications();
         renderRows();
         updateProductPreview();
 
