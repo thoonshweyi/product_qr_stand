@@ -73,6 +73,9 @@ class ProductController extends Controller
 
         $currentBranchId = $request->user()->branch_id;
         $currentBranch = $request->user()->branch;
+        $activeBranchCount = $workflowChannel === 'stand'
+            ? Branch::where('status_id', 3)->count()
+            : 0;
         $productListTitle = match ($workflowChannel) {
             'stand' => 'Stand Products',
             'online' => 'Online Products',
@@ -118,6 +121,19 @@ class ProductController extends Controller
                         ->where('branch_id', $currentBranchId)
                         ->where('status', 'printed'),
                 ], 'product_version');
+            })
+            ->when($workflowChannel === 'stand', function ($query) {
+                $query->selectSub(
+                    DB::table('product_print_records')
+                        ->join('branches', 'branches.id', '=', 'product_print_records.branch_id')
+                        ->selectRaw('COUNT(DISTINCT product_print_records.branch_id)')
+                        ->whereColumn('product_print_records.product_id', 'products.id')
+                        ->whereColumn('product_print_records.product_version', 'products.print_version')
+                        ->where('product_print_records.status', 'printed')
+                        ->whereNotNull('product_print_records.branch_id')
+                        ->where('branches.status_id', 3),
+                    'all_branch_printed_count'
+                );
             })
             ->when($keyword !== '', function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
@@ -183,7 +199,8 @@ class ProductController extends Controller
             'currentBranchId',
             'workflowChannel',
             'productListTitle',
-            'categories'
+            'categories',
+            'activeBranchCount'
         ));
     }
 

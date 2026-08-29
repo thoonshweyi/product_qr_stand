@@ -177,12 +177,17 @@
                     </th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">No.</th>
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Product</th>
-                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer','Administrator']))
+                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                         Print status
                         @if ($currentBranchId)
                             <span class="mt-0.5 block normal-case text-[10px] font-normal text-gray-400">{{ $currentBranch->branch_short_name ?: $currentBranch->branch_name }}</span>
                         @endif
+                    </th>
+                    @endif
+                    @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Administrator','Editor','Checker']))
+                    <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                        All Branch Print Status
                     </th>
                     @endif
                     <th class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Category</th>
@@ -276,7 +281,7 @@
                             </div>
                         </td>
 
-                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer','Administrator']))
+                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Viewer']))
                         <td class="whitespace-nowrap p-4">
                             @if (! $currentBranchId)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -299,6 +304,38 @@
                                     title="Printed at {{ $product->current_branch_last_printed_at }}">
                                     <i class="fas fa-circle-check mr-1.5"></i>
                                     Printed · v{{ $product->print_version }}
+                                </span>
+                            @endif
+                        </td>
+                        @endif
+                        @if($workflowChannel === 'stand' && auth()->user()->hasRoles(['Administrator','Editor','Checker']))
+                        <td class="whitespace-nowrap p-4">
+                            @php
+                                $allBranchPrintedCount = (int) ($product->all_branch_printed_count ?? 0);
+                            @endphp
+
+                            @if ($activeBranchCount < 1)
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-circle-exclamation mr-1.5"></i>
+                                    No branch
+                                </span>
+                            @elseif ($allBranchPrintedCount === 0)
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                    title="0 of {{ $activeBranchCount }} active branches printed current version">
+                                    <i class="fas fa-circle-minus mr-1.5"></i>
+                                    Not Printed
+                                </span>
+                            @elseif ($allBranchPrintedCount < $activeBranchCount)
+                                <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                                    title="{{ $allBranchPrintedCount }} of {{ $activeBranchCount }} active branches printed current version">
+                                    <i class="fas fa-circle-half-stroke mr-1.5"></i>
+                                    Partial Printed
+                                </span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                                    title="All {{ $activeBranchCount }} active branches printed current version">
+                                    <i class="fas fa-circle-check mr-1.5"></i>
+                                    Fully Printed
                                 </span>
                             @endif
                         </td>
