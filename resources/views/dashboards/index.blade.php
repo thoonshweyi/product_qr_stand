@@ -156,19 +156,26 @@
                             </td>
                             <td class="p-4">
                                 <div class="flex max-w-4xl flex-wrap gap-2">
-                                    @forelse ($previewPrintedRecords as $printRecord)
-                                        <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
+                                    @if ($activeBranchCount > 0 && $allBranchPrintedCount >= $activeBranchCount)
+                                        <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="All {{ $activeBranchCount }} active branches printed current version">
                                             <i class="fa-solid fa-circle-check mr-1.5"></i>
-                                            {{ $printRecord->branch?->branch_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
+                                            All branches printed
                                         </span>
-                                    @empty
-                                        <span class="px-2 py-1.5 text-xs text-gray-400">No branch has printed current version yet.</span>
-                                    @endforelse
+                                    @else
+                                        @forelse ($previewPrintedRecords as $printRecord)
+                                            <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
+                                                <i class="fa-solid fa-circle-check mr-1.5"></i>
+                                                {{ $printRecord->branch?->branch_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
+                                            </span>
+                                        @empty
+                                            <span class="px-2 py-1.5 text-xs text-gray-400">No branch has printed current version yet.</span>
+                                        @endforelse
 
-                                    @if ($morePrintedCount > 0)
-                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                            +{{ $morePrintedCount }} more
-                                        </span>
+                                        @if ($morePrintedCount > 0)
+                                            <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                                +{{ $morePrintedCount }} more
+                                            </span>
+                                        @endif
                                     @endif
                                 </div>
                             </td>

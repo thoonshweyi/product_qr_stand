@@ -22,15 +22,15 @@
 
     <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-            <form action="{{ route('dashboards.branch-print-report') }}" method="GET" class="flex w-full flex-wrap items-end gap-3 2xl:flex-nowrap">
-                <div class="w-full min-w-64 flex-1">
+            <form action="{{ route('dashboards.branch-print-report') }}" method="GET" class="flex w-full flex-wrap items-end gap-3">
+                <div class="w-full sm:w-72">
                     <label for="keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                     <input type="search" name="keyword" id="keyword" value="{{ request('keyword') }}"
                         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         placeholder="Enter code or name">
                 </div>
 
-                <div class="w-full min-w-64 flex-1">
+                <div class="w-full sm:w-72">
                     <label for="printed_branch_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Printed Branch</label>
                     <select name="printed_branch_id" id="printed_branch_id"
                         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -43,7 +43,7 @@
                     </select>
                 </div>
 
-                <div class="flex shrink-0 gap-2">
+                <div class="flex gap-2">
                     <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
                     @if (request()->filled('keyword') || request()->filled('printed_branch_id'))
                         <a href="{{ route('dashboards.branch-print-report') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
@@ -115,14 +115,21 @@
                             </td>
                             <td class="p-4">
                                 <div class="flex max-w-5xl flex-wrap gap-2">
-                                    @forelse ($currentVersionPrintedRecords as $printRecord)
-                                        <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
+                                    @if ($activeBranchCount > 0 && $allBranchPrintedCount >= $activeBranchCount)
+                                        <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="All {{ $activeBranchCount }} active branches printed current version">
                                             <i class="fa-solid fa-circle-check mr-1.5"></i>
-                                            {{ $printRecord->branch?->branch_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
+                                            All branches printed
                                         </span>
-                                    @empty
-                                        <span class="text-xs text-gray-400">No branch has printed current version yet.</span>
-                                    @endforelse
+                                    @else
+                                        @forelse ($currentVersionPrintedRecords as $printRecord)
+                                            <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
+                                                <i class="fa-solid fa-circle-check mr-1.5"></i>
+                                                {{ $printRecord->branch?->branch_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
+                                            </span>
+                                        @empty
+                                            <span class="text-xs text-gray-400">No branch has printed current version yet.</span>
+                                        @endforelse
+                                    @endif
                                 </div>
                             </td>
                             <td class="whitespace-nowrap p-4 text-right">
