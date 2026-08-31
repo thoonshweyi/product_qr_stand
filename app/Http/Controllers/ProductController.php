@@ -1161,6 +1161,10 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+            ProductWorkflowAction::where('product_id', $product->id)->delete();
+            ProductWorkflow::where('product_id', $product->id)->delete();
+            $product->printRecords()->delete();
+            $product->editLogs()->delete();
             $product->specificationValues()->delete();
             $product->images()->delete();
             $product->delete();
