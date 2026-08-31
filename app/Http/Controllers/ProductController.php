@@ -66,6 +66,7 @@ class ProductController extends Controller
         $brand = trim((string) $request->query('brand', ''));
         $stage = trim((string) $request->query('stage', ''));
         $onlineMonth = trim((string) $request->query('online_month', ''));
+        $createdDate = trim((string) $request->query('created_date', ''));
         $categoryId = $request->query('category_id');
         $allowedStages = ['ongoing', 'checked', 'exported', 'finished'];
 
@@ -74,6 +75,7 @@ class ProductController extends Controller
             || $brand !== ''
             || in_array($stage, $allowedStages, true)
             || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth))
+            || preg_match('/^\d{4}-\d{2}-\d{2}$/', $createdDate)
             || $categoryId;
 
         $currentBranchId = $request->user()->branch_id;
@@ -166,6 +168,10 @@ class ProductController extends Controller
                 fn ($query) => $query
                     ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
                     ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
+            )
+            ->when(
+                preg_match('/^\d{4}-\d{2}-\d{2}$/', $createdDate),
+                fn ($query) => $query->whereDate('created_at', $createdDate)
             )
             ->when(filled($categoryId), fn ($query) => $query->where('category_id', $categoryId))
             ->when(! auth()->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))

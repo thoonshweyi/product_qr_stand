@@ -21,6 +21,37 @@
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+            <form action="{{ route('dashboards.branch-print-report') }}" method="GET" class="flex w-full flex-wrap items-end gap-3 2xl:flex-nowrap">
+                <div class="w-full min-w-64 flex-1">
+                    <label for="keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
+                    <input type="search" name="keyword" id="keyword" value="{{ request('keyword') }}"
+                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        placeholder="Enter code or name">
+                </div>
+
+                <div class="w-full min-w-64 flex-1">
+                    <label for="printed_branch_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Printed Branch</label>
+                    <select name="printed_branch_id" id="printed_branch_id"
+                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                        <option value="">All printed branches</option>
+                        @foreach ($branches as $branch)
+                            <option value="{{ $branch->id }}" @selected((string) request('printed_branch_id') === (string) $branch->id)>
+                                {{ $branch->branch_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex shrink-0 gap-2">
+                    <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
+                    @if (request()->filled('keyword') || request()->filled('printed_branch_id'))
+                        <a href="{{ route('dashboards.branch-print-report') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
+                    @endif
+                </div>
+            </form>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -111,11 +142,14 @@
             </table>
         </div>
 
-        @if ($printReportProducts->hasPages())
-            <div class="border-t border-gray-200 p-4 dark:border-gray-700">
+        <div class="flex flex-col gap-3 border-t border-gray-200 p-4 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Showing {{ $printReportProducts->firstItem() ?? 0 }} to {{ $printReportProducts->lastItem() ?? 0 }} of {{ $printReportProducts->total() }} products
+            </p>
+            <div>
                 {{ $printReportProducts->links() }}
             </div>
-        @endif
+        </div>
     </div>
 </div>
 @endsection

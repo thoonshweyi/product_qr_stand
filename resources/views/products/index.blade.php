@@ -113,8 +113,8 @@
 
 <div class="bg-white dark:bg-gray-800">
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form id="search_form" action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="grid w-full max-w-7xl grid-cols-12 items-end gap-3">
-            <div class="col-span-12 sm:col-span-6 lg:col-span-3">
+        <form id="search_form" action="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" method="GET" class="flex w-full flex-wrap items-end gap-3 2xl:flex-nowrap">
+            <div class="w-full min-w-64 flex-1">
                 <label for="product-keyword" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Product code or name</label>
                 <input type="search" name="keyword" id="product-keyword" value="{{ request('keyword') }}"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -132,7 +132,7 @@
                 </select>
             </div> -->
 
-            <div class="col-span-6 sm:col-span-3 lg:col-span-2">
+            <div class="min-w-40 flex-1">
                 <label for="product-brand" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Brand</label>
                 <select name="brand" id="product-brand"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -143,7 +143,7 @@
                 </select>
             </div>
 
-            <div class="col-span-6 sm:col-span-3 lg:col-span-2">
+            <div class="min-w-40 flex-1">
                 <label for="product-stage-filter" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Stage</label>
                 <select name="stage" id="product-stage-filter"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -156,7 +156,7 @@
             </div>
 
             @if ($workflowChannel === 'online')
-                <div class="col-span-6 sm:col-span-3 lg:col-span-2">
+                <div class="min-w-44 flex-1">
                     <label for="online_month" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Online month</label>
                     <input type="text" name="online_month" id="online_month" value="{{ request('online_month') }}"
                         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -164,7 +164,7 @@
                 </div>
             @endif
 
-            <div class="col-span-6 sm:col-span-3 {{ $workflowChannel === 'online' ? 'lg:col-span-2' : 'lg:col-span-3' }}">
+            <div class="min-w-44 flex-1">
                 <label for="product-status" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Main Category</label>
                 <select name="category_id" id="product-status"
                     class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
@@ -175,9 +175,15 @@
                 </select>
             </div>
 
-            <div class="col-span-12 flex gap-2 sm:col-span-6 {{ $workflowChannel === 'online' ? 'lg:col-span-1' : 'lg:col-span-2' }}">
+            <div class="min-w-40 flex-1">
+                <label for="created_date" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Date</label>
+                <input type="date" name="created_date" id="created_date" value="{{ request('created_date') }}"
+                    class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <div class="flex shrink-0 gap-2">
                 <button type="submit" class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800">Search</button>
-                @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand') || request()->filled('stage') || request()->filled('online_month') || request()->filled('category_id'))
+                @if (request()->filled('keyword') || request()->filled('status_id') || request()->filled('brand') || request()->filled('stage') || request()->filled('online_month') || request()->filled('category_id') || request()->filled('created_date'))
                     <a href="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
                 @endif
             </div>
