@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/dashboards', [DashboardsController::class, 'index'])->name('dashboards.index');
+    Route::get('/dashboards/branch-print-report', [DashboardsController::class, 'branchPrintReport'])
+        ->name('dashboards.branch-print-report');
 
     Route::resource('statuses', StatusesController::class);
 

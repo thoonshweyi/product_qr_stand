@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 
 class DashboardsController extends Controller
 {
@@ -16,11 +16,29 @@ class DashboardsController extends Controller
             'stand_and_online' => $this->productCountByWorkflowSlug('stand-and-online'),
         ];
 
-        $activeBranchCount = Branch::query()
-            ->where('status_id', 3)
-            ->count();
+        $printReportProducts = $this->branchPrintReportQuery()
+            ->latest('id')
+            ->limit(9)
+            ->get(['id', 'product_code', 'product_name', 'name', 'brand', 'stage', 'print_version']);
 
-        $printReportProducts = Product::query()
+        return view('dashboards.index', compact(
+            'productCounts',
+            'printReportProducts',
+        ));
+    }
+
+    public function branchPrintReport()
+    {
+        $printReportProducts = $this->branchPrintReportQuery()
+            ->latest('id')
+            ->paginate(30);
+
+        return view('dashboards.branch-print-report', compact('printReportProducts'));
+    }
+
+    private function branchPrintReportQuery(): Builder
+    {
+        return Product::query()
             ->with([
                 'printRecords' => fn ($query) => $query
                     ->with('branch:id,branch_name,branch_code,branch_short_name')
@@ -36,16 +54,7 @@ class DashboardsController extends Controller
                     ->whereColumn('product_workflows.product_id', 'products.id')
                     ->where('workflows.slug', 'like', '%stand%');
             })
-            ->whereIn('stage', ['checked', 'finished'])
-            ->latest('id')
-            ->limit(30)
-            ->get(['id', 'product_code', 'product_name', 'name', 'brand', 'stage', 'print_version']);
-
-        return view('dashboards.index', compact(
-            'productCounts',
-            'activeBranchCount',
-            'printReportProducts',
-        ));
+            ->whereIn('stage', ['checked', 'finished']);
     }
 
     private function productCountByWorkflowSlug(string $workflowSlug): int
