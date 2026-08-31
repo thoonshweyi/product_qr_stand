@@ -27,7 +27,7 @@
         <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stand Products</p>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stand Only Products</p>
                     <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($productCounts['stand']) }}</p>
                 </div>
                 <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
@@ -43,7 +43,7 @@
         <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Online Products</p>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Online Only Products</p>
                     <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($productCounts['online']) }}</p>
                 </div>
                 <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
@@ -77,9 +77,9 @@
         <div class="border-b border-gray-200 p-5 dark:border-gray-700">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Branch Print Matrix</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Branch Print Progress Report</h2>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Quickly check which branches have printed each stand product's current version.
+                        Check each product's branch print progress without scrolling across many branch columns.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 text-xs font-medium">
@@ -100,14 +100,11 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="sticky left-0 z-10 min-w-72 bg-gray-50 p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-300">Product</th>
+                        <th class="min-w-80 p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:text-gray-300">Product</th>
                         <th class="whitespace-nowrap p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:text-gray-300">Stage</th>
                         <th class="whitespace-nowrap p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:text-gray-300">Version</th>
-                        @foreach ($branches as $branch)
-                            <th class="whitespace-nowrap p-4 text-center text-xs font-semibold uppercase text-gray-500 dark:text-gray-300" title="{{ $branch->branch_name }}">
-                                {{ $branch->branch_short_name ?: $branch->branch_code }}
-                            </th>
-                        @endforeach
+                        <th class="whitespace-nowrap p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:text-gray-300">Progress</th>
+                        <th class="min-w-96 p-4 text-left text-xs font-semibold uppercase text-gray-500 dark:text-gray-300">Printed Branches</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -118,9 +115,19 @@
                                 ->unique('branch_id')
                                 ->keyBy('branch_id');
                             $productStage = ucfirst(str_replace(['_', '-'], ' ', $product->stage ?: 'ongoing'));
+                            $currentVersionPrintedRecords = $latestPrintRecords
+                                ->filter(fn ($record) => (int) $record->product_version >= (int) $product->print_version);
+                            $oldVersionPrintedRecords = $latestPrintRecords
+                                ->filter(fn ($record) => (int) $record->product_version < (int) $product->print_version);
+                            $currentPrintedCount = $currentVersionPrintedRecords->count();
+                            $oldPrintedCount = $oldVersionPrintedRecords->count();
+                            $notPrintedCount = max($activeBranchCount - $currentPrintedCount, 0);
+                            $progressPercent = $activeBranchCount > 0
+                                ? round(($currentPrintedCount / $activeBranchCount) * 100)
+                                : 0;
                         @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="sticky left-0 z-10 bg-white p-4 dark:bg-gray-800">
+                            <td class="p-4">
                                 <div class="min-w-0">
                                     <p class="truncate font-semibold text-gray-900 dark:text-white">{{ $product->product_name ?: $product->name }}</p>
                                     <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ $product->product_code }} · {{ $product->brand }}</p>
@@ -132,28 +139,55 @@
                                 </span>
                             </td>
                             <td class="whitespace-nowrap p-4 text-gray-600 dark:text-gray-300">v{{ $product->print_version }}</td>
-                            @foreach ($branches as $branch)
-                                @php($printRecord = $latestPrintRecords->get($branch->id))
-                                <td class="whitespace-nowrap p-4 text-center">
-                                    @if (! $printRecord)
-                                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-300" title="Not printed">
-                                            <i class="fa-solid fa-minus text-xs"></i>
+                            <td class="min-w-64 p-4">
+                                <div class="flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <span>{{ $currentPrintedCount }}/{{ $activeBranchCount }} printed</span>
+                                    <span>{{ $progressPercent }}%</span>
+                                </div>
+                                <div class="mt-2 h-2 rounded-full bg-gray-100 dark:bg-gray-700">
+                                    <div class="h-2 rounded-full bg-blue-600" style="width: {{ $progressPercent }}%"></div>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                                    <span class="rounded-full bg-green-100 px-2 py-0.5 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                        {{ $currentPrintedCount }} printed
+                                    </span>
+                                    <span class="rounded-full bg-orange-100 px-2 py-0.5 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
+                                        {{ $oldPrintedCount }} reprint
+                                    </span>
+                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                        {{ $notPrintedCount }} not printed
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex max-w-3xl flex-wrap gap-2">
+                                    @forelse ($currentVersionPrintedRecords->take(8) as $printRecord)
+                                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
+                                            <i class="fa-solid fa-circle-check mr-1.5"></i>
+                                            {{ $printRecord->branch?->branch_short_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
                                         </span>
-                                    @elseif ((int) $printRecord->product_version < (int) $product->print_version)
-                                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" title="Printed old version {{ $printRecord->product_version }}">
-                                            <i class="fa-solid fa-rotate text-xs"></i>
+                                    @empty
+                                        <span class="text-xs text-gray-400">No branch has printed current version yet.</span>
+                                    @endforelse
+
+                                    @foreach ($oldVersionPrintedRecords->take(4) as $printRecord)
+                                        <span class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" title="Printed old version {{ $printRecord->product_version }}">
+                                            <i class="fa-solid fa-rotate mr-1.5"></i>
+                                            {{ $printRecord->branch?->branch_short_name ?: $printRecord->branch?->branch_code ?: 'Branch' }}
                                         </span>
-                                    @else
-                                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" title="Printed at {{ $printRecord->printed_at?->format('Y-m-d h:i A') }}">
-                                            <i class="fa-solid fa-check text-xs"></i>
+                                    @endforeach
+
+                                    @if ($latestPrintRecords->count() > 12)
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                            +{{ $latestPrintRecords->count() - 12 }} more
                                         </span>
                                     @endif
-                                </td>
-                            @endforeach
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ 3 + $branches->count() }}" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <td colspan="5" class="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
                                 No checked stand products are ready for branch print tracking yet.
                             </td>
                         </tr>
