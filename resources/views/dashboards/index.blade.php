@@ -157,9 +157,9 @@
                             <td class="p-4">
                                 <div class="flex max-w-4xl flex-wrap gap-2">
                                     @if ($activeBranchCount > 0 && $allBranchPrintedCount >= $activeBranchCount)
-                                        <span class="inline-flex items-center rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300" title="All {{ $activeBranchCount }} active branches printed current version">
-                                            <i class="fa-solid fa-circle-check mr-1.5"></i>
-                                            All branches printed
+                                        <span class="inline-flex items-center rounded-lg bg-green-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm ring-1 ring-inset ring-green-700 dark:bg-green-500 dark:text-green-950 dark:ring-green-400" title="All {{ $activeBranchCount }} active branches printed current version">
+                                            <i class="fa-solid fa-check-double mr-1.5"></i>
+                                            All Branch
                                         </span>
                                     @else
                                         @forelse ($previewPrintedRecords as $printRecord)
