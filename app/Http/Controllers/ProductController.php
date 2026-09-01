@@ -184,8 +184,15 @@ class ProductController extends Controller
         if ($request->document_search == 'Export') {
             $products = $productsQuery->where('stage', 'checked')
                 ->get();
-            $preproducts = $exportDataService->prepare($products);
-            $this->recordOnlineExportWorkflowActions($request, $products);
+            $preproducts = $exportDataService->prepare($products)
+                ->filter(fn ($preproduct) => filled($preproduct['onlinedata'] ?? null))
+                ->values();
+            $exportedProducts = $preproducts
+                ->pluck('product')
+                ->filter()
+                ->values();
+
+            $this->recordOnlineExportWorkflowActions($request, $exportedProducts);
 
             return Excel::download(
                 new ProductsExport($preproducts),
@@ -1008,7 +1015,6 @@ class ProductController extends Controller
                 'description_en' => filled($descriptionEn) ? $descriptionEn : self::DEFAULT_DESCRIPTION_EN,
                 'status_id' => $request->status_id,
                 // 'category_id' => $request->category_id,
-                'user_id' => $request->user()?->id,
                 'online_date' => $requiresOnlineDate
                     ? Carbon::createFromFormat('Y-m-d', $request->input('online_date'))->startOfMonth()->toDateString()
                     : null,
@@ -1350,62 +1356,6 @@ class ProductController extends Controller
         ]);
 
         return response()->json(['success' => 'Status Change Successfully']);
-    }
-
-    public function exportOnlineProducts(Request $request, OnlineProductExportDataService $exportDataService)
-    {
-        // dd($request);
-        $keyword = trim((string) $request->query('keyword', ''));
-        $statusId = $request->query('status_id');
-        $brand = trim((string) $request->query('brand', ''));
-        $stage = trim((string) $request->query('stage', ''));
-        $onlineMonth = trim((string) $request->query('online_month', ''));
-        $allowedStages = ['ongoing', 'checked', 'exported', 'finished'];
-
-        $products = Product::query()
-            ->with([
-                'category:id,name',
-                'country:id,name',
-                'status:id,name',
-                'specificationValues.specification:id,name',
-            ])
-            ->whereExists(function ($query) {
-                $query->selectRaw('1')
-                    ->from('product_workflows')
-                    ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
-                    ->whereColumn('product_workflows.product_id', 'products.id')
-                    ->where('workflows.slug', 'like', '%online%');
-            })
-            ->when($keyword !== '', function ($query) use ($keyword) {
-                $query->where(function ($query) use ($keyword) {
-                    $query->where('product_code', 'like', '%'.$keyword.'%')
-                        ->orWhere('name', 'like', '%'.$keyword.'%');
-                });
-            })
-            ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
-            ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
-            ->when(
-                in_array($stage, $allowedStages, true),
-                fn ($query) => $query->where('stage', $stage)
-            )
-            ->where('stage', 'checked')
-            ->when(
-                preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
-                fn ($query) => $query
-                    ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
-                    ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
-            )
-            ->when(! $request->user()->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
-            ->orderBy('products.id')
-            ->get();
-
-        $preproducts = $exportDataService->prepare($products);
-        $this->recordOnlineExportWorkflowActions($request, $products);
-
-        return Excel::download(
-            new ProductsExport($preproducts),
-            'online-products-'.now()->format('Y-m-d').'.xlsx'
-        );
     }
 
     private function recordOnlineExportWorkflowActions(Request $request, $products): void
