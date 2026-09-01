@@ -23,6 +23,13 @@
             font-style: normal;
         }
 
+        @font-face {
+            font-family: "BatchPrintPyidaungsu";
+            src: url("{{ asset('assets/fonts/batch-print/Pyidaungsu-Regular.ttf') }}") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -308,7 +315,7 @@
             min-height: 0;
             overflow: hidden;
             padding-bottom: 0;
-            font-family: "BatchPrintLatin", "BatchPrintMyanmar", sans-serif;
+            font-family: "BatchPrintLatin", "BatchPrintPyidaungsu", "BatchPrintMyanmar", sans-serif;
             text-rendering: optimizeLegibility;
         }
 
