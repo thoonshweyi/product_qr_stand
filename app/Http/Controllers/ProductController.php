@@ -1358,6 +1358,69 @@ class ProductController extends Controller
         return response()->json(['success' => 'Status Change Successfully']);
     }
 
+    public function cleanDescriptionJson(Request $request)
+    {
+        $validated = $request->validate([
+            'description' => ['required', 'string'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->parseProductDescription($validated['description']),
+        ]);
+    }
+
+    private function parseProductDescription(string $rawDescription): array
+    {
+        $lines = collect(preg_split('/\R/u', str_replace(["\r\n", "\r"], "\n", $rawDescription)))
+            ->map(fn ($line) => $this->cleanDescriptionLine($line))
+            ->filter(fn ($line) => filled($line))
+            ->values();
+
+        $attributes = [];
+        $descriptionLines = [];
+        $isReadingDescription = false;
+
+        foreach ($lines as $line) {
+            $matchesAttribute = preg_match('/^([^:：]{1,80})[:：]\s*(.*)$/u', $line, $matches);
+
+            if ($matchesAttribute && ! $isReadingDescription) {
+                $label = Str::squish($matches[1]);
+                $value = Str::squish($matches[2]);
+
+                if (filled($label) && filled($value)) {
+                    $attributes[Str::snake(Str::lower($label))] = [
+                        'label' => $label,
+                        'value' => $value,
+                    ];
+
+                    continue;
+                }
+            }
+
+            $isReadingDescription = true;
+            $descriptionLines[] = $line;
+        }
+
+        return [
+            'attributes' => $attributes,
+            'description' => collect($descriptionLines)
+                ->map(fn ($line) => Str::squish($line))
+                ->filter(fn ($line) => filled($line))
+                ->implode("\n"),
+            'description_lines' => $descriptionLines,
+        ];
+    }
+
+    private function cleanDescriptionLine(string $line): string
+    {
+        $line = html_entity_decode($line, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $line = str_replace("\xc2\xa0", ' ', $line);
+        $line = preg_replace('/^[\s\p{So}\p{Pd}•●▪▫■□◆◇♦◊]+/u', '', $line) ?? $line;
+
+        return Str::squish($line);
+    }
+
     private function recordOnlineExportWorkflowActions(Request $request, $products): void
     {
         abort_unless($request->user()?->hasRoles(['Ecommerce Admin']), 403, 'Only Ecommerce Admin can export online products.');
