@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ExcelImportValidationException;
 use App\Exports\ProductsExport;
+use App\Imports\ProductImport;
 use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Country;
@@ -1368,6 +1370,41 @@ class ProductController extends Controller
             'success' => true,
             'data' => $this->parseProductDescription($validated['description']),
         ]);
+    }
+
+    public function import(Request $request)
+    {
+        $this->authorize('create', Product::class);
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xls,xlsx', 'max:5120'],
+        ]);
+
+        ini_set('max_execution_time', '600');
+
+        DB::beginTransaction();
+
+        try {
+            $import = new ProductImport($request->user()->id);
+            Excel::import($import, $request->file('file'));
+
+            DB::commit();
+
+            return back()->with('success', $import->importedCount().' products imported successfully.');
+        } catch (ExcelImportValidationException $e) {
+            DB::rollBack();
+            Log::info($e);
+
+            return back()->with('validation_errors', [
+                'row' => $e->rowNumber(),
+                'errors' => $e->errors(),
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return back()->with('error', 'System Error: '.$e->getMessage());
+        }
     }
 
     private function parseProductDescription(string $rawDescription): array

@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
         ->name('products.workflow.online.finish');
     Route::post('/products/description/clean-json', [ProductController::class, 'cleanDescriptionJson'])
         ->name('products.description.clean-json');
+    Route::post('/products/import', [ProductController::class, 'import'])
+        ->name('products.import');
     Route::get('/products/workflow/{channel}', [ProductController::class, 'workflowProducts'])
         ->whereIn('channel', ['stand', 'online'])
         ->name('products.workflow.index');
