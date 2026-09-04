@@ -19,6 +19,7 @@ use App\Models\Status;
 use App\Models\Workflow;
 use App\Models\WorkflowStep;
 use App\Services\OnlineProductExportDataService;
+use App\Services\ProductService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -1374,25 +1375,6 @@ class ProductController extends Controller
 
     public function import(Request $request)
     {
-        $sampleDescription = '
-        ♦Brand: DECO
-        ♦Name: PVC Ceiling Gypsum Board
-        ♦Model: 262
-        ♦Code: 0305092001023
-        ♦Country of origin: China 
-        ♦Size: (603mmx603mm)
-        ♦Thickness: 7.5mm
-        ♦1 Packing: 10 pcs
-        ♦Weight: 2kg
-        ♦Usage Location: Indoor
-        ♦Color: White
-        ♦အိမ်မျက်နှာကျက်တွင် လှပ‌သေသပ်စေရန် တပ်ဆင်အသုံးပြုနိုင်ပြီး ရာသီဥတုအပူဒဏ်ကိုကာကွယ်ပေးနိုင်ခြင်း။
-        ♦(၁၀) ပေ ပတ်လည် အခန်းတစ်ခန်းအတွက် (၂၅) ချပ် အသုံးပြုရမည်ဖြစ်ပြီး တပ်ဆင်ရာတွင်လည်း Ceiling frame များဖြင့် အလွယ်တကူအသုံးပြုနိုင်ပါသည်။
-        PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။
-        ';
-        $descriptionData = $this->parseProductDescription($sampleDescription);
-        dd($descriptionData);
-
         $this->authorize('create', Product::class);
 
         $request->validate([
@@ -1404,7 +1386,7 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            $import = new ProductImport($request->user()->id);
+            $import = new ProductImport($request->user(), app(ProductService::class));
             Excel::import($import, $request->file('file'));
 
             DB::commit();

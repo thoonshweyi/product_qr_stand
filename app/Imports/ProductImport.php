@@ -4,12 +4,10 @@ namespace App\Imports;
 
 use App\Exceptions\ExcelImportValidationException;
 use App\Models\Category;
-use App\Models\Product;
-use App\Models\ProductSpecificationValue;
-use App\Models\ProductWorkflow;
-use App\Models\Specification;
+use App\Models\User;
 use App\Models\Workflow;
-use App\Models\WorkflowStep;
+use App\Services\ProductService;
+use App\Support\ProductValidationRules;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +15,6 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProductImport implements ToCollection, WithHeadingRow
 {
@@ -41,6 +38,7 @@ class ProductImport implements ToCollection, WithHeadingRow
     ];
 
     private const OPTIONAL_COLUMNS = [
+        'website_url',
         'unit',
         'description',
         'description_en',
@@ -52,28 +50,33 @@ class ProductImport implements ToCollection, WithHeadingRow
         'size',
     ];
 
-    private array $importedProductCodes = [];
+    private array $seenProductCodes = [];
 
     private int $importedCount = 0;
 
-    public function __construct(private readonly int $userId) {}
+    public function __construct(
+        private readonly User $user,
+        private readonly ProductService $productService,
+    ) {}
 
     public function collection(Collection $rows): void
     {
         $preparedRows = $rows
             ->map(fn ($row, $index) => [
                 'row_number' => $index + 2,
-                'data' => $this->normalizeRow($row->toArray()),
+                'raw' => $this->normalizeRawRow($row->toArray()),
             ])
-            ->reject(fn ($row) => $this->isEmptyRow($row['data']))
+            ->reject(fn ($row) => $this->isEmptyRow($row['raw']))
             ->values();
 
         $this->validateHeadings($preparedRows);
 
+        $validatedRows = [];
         $rowErrors = [];
 
         foreach ($preparedRows as $preparedRow) {
-            $errors = $this->validateRow($preparedRow['data']);
+            $normalizedData = $this->normalizeForProductCreate($preparedRow['raw']);
+            $errors = $this->validateRow($normalizedData);
 
             if (! empty($errors)) {
                 $rowErrors[] = [
@@ -84,15 +87,16 @@ class ProductImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $this->importedProductCodes[] = $preparedRow['data']['product_code'];
+            $this->seenProductCodes[] = $normalizedData['product_code'];
+            $validatedRows[] = $normalizedData;
         }
 
         if (! empty($rowErrors)) {
             throw new ExcelImportValidationException($rowErrors);
         }
 
-        foreach ($preparedRows as $preparedRow) {
-            $this->createProduct($preparedRow['data']);
+        foreach ($validatedRows as $validatedRow) {
+            $this->productService->create($validatedRow, $this->user);
             $this->importedCount++;
         }
     }
@@ -100,46 +104,6 @@ class ProductImport implements ToCollection, WithHeadingRow
     public function importedCount(): int
     {
         return $this->importedCount;
-    }
-
-    private function validateRow(array $row): array
-    {
-        $validator = Validator::make($row, [
-            'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
-            'product_name' => ['required', 'string', 'max:255'],
-            'name' => ['required', 'string', 'max:255'],
-            'brand' => ['required', 'string', 'max:255'],
-            'model' => ['required', 'string', 'max:255'],
-            'country_of_origin' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'exists:categories,name'],
-            'workflow' => ['required', 'string', 'exists:workflows,slug'],
-            'unit' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'description_en' => ['nullable', 'string', 'max:2000'],
-            'online_date' => ['nullable', 'date'],
-            'weight' => ['nullable', 'string', 'max:255'],
-            'length' => ['nullable', 'string', 'max:255'],
-            'width' => ['nullable', 'string', 'max:255'],
-            'height' => ['nullable', 'string', 'max:255'],
-            'size' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $validator->after(function ($validator) use ($row) {
-            if (in_array($row['product_code'] ?? null, $this->importedProductCodes, true)) {
-                $validator->errors()->add('product_code', 'The product code is duplicated in this Excel file.');
-            }
-
-            $workflow = Workflow::where('slug', $row['workflow'] ?? null)->first();
-            if ($workflow && ! WorkflowStep::where('workflow_id', $workflow->id)->exists()) {
-                $validator->errors()->add('workflow', 'The selected workflow does not have any steps.');
-            }
-        });
-
-        if ($validator->fails()) {
-            return $validator->errors()->toArray();
-        }
-
-        return [];
     }
 
     private function validateHeadings(Collection $preparedRows): void
@@ -155,7 +119,7 @@ class ProductImport implements ToCollection, WithHeadingRow
             ]);
         }
 
-        $headings = collect($preparedRows->first()['data'])->keys();
+        $headings = collect($preparedRows->first()['raw'])->keys();
         $allowedColumns = collect(self::REQUIRED_COLUMNS)->merge(self::OPTIONAL_COLUMNS);
         $missingColumns = collect(self::REQUIRED_COLUMNS)->diff($headings)->values();
         $unknownColumns = $headings->diff($allowedColumns)->values();
@@ -167,11 +131,15 @@ class ProductImport implements ToCollection, WithHeadingRow
         $errors = [];
 
         if ($missingColumns->isNotEmpty()) {
-            $errors['missing_columns'] = ['Missing required columns: '.$missingColumns->implode(', ')];
+            $errors['missing_columns'] = [
+                'Missing required columns: '.$missingColumns->implode(', '),
+            ];
         }
 
         if ($unknownColumns->isNotEmpty()) {
-            $errors['unknown_columns'] = ['Unknown columns: '.$unknownColumns->implode(', ')];
+            $errors['unknown_columns'] = [
+                'Unknown columns: '.$unknownColumns->implode(', '),
+            ];
         }
 
         throw new ExcelImportValidationException([
@@ -182,84 +150,125 @@ class ProductImport implements ToCollection, WithHeadingRow
         ]);
     }
 
-    private function createProduct(array $row): void
+    private function validateRow(array $row): array
     {
-        $workflow = Workflow::where('slug', $row['workflow'])->firstOrFail();
-        $firstWorkflowStep = WorkflowStep::where('workflow_id', $workflow->id)
-            ->orderBy('step_no')
-            ->orderBy('id')
-            ->firstOrFail();
-        $category = Category::where('name', $row['category'])->firstOrFail();
+        $validator = Validator::make(
+            $row,
+            ProductValidationRules::create($row, ['require_images' => false])
+        );
 
-        $product = Product::create([
-            'product_code' => $row['product_code'],
-            'product_name' => $row['product_name'],
-            'name' => $row['name'],
-            'brand' => $row['brand'],
-            'model' => $row['model'],
-            'country_of_origin' => $row['country_of_origin'],
-            'category_id' => $category->id,
-            'unit' => $row['unit'] ?? null,
-            'description' => $row['description'] ?? null,
-            'description_en' => $row['description_en'] ?? null,
-            'status_id' => 1,
-            'workflow_id' => $workflow->id,
-            'stage' => 'ongoing',
-            'online_date' => filled($row['online_date'] ?? null)
-                ? Carbon::parse($row['online_date'])->startOfMonth()->toDateString()
-                : null,
-            'user_id' => $this->userId,
-        ]);
-
-        ProductWorkflow::create([
-            'product_id' => $product->id,
-            'workflow_id' => $workflow->id,
-            'current_step_id' => $firstWorkflowStep->id,
-            'status' => 'ongoing',
-        ]);
-
-        $destinationUrl = route('products.show', $product->id);
-        $product->update([
-            'qr_destination' => $destinationUrl,
-            'qr' => $this->generateQr($destinationUrl, $product->product_code),
-        ]);
-
-        foreach (self::SPECIFICATION_COLUMNS as $column => $name) {
-            if (! filled($row[$column] ?? null)) {
-                continue;
+        $validator->after(function ($validator) use ($row) {
+            if (in_array($row['product_code'] ?? null, $this->seenProductCodes, true)) {
+                $validator->errors()->add(
+                    'product_code',
+                    'The product code is duplicated in this Excel file.'
+                );
             }
+        });
 
-            $specification = Specification::firstOrCreate(
-                ['slug' => Str::slug($name)],
-                [
-                    'name' => $name,
-                    'status_id' => 3,
-                    'user_id' => $this->userId,
-                    'category_id' => $category->id,
-                ]
-            );
-
-            ProductSpecificationValue::create([
-                'product_id' => $product->id,
-                'specification_id' => $specification->id,
-                'value' => $row[$column],
-            ]);
-        }
+        return $validator->fails()
+            ? $validator->errors()->toArray()
+            : [];
     }
 
-    private function normalizeRow(array $row): array
+    private function normalizeRawRow(array $row): array
     {
         return collect($row)
             ->mapWithKeys(function ($value, $key) {
                 $key = Str::snake(Str::lower(Str::squish((string) $key)));
 
-                if ($key === 'online_date' && is_numeric($value)) {
-                    $value = Carbon::instance(Date::excelToDateTimeObject($value))->toDateString();
+                if ($key === 'online_date' && filled($value)) {
+                    $value = $this->normalizeDateValue($value);
                 }
 
-                return [$key => is_string($value) ? Str::squish($value) : $value];
+                $value = is_string($value)
+                    ? Str::squish($value)
+                    : $value;
+
+                return [
+                    $key => blank($value) ? null : $value,
+                ];
             })
+            ->filter(fn ($value, $key) => filled($key))
             ->all();
+    }
+
+    private function normalizeForProductCreate(array $row): array
+    {
+        $categoryId = $this->categoryId($row['category'] ?? null);
+        $workflowId = $this->workflowId($row['workflow'] ?? null);
+
+        return [
+            ...$row,
+            'category_id' => $categoryId,
+            'workflow_id' => $workflowId,
+            'status_id' => 1,
+            'specifications' => $this->normalizeSpecifications($row),
+        ];
+    }
+
+    private function normalizeSpecifications(array $row): array
+    {
+        return collect(self::SPECIFICATION_COLUMNS)
+            ->map(fn ($name, $column) => [
+                'name' => $name,
+                'value' => $row[$column] ?? null,
+            ])
+            ->filter(fn ($specification) => filled($specification['value']))
+            ->values()
+            ->all();
+    }
+
+    private function categoryId(mixed $value): ?int
+    {
+        if (! filled($value)) {
+            return null;
+        }
+
+        return Category::query()
+            ->when(
+                is_numeric($value),
+                fn ($query) => $query->whereKey($value),
+                fn ($query) => $query->where('name', $value)
+            )
+            ->value('id');
+    }
+
+    private function workflowId(mixed $value): ?int
+    {
+        if (! filled($value)) {
+            return null;
+        }
+
+        $slug = Str::slug((string) $value);
+
+        return Workflow::query()
+            ->when(
+                is_numeric($value),
+                fn ($query) => $query->whereKey($value),
+                fn ($query) => $query
+                    ->where('slug', $value)
+                    ->orWhere('slug', $slug)
+                    ->orWhere('name', $value)
+            )
+            ->value('id');
+    }
+
+    private function normalizeDateValue(mixed $value): string
+    {
+        try {
+            if (is_numeric($value)) {
+                return Carbon::instance(Date::excelToDateTimeObject($value))
+                    ->startOfMonth()
+                    ->toDateString();
+            }
+
+            return Carbon::parse($value)
+                ->startOfMonth()
+                ->toDateString();
+        } catch (\Throwable) {
+            return (string) $value;
+        }
     }
 
     private function isEmptyRow(array $row): bool
@@ -267,19 +276,5 @@ class ProductImport implements ToCollection, WithHeadingRow
         return collect($row)
             ->filter(fn ($value) => filled($value))
             ->isEmpty();
-    }
-
-    private function generateQr(string $destinationUrl, string $productCode): string
-    {
-        $relativePath = 'assets/img/products/qrs/'.basename($productCode).'.svg';
-        $absolutePath = public_path($relativePath);
-
-        if (! file_exists(dirname($absolutePath))) {
-            mkdir(dirname($absolutePath), 0755, true);
-        }
-
-        file_put_contents($absolutePath, QrCode::format('svg')->size(100)->generate($destinationUrl));
-
-        return $relativePath;
     }
 }
