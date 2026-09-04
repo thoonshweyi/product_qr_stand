@@ -29,6 +29,29 @@ class ProductImport implements ToCollection, WithHeadingRow
         'size' => 'Size',
     ];
 
+    private const REQUIRED_COLUMNS = [
+        'product_code',
+        'product_name',
+        'name',
+        'brand',
+        'model',
+        'country_of_origin',
+        'category',
+        'workflow',
+    ];
+
+    private const OPTIONAL_COLUMNS = [
+        'unit',
+        'description',
+        'description_en',
+        'online_date',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'size',
+    ];
+
     private array $importedProductCodes = [];
 
     private int $importedCount = 0;
@@ -37,17 +60,39 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows): void
     {
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2;
-            $row = $this->normalizeRow($row->toArray());
+        $preparedRows = $rows
+            ->map(fn ($row, $index) => [
+                'row_number' => $index + 2,
+                'data' => $this->normalizeRow($row->toArray()),
+            ])
+            ->reject(fn ($row) => $this->isEmptyRow($row['data']))
+            ->values();
 
-            if ($this->isEmptyRow($row)) {
+        $this->validateHeadings($preparedRows);
+
+        $rowErrors = [];
+
+        foreach ($preparedRows as $preparedRow) {
+            $errors = $this->validateRow($preparedRow['data']);
+
+            if (! empty($errors)) {
+                $rowErrors[] = [
+                    'row' => $preparedRow['row_number'],
+                    'errors' => $errors,
+                ];
+
                 continue;
             }
 
-            $this->validateRow($row, $rowNumber);
-            $this->createProduct($row);
-            $this->importedProductCodes[] = $row['product_code'];
+            $this->importedProductCodes[] = $preparedRow['data']['product_code'];
+        }
+
+        if (! empty($rowErrors)) {
+            throw new ExcelImportValidationException($rowErrors);
+        }
+
+        foreach ($preparedRows as $preparedRow) {
+            $this->createProduct($preparedRow['data']);
             $this->importedCount++;
         }
     }
@@ -57,7 +102,7 @@ class ProductImport implements ToCollection, WithHeadingRow
         return $this->importedCount;
     }
 
-    private function validateRow(array $row, int $rowNumber): void
+    private function validateRow(array $row): array
     {
         $validator = Validator::make($row, [
             'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
@@ -91,8 +136,50 @@ class ProductImport implements ToCollection, WithHeadingRow
         });
 
         if ($validator->fails()) {
-            throw new ExcelImportValidationException($validator->errors()->toArray(), $rowNumber);
+            return $validator->errors()->toArray();
         }
+
+        return [];
+    }
+
+    private function validateHeadings(Collection $preparedRows): void
+    {
+        if ($preparedRows->isEmpty()) {
+            throw new ExcelImportValidationException([
+                [
+                    'row' => 1,
+                    'errors' => [
+                        'file' => ['The Excel file does not have any product rows.'],
+                    ],
+                ],
+            ]);
+        }
+
+        $headings = collect($preparedRows->first()['data'])->keys();
+        $allowedColumns = collect(self::REQUIRED_COLUMNS)->merge(self::OPTIONAL_COLUMNS);
+        $missingColumns = collect(self::REQUIRED_COLUMNS)->diff($headings)->values();
+        $unknownColumns = $headings->diff($allowedColumns)->values();
+
+        if ($missingColumns->isEmpty() && $unknownColumns->isEmpty()) {
+            return;
+        }
+
+        $errors = [];
+
+        if ($missingColumns->isNotEmpty()) {
+            $errors['missing_columns'] = ['Missing required columns: '.$missingColumns->implode(', ')];
+        }
+
+        if ($unknownColumns->isNotEmpty()) {
+            $errors['unknown_columns'] = ['Unknown columns: '.$unknownColumns->implode(', ')];
+        }
+
+        throw new ExcelImportValidationException([
+            [
+                'row' => 1,
+                'errors' => $errors,
+            ],
+        ]);
     }
 
     private function createProduct(array $row): void

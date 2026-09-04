@@ -8,9 +8,9 @@ class ExcelImportValidationException extends Exception
 {
     public function __construct(
         private readonly array $errors,
-        private readonly int $rowNumber
+        private readonly int $rowNumber = 1
     ) {
-        parent::__construct('Validation failed at row '.$rowNumber.'.');
+        parent::__construct('Excel import validation failed.');
     }
 
     public function errors(): array

@@ -1374,7 +1374,7 @@ class ProductController extends Controller
 
     public function import(Request $request)
     {
-        $sampleDescription = "
+        $sampleDescription = '
         ♦Brand: DECO
         ♦Name: PVC Ceiling Gypsum Board
         ♦Model: 262
@@ -1389,11 +1389,9 @@ class ProductController extends Controller
         ♦အိမ်မျက်နှာကျက်တွင် လှပ‌သေသပ်စေရန် တပ်ဆင်အသုံးပြုနိုင်ပြီး ရာသီဥတုအပူဒဏ်ကိုကာကွယ်ပေးနိုင်ခြင်း။
         ♦(၁၀) ပေ ပတ်လည် အခန်းတစ်ခန်းအတွက် (၂၅) ချပ် အသုံးပြုရမည်ဖြစ်ပြီး တပ်ဆင်ရာတွင်လည်း Ceiling frame များဖြင့် အလွယ်တကူအသုံးပြုနိုင်ပါသည်။
         PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။
-        ";
+        ';
         $descriptionData = $this->parseProductDescription($sampleDescription);
         dd($descriptionData);
-
-
 
         $this->authorize('create', Product::class);
 
@@ -1416,10 +1414,7 @@ class ProductController extends Controller
             DB::rollBack();
             Log::info($e);
 
-            return back()->with('validation_errors', [
-                'row' => $e->rowNumber(),
-                'errors' => $e->errors(),
-            ]);
+            return back()->with('validation_errors', $e->errors());
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

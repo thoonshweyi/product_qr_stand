@@ -100,6 +100,14 @@
             @endif
 
         @can('create', App\Models\Product::class)
+            <form id="product-import-form" action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="inline-flex">
+                @csrf
+                <input type="file" name="file" id="product-import-file" accept=".xls,.xlsx" class="hidden">
+                <button type="button" id="product-import-button" title="Import Excel" aria-label="Import Excel"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-green-200 bg-white text-green-700 shadow-sm transition hover:border-green-300 hover:bg-green-50 focus:outline-none focus:ring-4 focus:ring-green-100 dark:border-green-800 dark:bg-gray-800 dark:text-green-300 dark:hover:bg-green-900/30 dark:focus:ring-green-900">
+                    <i class="fa-solid fa-file-import text-base"></i>
+                </button>
+            </form>
             <a href="{{ route('products.create') }}" class="inline-flex w-fit items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">
                 <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H6a1 1 0 1 1 0-2h3V6a1 1 0 0 1 1-1Z" clip-rule="evenodd"/></svg>
                 Add product
@@ -112,6 +120,26 @@
 @if (session('success'))
     <div class="border-b border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300">
         {{ session('success') }}
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="border-b border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+        {{ $errors->first() }}
+    </div>
+@endif
+
+@if (session('validation_errors'))
+    <div class="border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300">
+        <p class="font-semibold">Excel import validation failed.</p>
+        <ul class="mt-2 list-disc space-y-1 pl-5">
+            @foreach (collect(session('validation_errors'))->take(5) as $validationError)
+                <li>
+                    Row {{ $validationError['row'] ?? '-' }}:
+                    {{ collect($validationError['errors'] ?? [])->flatten()->implode(' ') }}
+                </li>
+            @endforeach
+        </ul>
     </div>
 @endif
 
@@ -191,17 +219,6 @@
                     <a href="{{ $workflowChannel ? route('products.workflow.index', $workflowChannel) : route('products.index') }}" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">Clear</a>
                 @endif
             </div>
-        </form>
-    </div>
-
-    <div class="border-b border-gray-200 p-4 dark:border-gray-700">
-        <form action="{{ route('products.import') }}" method="POST">
-            @csrf
-            <button type="submit" type="button" id=""
-                class="inline-flex w-fit items-center justify-center rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400">
-                <i class="fas fa-circle-check mr-2"></i>
-                Excel Import
-            </button>
         </form>
     </div>
 
@@ -642,6 +659,28 @@
         });
         // End change btn
 
+        $('#product-import-button').click(function () {
+            $('#product-import-file').click();
+        });
+
+        $('#product-import-file').change(function () {
+            if (!this.files.length) return;
+
+            Swal.fire({
+                title: "Import Excel?",
+                text: this.files[0].name,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Import",
+                cancelButtonText: "Cancel",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#product-import-form').submit();
+                } else {
+                    $(this).val('');
+                }
+            });
+        });
 
         // Start export btn
         $('#export-btn').click(function(){
