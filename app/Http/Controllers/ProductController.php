@@ -371,9 +371,8 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Product::class);
-        $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
-        $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
+        // Start Validation
         $selectedWorkflowSlug = Workflow::whereKey($request->input('workflow_id'))->value('slug');
         $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
         $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
@@ -437,6 +436,11 @@ class ProductController extends Controller
                 },
             ],
         ]);
+        // End Validation
+
+        // Start Product Creat
+        $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
+        $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
         $user = Auth::user();
         $user_id = $user->id;
@@ -576,6 +580,7 @@ class ProductController extends Controller
                 'message' => 'There is an error in saving product.',
             ]);
         }
+        // End Product Create
 
     }
 
@@ -1386,8 +1391,11 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            $import = new ProductImport($request->user(), app(ProductService::class));
-            Excel::import($import, $request->file('file'));
+            $import = new ProductImport(new ProductService($request->user()));
+            $file = $request->file('file');
+
+            Excel::import($import, $file);
+            dd("imported");
 
             DB::commit();
 
