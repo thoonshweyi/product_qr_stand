@@ -37,6 +37,8 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     private int $importedCount = 0;
 
+    private array $rowErrors = [];
+
     public function __construct(?ProductService $productService = null, ?User $user = null)
     {
         $this->productService = $productService ?? app(ProductService::class);
@@ -45,7 +47,7 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        $preparedRows = $rows
+        $numberedRows = $rows
             ->map(fn ($row, $index) => [
                 'row_number' => $index + 2,
                 'data' => $row->toArray(),
@@ -53,15 +55,15 @@ class ProductImport implements ToCollection, WithHeadingRow
             ->reject(fn ($row) => collect($row['data'])->filter(fn ($value) => filled($value))->isEmpty())
             ->values();
 
-        $this->totalCount = $preparedRows->count();
-        $rowErrors = [];
-        $validatedRows = [];
+        $this->totalCount = $numberedRows->count();
 
         $productCodes = $rows->pluck('product_code')->filter()->toArray();
         $productresults = collect($this->productService->search_products($productCodes))->keyBy('barcode_code');
 
-        foreach ($preparedRows as $preparedRow) {
-            $data = $preparedRow['data'];
+        // dd($productresults);
+
+        foreach ($numberedRows as $numberedRow) {
+            $data = $numberedRow['data'];
 
             // Start Same Data Structure for Request and Row
             $workflow_id = Workflow::where('name', $data['workflow'] ?? null)->value('id');
@@ -105,6 +107,8 @@ class ProductImport implements ToCollection, WithHeadingRow
             $data['category_id'] = Category::where('name', $maincategory)->value('id');
             // End Get From ERP
 
+            $data['website_url'] = $data['website_url_ss'] ?? '';
+            // dd($data);
             // End Same Data Structure for Request and Row
 
             $selectedWorkflowSlug = Workflow::whereKey($data['workflow_id'])->value('slug');
@@ -124,6 +128,7 @@ class ProductImport implements ToCollection, WithHeadingRow
                 'website_url' => ['nullable', 'url', 'max:2000'],
                 'description' => ['nullable', 'string', 'max:2000'],
                 'description_en' => ['nullable', 'string', 'max:2000'],
+                // 'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
                 'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
@@ -177,8 +182,8 @@ class ProductImport implements ToCollection, WithHeadingRow
                     'row' => $data,
                 ]);
 
-                $rowErrors[] = [
-                    'row' => $preparedRow['row_number'],
+                $this->rowErrors[] = [
+                    'row' => $numberedRow['row_number'],
                     'product_code' => $data['product_code'] ?? '',
                     'product_name' => $data['product_name'] ?? '',
                     'workflow' => $data['workflow'] ?? '',
@@ -188,16 +193,14 @@ class ProductImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $validatedRows[] = $data;
-        }
+            $product = $this->productService->create($data, $this->user);
 
-        if (! empty($rowErrors)) {
-            throw new ExcelImportValidationException($rowErrors, 1, $this->totalCount);
-        }
 
-        foreach ($validatedRows as $data) {
-            $this->productService->create($data, $this->user);
             $this->importedCount++;
+
+            $product->update([
+                'stage' => 'Default'
+            ]);
         }
     }
 
@@ -209,5 +212,10 @@ class ProductImport implements ToCollection, WithHeadingRow
     public function importedCount(): int
     {
         return $this->importedCount;
+    }
+
+    public function rowErrors(): array
+    {
+        return $this->rowErrors;
     }
 }

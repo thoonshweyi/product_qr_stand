@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="p-5">
+        <form id="product-import-form" action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="p-5">
             @csrf
 
             <div class="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -93,9 +93,9 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="inline-flex h-11 items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-200 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-900">
+                <button type="button" id="import-product-button" class="inline-flex h-11 items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-200 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-900">
                     <i class="fa-solid fa-upload mr-2"></i>
-                    Import
+                    <span id="import-product-button-label">Import</span>
                 </button>
             </div>
         </form>
@@ -106,7 +106,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Records</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $summary['total'] ?? 0 }}</p>
+                    <p id="total-count" class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">0</p>
                 </div>
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                     <i class="fa-solid fa-list-check text-lg"></i>
@@ -118,7 +118,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Success Records</p>
-                    <p class="mt-2 text-3xl font-bold text-green-700 dark:text-green-300">{{ $summary['success'] ?? 0 }}</p>
+                    <p id="success-count" class="mt-2 text-3xl font-bold text-green-700 dark:text-green-300">0</p>
                 </div>
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                     <i class="fa-solid fa-circle-check text-lg"></i>
@@ -130,7 +130,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Failed Records</p>
-                    <p class="mt-2 text-3xl font-bold text-red-700 dark:text-red-300">{{ $summary['fail'] ?? 0 }}</p>
+                    <p id="fail-count" class="mt-2 text-3xl font-bold text-red-700 dark:text-red-300">0</p>
                 </div>
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300">
                     <i class="fa-solid fa-triangle-exclamation text-lg"></i>
@@ -144,18 +144,14 @@
             <div>
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">Failed Record List</h2>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    @if ($failedRecords->isNotEmpty())
-                        Rows below need to be fixed and imported again.
-                    @else
-                        Sample format for failed records after validation.
-                    @endif
+                    The following records contained errors and could not be imported. Please review and fix them.
                 </p>
             </div>
 
             @if ($failedRecords->isEmpty())
-                <span class="inline-flex w-fit items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                <!-- <span class="inline-flex w-fit items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                     Sample Preview
-                </span>
+                </span> -->
             @endif
         </div>
 
@@ -169,7 +165,8 @@
                         <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">Error Message</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                <tbody id="failed-records-lists-tbody" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                    {{-- 
                     @forelse ($previewFailedRecords as $record)
                         <tr class="{{ $failedRecords->isEmpty() ? 'opacity-70' : '' }}">
                             <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-gray-900 dark:text-white">
@@ -202,6 +199,13 @@
                             </td>
                         </tr>
                     @endforelse
+                    --}}
+
+                    <tr>
+                        <td colspan="4" class="px-5 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                            No failed records yet.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -214,6 +218,121 @@
     $('#product-import-file').on('change', function () {
         const fileName = this.files.length ? this.files[0].name : 'Choose Excel file to import';
         $('#selected-file-name').text(fileName);
+    });
+
+    $('#import-product-button').on('click', function () {
+        const fileInput = $('#product-import-file');
+        if (!fileInput.val()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No file selected',
+                text: 'Please select an Excel file to import.',
+            });
+            return;
+        }
+        
+        Swal.fire({
+            icon: "question",
+            title: "Are you sure to import product?",
+            // text: ``,
+            showCancelButton: true,
+        }).then((result) => {
+            if(result.isConfirmed)
+            {
+                isSubmitting = true;                            
+                $(".fullloader").removeClass("hidden");
+
+                $('#import-product-button').prop('disabled', true);
+                $('#import-product-button-label').text('Saving...');
+
+                // console.log('submit');
+                const form = document.getElementById('product-import-form');
+                const formData = new FormData(form);
+
+                $.ajax({
+                    url: form.action,
+                    type:"POST",
+                    dataType: "json",
+                    data:formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        Accept: 'application/json'
+                    },
+                    success:async function(response){
+                        console.log(response);
+
+                        const data = response;
+
+                        if(data.success){
+                            Swal.fire({
+                                icon: "success",
+                                title: "Products imported successfully!",
+                                text: data.message,
+                            });
+
+                            $('#total-count').text(data.import_dashboard.total);
+                            $('#success-count').text(data.import_dashboard.success);
+                            $('#fail-count').text(data.import_dashboard.fail);
+                            
+                            
+                            let html = '';
+                            let failedRecords = data.failed_records;
+                            $.each(failedRecords,function(idx,failedRecord){
+                                html += `
+                                <tr>
+                                        <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            #${failedRecord.row ?? '-'}
+                                        </td>
+                                        <td class="px-5 py-4">
+                                            <p class="text-sm font-semibold text-gray-900 dark:text-white">${failedRecord.product_name ?? '-'}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">${failedRecord.product_code ?? '-'}</p>
+                                        </td>
+                                        <td class="whitespace-nowrap px-5 py-4">
+                                            <span class="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                                ${failedRecord.workflow ?? '-'}
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-4">
+                                            <ul class="space-y-1">
+                                                ${failedRecord.errors.map(message => `
+                                                    <li class="flex items-start gap-2 text-sm text-red-700 dark:text-red-300">
+                                                        <i class="fa-solid fa-circle-xmark mt-0.5 text-xs"></i>
+                                                        <span>${message}</span>
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                `;
+
+                            })
+                            $('#failed-records-lists-tbody').html(html);
+                            
+                        }else{
+                            Swal.fire({
+                                icon: "error",
+                                title: "Product Import Error!!",
+                                text: `${data.message}`,
+                            });
+                        }
+                    },
+                    error:function(response){
+                        console.log("Error: ", response);
+                    },
+                    complete: function() {
+                        isSubmitting = false;
+                        $(".fullloader").addClass("hidden");
+                        $('#import-product-button').prop('disabled', false);
+                        $('#import-product-button-label').text('Import');
+                    }
+                
+                });
+
+            }
+        })
+
+        
     });
 </script>
 @endsection

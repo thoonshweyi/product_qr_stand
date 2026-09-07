@@ -1427,33 +1427,26 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('products.import.form')
-                ->with('success', $import->importedCount().' products imported successfully.')
-                ->with('import_summary', [
+            $response = [
+                'success' => true,
+                'message' => $import->importedCount().' products imported successfully.',
+                'import_dashboard' => [
                     'total' => $import->totalCount(),
                     'success' => $import->importedCount(),
-                    'fail' => 0,
-                ]);
-        } catch (ExcelImportValidationException $e) {
-            DB::rollBack();
-            Log::info($e);
+                    'fail' => count($import->rowErrors()),
+                ],
+                'failed_records' => $import->rowErrors(),
+            ];
 
-            return redirect()
-                ->route('products.import.form')
-                ->with('validation_errors', $e->errors())
-                ->with('import_summary', [
-                    'total' => $e->totalCount(),
-                    'success' => 0,
-                    'fail' => count($e->errors()),
-                ]);
+            return response()->json($response);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
 
-            return redirect()
-                ->route('products.import.form')
-                ->with('error', 'System Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'There is an error in importing product.',
+            ]);
         }
     }
 

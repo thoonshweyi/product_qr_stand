@@ -252,7 +252,7 @@ class ProductService
                 inner join master_data.master_product_barcode bar on prod.product_id= bar.product_id
                 and mulunit.product_unit_id= bar.product_unit_id
             where prod.inactive = 'A'
-            and prod.product_code='$productCodesString'
+            and prod.product_code in ('$productCodesString')
         ");
         // dd($products);
 
