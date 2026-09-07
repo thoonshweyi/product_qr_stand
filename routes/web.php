@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
         ->name('products.workflow.online.finish');
     Route::post('/products/description/clean-json', [ProductController::class, 'cleanDescriptionJson'])
         ->name('products.description.clean-json');
+    Route::get('/products/import', [ProductController::class, 'importForm'])
+        ->name('products.import.form');
     Route::post('/products/import', [ProductController::class, 'import'])
         ->name('products.import');
     Route::get('/products/workflow/{channel}', [ProductController::class, 'workflowProducts'])

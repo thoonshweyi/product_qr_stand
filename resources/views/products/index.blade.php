@@ -100,14 +100,10 @@
             @endif
 
         @can('create', App\Models\Product::class)
-            <form id="product-import-form" action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data" class="inline-flex">
-                @csrf
-                <input type="file" name="file" id="product-import-file" accept=".xls,.xlsx" class="hidden">
-                <button type="button" id="product-import-button" title="Import Excel" aria-label="Import Excel"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-green-200 bg-white text-green-700 shadow-sm transition hover:border-green-300 hover:bg-green-50 focus:outline-none focus:ring-4 focus:ring-green-100 dark:border-green-800 dark:bg-gray-800 dark:text-green-300 dark:hover:bg-green-900/30 dark:focus:ring-green-900">
-                    <i class="fa-solid fa-file-import text-base"></i>
-                </button>
-            </form>
+            <a href="{{ route('products.import.form') }}" title="Import Excel" aria-label="Import Excel"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 bg-white text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
+                <i class="fa-solid fa-file-import text-base"></i>
+            </a>
             <a href="{{ route('products.create') }}" class="inline-flex w-fit items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">
                 <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H6a1 1 0 1 1 0-2h3V6a1 1 0 0 1 1-1Z" clip-rule="evenodd"/></svg>
                 Add product
@@ -658,29 +654,6 @@
             });
         });
         // End change btn
-
-        $('#product-import-button').click(function () {
-            $('#product-import-file').click();
-        });
-
-        $('#product-import-file').change(function () {
-            if (!this.files.length) return;
-
-            Swal.fire({
-                title: "Import Excel?",
-                text: this.files[0].name,
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonText: "Import",
-                cancelButtonText: "Cancel",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#product-import-form').submit();
-                } else {
-                    $(this).val('');
-                }
-            });
-        });
 
         // Start export btn
         $('#export-btn').click(function(){

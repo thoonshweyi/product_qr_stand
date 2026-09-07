@@ -1378,6 +1378,35 @@ class ProductController extends Controller
         ]);
     }
 
+    public function importForm()
+    {
+        $this->authorize('create', Product::class);
+
+        $sampleFailedRecords = [
+            [
+                'row' => 3,
+                'product_code' => '200000309125',
+                'product_name' => 'Insulation Bucket',
+                'workflow' => 'Online Only',
+                'errors' => [
+                    'Online date is required for online workflow.',
+                    'This workflow requires these specifications: Weight, Length, Width, Height, Size.',
+                ],
+            ],
+            [
+                'row' => 7,
+                'product_code' => '2000000167503',
+                'product_name' => 'PVC Ceiling Gypsum Board',
+                'workflow' => 'Stand Only',
+                'errors' => [
+                    'The product code has already been taken.',
+                ],
+            ],
+        ];
+
+        return view('products.import', compact('sampleFailedRecords'));
+    }
+
     public function import(Request $request)
     {
         $this->authorize('create', Product::class);
@@ -1391,25 +1420,40 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            $import = new ProductImport(new ProductService($request->user()));
+            $import = new ProductImport(app(ProductService::class), $request->user());
             $file = $request->file('file');
 
             Excel::import($import, $file);
-            // dd("imported");
 
             DB::commit();
 
-            return back()->with('success', $import->importedCount().' products imported successfully.');
+            return redirect()
+                ->route('products.import.form')
+                ->with('success', $import->importedCount().' products imported successfully.')
+                ->with('import_summary', [
+                    'total' => $import->totalCount(),
+                    'success' => $import->importedCount(),
+                    'fail' => 0,
+                ]);
         } catch (ExcelImportValidationException $e) {
             DB::rollBack();
             Log::info($e);
 
-            return back()->with('validation_errors', $e->errors());
+            return redirect()
+                ->route('products.import.form')
+                ->with('validation_errors', $e->errors())
+                ->with('import_summary', [
+                    'total' => $e->totalCount(),
+                    'success' => 0,
+                    'fail' => count($e->errors()),
+                ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
 
-            return back()->with('error', 'System Error: '.$e->getMessage());
+            return redirect()
+                ->route('products.import.form')
+                ->with('error', 'System Error: '.$e->getMessage());
         }
     }
 

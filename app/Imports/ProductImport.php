@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Exceptions\ExcelImportValidationException;
 use App\Models\Category;
 use App\Models\Status;
 use App\Models\User;
@@ -9,7 +10,6 @@ use App\Models\Workflow;
 use App\Models\WorkflowStep;
 use App\Services\ProductService;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -29,62 +29,82 @@ class ProductImport implements ToCollection, WithHeadingRow
 
     private const DEFAULT_DESCRIPTION_EN = 'Shop for variety of high quality products with reasonable price at PRO 1 Global, leading provider for construction and home improvement products.';
 
-    public function __construct(ProductService $productService = null, User $user = null)
+    private ProductService $productService;
+
+    private ?User $user;
+
+    private int $totalCount = 0;
+
+    private int $importedCount = 0;
+
+    public function __construct(?ProductService $productService = null, ?User $user = null)
     {
-        $this->productService = $productService;
+        $this->productService = $productService ?? app(ProductService::class);
         $this->user = $user;
     }
 
-    public function collection(Collection $rows){
+    public function collection(Collection $rows)
+    {
+        $preparedRows = $rows
+            ->map(fn ($row, $index) => [
+                'row_number' => $index + 2,
+                'data' => $row->toArray(),
+            ])
+            ->reject(fn ($row) => collect($row['data'])->filter(fn ($value) => filled($value))->isEmpty())
+            ->values();
+
+        $this->totalCount = $preparedRows->count();
+        $rowErrors = [];
+        $validatedRows = [];
+
         $productCodes = $rows->pluck('product_code')->filter()->toArray();
         $productresults = collect($this->productService->search_products($productCodes))->keyBy('barcode_code');
 
-        foreach ($rows as $row) {
-            $data = $row->toArray();
+        foreach ($preparedRows as $preparedRow) {
+            $data = $preparedRow['data'];
 
             // Start Same Data Structure for Request and Row
-                $workflow_id = Workflow::where('name', $data['workflow'] ?? null)->value('id');
-                $data['workflow_id'] = $workflow_id;
-                if (!empty($data['online_date'])) {
+            $workflow_id = Workflow::where('name', $data['workflow'] ?? null)->value('id');
+            $data['workflow_id'] = $workflow_id;
+            if (! empty($data['online_date'])) {
                 $data['online_date'] = is_numeric($data['online_date'])
                         ? Date::excelToDateTimeObject($data['online_date'])->format('Y-m-d')
                         : Carbon::parse($data['online_date'])->format('Y-m-d');
-                } else {
-                    $data['online_date'] = null;
-                }
-                
-                $data['status_id'] = Status::where('name', 'Active')->value('id');
+            } else {
+                $data['online_date'] = null;
+            }
 
-                // Start GET From Description
-                    $description = $this->productService->parseProductDescription($data['description'] ?? '');
-                    $description_en = $this->productService->parseProductDescription($data['description_en'] ?? '');
+            $data['status_id'] = Status::where('name', 'Active')->value('id');
 
-                    $attributes = $description['attributes'] ?? [];
-                    
-                    $data['name'] = $attributes['name']['value'] ?? '';
-                    $data['product_name'] = $data['product_name'] ?? '';
-                    $data['brand'] = $attributes['brand']['value'] ?? '';
-                    $data['model'] = $attributes['model']['value'] ?? '';
-                    $data['country_of_origin'] = $attributes['country_of_origin']['value'] ?? '';
-                    $data['description'] = $description['description'] ?? '';
-                    $data['description_en'] = $description_en['description'] ?? '';
+            // Start GET From Description
+            $description = $this->productService->parseProductDescription($data['description'] ?? '');
+            $description_en = $this->productService->parseProductDescription($data['description_en'] ?? '');
 
-                    $data['specifications'] = $this->productService->getSpecifications(Arr::except($attributes, [
-                        'brand', 
-                        'name', 
-                        'model', 
-                        'code', 
-                        'country_of_origin'
-                    ]));
-                // End GET From Description
+            $attributes = $description['attributes'] ?? [];
 
-                // Start Get From ERP
-                $productresult = $productresults->get($data['product_code']);
-                $maincategory = $productresult->maincategory ?? '';
-                $data['category_id'] = Category::where('name', $maincategory)->value('id');
-                // End Get From ERP
+            $data['name'] = $attributes['name']['value'] ?? '';
+            $data['product_name'] = $data['product_name'] ?? '';
+            $data['brand'] = $attributes['brand']['value'] ?? '';
+            $data['model'] = $attributes['model']['value'] ?? '';
+            $data['country_of_origin'] = $attributes['country_of_origin']['value'] ?? '';
+            $data['description'] = $description['description'] ?? '';
+            $data['description_en'] = $description_en['description'] ?? '';
 
-                // dd($data);
+            $data['specifications'] = $this->productService->getSpecifications(Arr::except($attributes, [
+                'brand',
+                'name',
+                'model',
+                'code',
+                'country_of_origin',
+            ]));
+            // End GET From Description
+
+            // Start Get From ERP
+            $productresult = $productresults->get($data['product_code']);
+            $maincategory = $productresult->maincategory ?? '';
+            $data['category_id'] = Category::where('name', $maincategory)->value('id');
+            // End Get From ERP
+
             // End Same Data Structure for Request and Row
 
             $selectedWorkflowSlug = Workflow::whereKey($data['workflow_id'])->value('slug');
@@ -92,7 +112,7 @@ class ProductImport implements ToCollection, WithHeadingRow
             $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
             $minimumOnlineDate = now()->startOfMonth()->toDateString();
 
-            $validator = Validator::make($data,[
+            $validator = Validator::make($data, [
                 'product_code' => ['required', 'string', 'max:255', 'unique:products,product_code'],
                 'status_id' => ['required', 'exists:statuses,id'],
                 // 'category_id' => ['required', 'exists:categories,id'],
@@ -104,7 +124,7 @@ class ProductImport implements ToCollection, WithHeadingRow
                 'website_url' => ['nullable', 'url', 'max:2000'],
                 'description' => ['nullable', 'string', 'max:2000'],
                 'description_en' => ['nullable', 'string', 'max:2000'],
-                'main_image' => [$requiresMainImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+                'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'thumbnail_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
                 'brand_icon' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
                 'online_date' => [$requiresOnlineDate ? 'required' : 'nullable', 'date_format:Y-m-d', 'after_or_equal:'.$minimumOnlineDate],
@@ -156,13 +176,38 @@ class ProductImport implements ToCollection, WithHeadingRow
                     'errors' => $validator->errors()->all(),
                     'row' => $data,
                 ]);
-                throw new Exception('Validation failed: '.implode(', ', $validator->errors()->all()));
+
+                $rowErrors[] = [
+                    'row' => $preparedRow['row_number'],
+                    'product_code' => $data['product_code'] ?? '',
+                    'product_name' => $data['product_name'] ?? '',
+                    'workflow' => $data['workflow'] ?? '',
+                    'errors' => $validator->errors()->all(),
+                ];
+
+                continue;
             }
 
-            // $product = app(ProductCreateService::class)
-            // ->create($row, $this->user);
-            $product = $this->productService->create($data, $this->user);
-
+            $validatedRows[] = $data;
         }
+
+        if (! empty($rowErrors)) {
+            throw new ExcelImportValidationException($rowErrors, 1, $this->totalCount);
+        }
+
+        foreach ($validatedRows as $data) {
+            $this->productService->create($data, $this->user);
+            $this->importedCount++;
+        }
+    }
+
+    public function totalCount(): int
+    {
+        return $this->totalCount;
+    }
+
+    public function importedCount(): int
+    {
+        return $this->importedCount;
     }
 }
