@@ -23,6 +23,14 @@ class ProductService
     public function create(array $data, $user = null): Product
     {
         return DB::transaction(function () use ($data, $user,) {
+            // Start Workflow Config
+            $workflowConfig = $this->getWorkflowConfig($data['workflow_id'] ?? null);
+
+            $requiresOnlineDate = $workflowConfig['requiresOnlineDate'];
+            // End Workflow Config
+
+
+
             $defaultDescriptionMm = self::DEFAULT_DESCRIPTION_MM;
             $defaultDescriptionEn = self::DEFAULT_DESCRIPTION_EN;
 
@@ -197,6 +205,58 @@ class ProductService
             }
         }
         return $result;
+    }
+
+    public function getWorkflowConfig(?int $workflowId): array
+    {
+        $selectedWorkflowSlug = Workflow::whereKey($workflowId)->value('slug');
+        $requiresMainImage = Str::contains(strtolower((string) $selectedWorkflowSlug), 'stand');
+        $requiresOnlineDate = Str::contains(strtolower((string) $selectedWorkflowSlug), 'online');
+        $minimumOnlineDate = now()->startOfMonth()->toDateString();
+
+        return [
+            'selectedWorkflowSlug' => $selectedWorkflowSlug,
+            'requiresMainImage' => $requiresMainImage,
+            'requiresOnlineDate' => $requiresOnlineDate,
+            'minimumOnlineDate' => $minimumOnlineDate,
+        ];
+    }
+
+    public function search_products($productCodes){
+        $productCodesString = implode("','", $productCodes);
+
+        $conn = DB::connection('master_product');
+        // $branch = Branch::whereId($branch_code)->first();
+
+        $products = $conn->select("
+            select product_grade_name as ProductType
+                ,cat.remark as MainCategory
+                --,coalesce(cat.remark,'N/A') as Main_Category
+                ,coalesce(cat.product_category_code,'N/A') as Category,coalesce(cat.product_category_name,'-') as Category_Name
+                ,coalesce(subcat.product_group_code,'N/A') as Group,coalesce(subcat.product_group_name,'-') as Group_Name
+                ,coalesce(class.product_pattern_code,'N/A')as Pattern,coalesce(class.product_pattern_name,'-') as Pattern_Name
+                ,coalesce(subclass.product_design_code,'N/A') as Design,coalesce(subclass.product_design_name,'-') as Design_Name
+                ,barcode_code
+                ,coalesce(regexp_replace(prod.product_name1, E'[\\n\\r]+',' ', 'g' ),'')as product_name
+                ,product_unit_name as Unit
+                ,product_brand_name as Brand
+            from master_data.master_product prod 
+                left join master_data.master_product_category cat on prod.product_category_id = cat.product_category_id
+                left join master_data.master_product_group subcat on prod.product_group_id = subcat.product_group_id
+                left join master_data.master_product_pattern class on prod.product_pattern_id = class.product_pattern_id -- class
+                left join master_data.master_product_design subclass on prod.product_design_id = subclass.product_design_id -- sub-class
+                left join master_data.master_product_multiunit mulunit on prod.product_id= mulunit.product_id and prod.product_code= mulunit.product_code
+                left join master_data.master_product_unit unit on mulunit.product_unit_id= unit.product_unit_id
+                left join master_data.master_product_brand bd on prod.product_brand_id= bd.product_brand_id
+                left join  master_data.master_product_grade gd on prod.product_grade_id= gd.product_grade_id
+                inner join master_data.master_product_barcode bar on prod.product_id= bar.product_id
+                and mulunit.product_unit_id= bar.product_unit_id
+            where prod.inactive = 'A'
+            and prod.product_code='$productCodesString'
+        ");
+        // dd($products);
+
+        return $products;
     }
 
 }

@@ -1395,7 +1395,7 @@ class ProductController extends Controller
             $file = $request->file('file');
 
             Excel::import($import, $file);
-            dd("imported");
+            // dd("imported");
 
             DB::commit();
 
