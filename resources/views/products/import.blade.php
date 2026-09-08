@@ -93,10 +93,18 @@
                     @enderror
                 </div>
 
-                <button type="button" id="import-product-button" class="inline-flex h-11 items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-200 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-900">
-                    <i class="fa-solid fa-upload mr-2"></i>
-                    <span id="import-product-button-label">Import</span>
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" id="import-product-button" class="inline-flex h-11 items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-200 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-900">
+                        <i class="fa-solid fa-upload mr-2"></i>
+                        <span id="import-product-button-label">Import</span>
+                    </button>
+
+                    <a href="{{ asset('download/product_format.xlsx') }}" download
+                        class="inline-flex h-11 items-center justify-center rounded-lg border border-blue-200 bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 dark:border-blue-800 dark:bg-gray-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:focus:ring-blue-900">
+                        <i class="fa-solid fa-file-excel mr-2"></i>
+                        Sample
+                    </a>
+                </div>
             </div>
         </form>
     </div>
