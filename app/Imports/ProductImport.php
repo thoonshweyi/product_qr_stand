@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Exceptions\ExcelImportValidationException;
 use App\Models\Category;
+use App\Models\Country;
 use App\Models\ProductWorkflow;
 use App\Models\Status;
 use App\Models\User;
@@ -67,49 +68,52 @@ class ProductImport implements ToCollection, WithHeadingRow
             $data = $numberedRow['data'];
 
             // Start Same Data Structure for Request and Row
-            $workflow_id = Workflow::where('name', $data['workflow'] ?? null)->value('id');
-            $data['workflow_id'] = $workflow_id;
-            if (! empty($data['online_date'])) {
-                $data['online_date'] = is_numeric($data['online_date'])
-                        ? Date::excelToDateTimeObject($data['online_date'])->format('Y-m-d')
-                        : Carbon::parse($data['online_date'])->format('Y-m-d');
-            } else {
-                $data['online_date'] = null;
-            }
+                    $workflow_id = Workflow::where('name', $data['workflow'] ?? null)->value('id');
+                    $data['workflow_id'] = $workflow_id;
+                    if (! empty($data['online_date'])) {
+                        $data['online_date'] = is_numeric($data['online_date'])
+                                ? Date::excelToDateTimeObject($data['online_date'])->format('Y-m-d')
+                                : Carbon::parse($data['online_date'])->format('Y-m-d');
+                    } else {
+                        $data['online_date'] = null;
+                    }
 
-            $data['status_id'] = Status::where('name', 'Active')->value('id');
+                    $data['status_id'] = Status::where('name', 'Active')->value('id');
 
-            // Start GET From Description
-            $description = $this->productService->parseProductDescription($data['description'] ?? '');
-            $description_en = $this->productService->parseProductDescription($data['description_en'] ?? '');
+                    // Start GET From Description
+                    $description = $this->productService->parseProductDescription($data['description'] ?? '');
+                    $description_en = $this->productService->parseProductDescription($data['description_en'] ?? '');
 
-            $attributes = $description['attributes'] ?? [];
+                    $attributes = $description['attributes'] ?? [];
 
-            $data['name'] = $attributes['name']['value'] ?? '';
-            $data['product_name'] = $data['product_name'] ?? '';
-            $data['brand'] = $attributes['brand']['value'] ?? '';
-            $data['model'] = $attributes['model']['value'] ?? '';
-            $data['country_of_origin'] = $attributes['country_of_origin']['value'] ?? '';
-            $data['description'] = $description['description'] ?? '';
-            $data['description_en'] = $description_en['description'] ?? '';
+                    $data['name'] = $attributes['name']['value'] ?? '';
+                    $data['product_name'] = $data['product_name'] ?? '';
+                    $data['brand'] = $attributes['brand']['value'] ?? '';
+                    $data['model'] = $attributes['model']['value'] ?? '';
+                    // $data['country_of_origin'] = $attributes['country_of_origin']['value'] ?? '';
+                    $data['description'] = $description['description'] ?? '';
+                    $data['description_en'] = $description_en['description'] ?? '';
+                    
+                    $countryOfOrigin = $attributes['country_of_origin']['value'] ?? '';
+                    $data['country_of_origin'] = (string) Country::where('name', $countryOfOrigin)->value('id') ?? $countryOfOrigin;
 
-            $data['specifications'] = $this->productService->getSpecifications(Arr::except($attributes, [
-                'brand',
-                'name',
-                'model',
-                'code',
-                'country_of_origin',
-            ]));
-            // End GET From Description
+                    $data['specifications'] = $this->productService->getSpecifications(Arr::except($attributes, [
+                        'brand',
+                        'name',
+                        'model',
+                        'code',
+                        'country_of_origin',
+                    ]));
+                    // End GET From Description
 
-            // Start Get From ERP
-            $productresult = $productresults->get($data['product_code']);
-            $maincategory = $productresult->maincategory ?? '';
-            $data['category_id'] = Category::where('name', $maincategory)->value('id');
-            // End Get From ERP
+                    // Start Get From ERP
+                    $productresult = $productresults->get($data['product_code']);
+                    $maincategory = $productresult->maincategory ?? '';
+                    $data['category_id'] = Category::where('name', $maincategory)->value('id');
+                    // End Get From ERP
 
-            $data['website_url'] = $data['website_url_ss'] ?? '';
-            // dd($data);
+                    $data['website_url'] = $data['website_url_ss'] ?? '';
+                    // dd($data);
             // End Same Data Structure for Request and Row
 
             $selectedWorkflowSlug = Workflow::whereKey($data['workflow_id'])->value('slug');
