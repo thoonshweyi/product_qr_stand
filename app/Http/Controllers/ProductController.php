@@ -1035,15 +1035,12 @@ class ProductController extends Controller
                     ->orderBy('id')
                     ->firstOrFail();
 
-                $productWorkflow = ProductWorkflow::create([
-                    'product_id' => $product->id,
-                    'workflow_id' => $product->workflow_id,
-                    'current_step_id' => $firstWorkflowStep->id,
-                    'status' => 'ongoing',
-                ]);
-
                 $product->update([
                     'stage' => 'ongoing',
+                ]);
+                $product->latestWorkflow?->update([
+                    'current_step_id' => $firstWorkflowStep->id,
+                    'status' => 'ongoing',
                 ]);
             }
             // End Image upload by Editor after import

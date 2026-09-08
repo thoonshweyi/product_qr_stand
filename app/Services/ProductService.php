@@ -72,13 +72,13 @@ class ProductService
                     : null,
             ]);
 
-            // Workflow will create on update
-            // $productWorkflow = new ProductWorkflow;
-            // $productWorkflow->product_id = $product->id;
-            // $productWorkflow->workflow_id = $data['workflow_id'];
-            // $productWorkflow->current_step_id = $firstWorkflowStep->id;
-            // $productWorkflow->status = 'ongoing';
-            // $productWorkflow->save();
+
+            $productWorkflow = new ProductWorkflow;
+            $productWorkflow->product_id = $product->id;
+            $productWorkflow->workflow_id = $data['workflow_id'];
+            $productWorkflow->current_step_id = $firstWorkflowStep->id;
+            $productWorkflow->status = 'ongoing';
+            $productWorkflow->save();
 
             foreach ($specificationRows as $row) {
                 $specificationName = Str::of($row['name'])->squish()->toString();

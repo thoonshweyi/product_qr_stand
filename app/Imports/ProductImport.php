@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Exceptions\ExcelImportValidationException;
 use App\Models\Category;
+use App\Models\ProductWorkflow;
 use App\Models\Status;
 use App\Models\User;
 use App\Models\Workflow;
@@ -201,6 +202,17 @@ class ProductImport implements ToCollection, WithHeadingRow
             $product->update([
                 'stage' => 'default',
             ]);
+
+            $product->latestWorkflow?->update([
+                'current_step_id' => null,
+                'status' => 'default',
+            ]);
+            // ProductWorkflow::where('product_id', $product->id)
+            // ->latest('id')
+            // ->first()
+            // ?->update([
+            //     'status' => 'default',
+            // ]);
         }
     }
 
