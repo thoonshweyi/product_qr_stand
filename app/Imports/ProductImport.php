@@ -199,7 +199,7 @@ class ProductImport implements ToCollection, WithHeadingRow
             $this->importedCount++;
 
             $product->update([
-                'stage' => 'Default'
+                'stage' => 'default',
             ]);
         }
     }

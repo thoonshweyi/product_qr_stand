@@ -1028,6 +1028,26 @@ class ProductController extends Controller
                     : null,
             ]);
 
+            // Start Image upload by Editor after import
+            if ($product->stage === 'default' && ! $product->latestWorkflow) {
+                $firstWorkflowStep = WorkflowStep::where('workflow_id', $product->workflow_id)
+                    ->orderBy('step_no')
+                    ->orderBy('id')
+                    ->firstOrFail();
+
+                $productWorkflow = ProductWorkflow::create([
+                    'product_id' => $product->id,
+                    'workflow_id' => $product->workflow_id,
+                    'current_step_id' => $firstWorkflowStep->id,
+                    'status' => 'ongoing',
+                ]);
+
+                $product->update([
+                    'stage' => 'ongoing',
+                ]);
+            }
+            // End Image upload by Editor after import
+
             $product->specificationValues()->delete();
 
             foreach ($specificationRows as $row) {

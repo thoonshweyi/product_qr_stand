@@ -407,7 +407,7 @@
                             @endif
                         </td>
                         @endif
-                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->category->name }}</td>
+                        <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product?->category?->name }}</td>
                         <td class="whitespace-nowrap p-4 text-sm text-gray-600 dark:text-gray-300">{{ $product->brand }}</td>
                         <td class="whitespace-nowrap p-4">
                             @php
