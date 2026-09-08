@@ -766,7 +766,6 @@ class ProductController extends Controller
                     })
                 : collect(),
         );
-
         return view('products.edit', compact(
             'product',
             'categories',
@@ -1008,6 +1007,7 @@ class ProductController extends Controller
         try {
             $oldProductCode = $product->product_code;
             $product->load('specificationValues.specification');
+            $oldStage = $product->stage;
             $oldPrintSnapshot = $this->productPrintSnapshot($product);
             $fromVersion = (int) $product->print_version;
 
@@ -1029,11 +1029,15 @@ class ProductController extends Controller
             ]);
 
             // Start Image upload by Editor after import
-            if ($product->stage === 'default' && ! $product->latestWorkflow) {
-                $firstWorkflowStep = WorkflowStep::where('workflow_id', $product->workflow_id)
-                    ->orderBy('step_no')
-                    ->orderBy('id')
-                    ->firstOrFail();
+            if ($product->stage === 'default' 
+                && $product->latestWorkflow?->current_step_id === null
+                && $product->latestWorkflow?->status === 'default' 
+            )
+            {
+                $firstWorkflowStep = WorkflowStep::where('workflow_id', $productWorkflow->workflow_id)
+                ->orderBy('step_no')
+                ->orderBy('id')
+                ->firstOrFail();
 
                 $product->update([
                     'stage' => 'ongoing',
@@ -1113,7 +1117,9 @@ class ProductController extends Controller
             $product->refresh()->load('specificationValues.specification');
             $newPrintSnapshot = $this->productPrintSnapshot($product);
 
-            if ($oldPrintSnapshot !== $newPrintSnapshot) {
+            if ($oldPrintSnapshot !== $newPrintSnapshot
+            && $oldStage !== 'default'
+            ) {
                 $product->increment('print_version');
                 $product->refresh();
 

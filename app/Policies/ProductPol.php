@@ -42,6 +42,15 @@ class ProductPol
         if ($user->hasRoles(['Admin', 'Administrator', 'Checker'])) {
             return true;
         }
+        if ($user->hasRoles(['Editor']) 
+            && $product->user_id == $user->id 
+            && $product->status_id == 1
+            && $product->stage == 'default'
+            && $product->latestWorkflow?->current_step_id === null
+            && $product->latestWorkflow?->status === 'default'
+            ) {
+            return true;
+        }
         return false;
         // return $product->user_id == $user->id;
     }
@@ -63,4 +72,21 @@ class ProductPol
         return false;
         // return $user->hasPermission('delete_resource') || $user->isOwner($product);
     }
+
+    public function editDefault(User $user, Product $product){
+        if ($user->hasRoles(['Admin', 'Administrator'])) {
+            return true;
+        }
+        if ($user->hasRoles(['Editor']) 
+            && $product->user_id == $user->id 
+            && $product->status_id == 1
+            && $product->stage == 'default'
+            && $product->latestWorkflow?->current_step_id === null
+            && $product->latestWorkflow?->status === 'default'
+            ) {
+            return true;
+        }
+        return false;
+    }
+
 }

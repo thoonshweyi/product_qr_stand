@@ -7,7 +7,8 @@
 
 @section('content')
 @php
-$minimumOnlineDate = now()->startOfMonth()->toDateString()
+$minimumOnlineDate = now()->startOfMonth()->toDateString();
+$canEditDefault = request()->user()->can('editDefault', $product) ?? false;
 @endphp
 <div id="product-edit-page" class="min-h-screen">
     <div class="border-b border-gray-200 bg-white px-4 py-5 dark:border-gray-700 dark:bg-gray-800 sm:px-6">
@@ -487,13 +488,17 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                             <a href="{{ route('products.index') }}" class="inline-flex flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">Cancel</a>
-                            @if ($canWorkflowAction && $currentWorkflowStep)
+                            @if ($canWorkflowAction || $canEditDefault)
                                 <button type="submit" id="update-product-button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                     <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     <span id="update-product-button-label">Update product</span>
                                 </button>
+                            @endif
+
+                            @if ($canWorkflowAction && $currentWorkflowStep)
+                            
                                 @php
                                     $workflowButtonLabel = match (strtolower($currentWorkflowStep->action)) {
                                         'checked' => 'Check',
@@ -1091,6 +1096,7 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
                                 console.log(response);
 
                                 const data = response;
+                                const caneditDefault = {{ $canEditDefault }};
 
                                 if(data.success){
                                     Swal.fire({
@@ -1105,6 +1111,14 @@ $minimumOnlineDate = now()->startOfMonth()->toDateString()
 
                                     $('#update-product-button').prop('disabled', false);
                                     $('#update-product-button-label').text('Update product');
+                                    
+                                    if(caneditDefault){
+                                        setTimeout(() => {                                            
+                                            window.location.href="{{ route('products.index') }}";
+                                        }, 3000);
+                                    }
+
+
                                 }else{
                                     Swal.fire({
                                         icon: "error",
