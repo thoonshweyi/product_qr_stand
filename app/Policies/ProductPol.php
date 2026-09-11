@@ -77,13 +77,15 @@ class ProductPol
         if ($user->hasRoles(['Admin', 'Administrator'])) {
             return true;
         }
-        if ($user->hasRoles(['Editor']) 
+        if ($user->hasRoles(['Checker'])  
+        || (
+            $user->hasRoles(['Editor']) 
             && $product->user_id == $user->id 
             && $product->status_id == 1
             && $product->stage == 'default'
             && $product->latestWorkflow?->current_step_id === null
-            && $product->latestWorkflow?->status === 'default'
-            ) {
+            && $product->latestWorkflow?->status === 'default')
+        ) {
             return true;
         }
         return false;

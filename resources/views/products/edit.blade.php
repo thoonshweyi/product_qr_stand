@@ -1096,7 +1096,7 @@ $canEditDefault = request()->user()->can('editDefault', $product) ?? false;
                                 console.log(response);
 
                                 const data = response;
-                                const caneditDefault = {{ $canEditDefault }};
+                                const caneditDefault = @json($canEditDefault);
 
                                 if(data.success){
                                     Swal.fire({
