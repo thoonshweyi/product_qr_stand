@@ -257,6 +257,14 @@
                 const form = document.getElementById('product-import-form');
                 const formData = new FormData(form);
 
+                Swal.fire({
+                    title: "Processing...",
+                    text: "Please wait while we import the Product Excel file.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
                 $.ajax({
                     url: form.action,
                     type:"POST",

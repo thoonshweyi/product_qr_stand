@@ -14,8 +14,10 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths
+
+class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths, WithTitle
 {
     private const COMPANY_MESSAGE = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
     private const DEFAULT_DESCRIPTION_MM = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
@@ -29,6 +31,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
     public function collection()
     {
         return $this->preproducts;
+    }
+
+    public function title(): string
+    {
+        return 'itemExcelImport';
     }
 
     public function headings(): array
@@ -97,6 +104,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
                 Str::lower(Str::squish((string) $value->specification?->name)) => $value->value,
             ],
         );
+        // dd($specifications);
 
         $descriptionLines = collect([
             'Brand: '.$product->brand,
@@ -166,11 +174,11 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             $product->model,
             $product->country?->name ?? '',
             '', // product_custom_product_type:
-            '', //$specifications->get('weight', ''), // product_weight:
-            '', //$specifications->get('length', ''), // product_length:
-            '', //$specifications->get('width', ''), // product_width:
-            '', //$specifications->get('height', ''), // product_height:
-            '', //$specifications->get('size', ''), // product_size:
+            $specifications->get('weight', ''), // product_weight:
+            $specifications->get('length', ''), // product_length:
+            $specifications->get('width', ''), // product_width:
+            $specifications->get('height', ''), // product_height:
+            $specifications->get('size', ''), // product_size:
             '', // additional_info_1:
             '', // additional_info_2:
             '', // additional_info_3:
