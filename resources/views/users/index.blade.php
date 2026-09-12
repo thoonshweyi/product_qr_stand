@@ -111,27 +111,40 @@
         </div>
     </div>
 </div>
-<!-- <div class="sticky bottom-0 right-0 items-center w-full p-4 bg-white border-t border-gray-200 sm:flex sm:justify-between dark:bg-gray-800 dark:border-gray-700">
+<div id="pagination-wrapper" class="sticky bottom-0 right-0 items-center w-full p-4 bg-white border-t border-gray-200 sm:flex sm:justify-between dark:bg-gray-800 dark:border-gray-700">
     <div class="flex items-center mb-4 sm:mb-0">
-        <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+        <!-- <a href="#" class="inline-flex justify-center p-1 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
         </a>
         <a href="#" class="inline-flex justify-center p-1 mr-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-        </a>
-        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing <span class="font-semibold text-gray-900 dark:text-white">1-20</span> of <span class="font-semibold text-gray-900 dark:text-white">2290</span></span>
+        </a> -->
+        <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+            Showing 
+            <span id="pagination-from" class="font-semibold text-gray-900 dark:text-white">1</span>
+            - 
+            <span id="pagination-to" class="font-semibold text-gray-900 dark:text-white">20</span>
+            of
+            <span id="pagination-total" class="font-semibold text-gray-900 dark:text-white">2290</span>
+        </span>
     </div>
-    <div class="flex items-center space-x-3">
-        <a href="#" class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+    <div id="pagination-pages" class="flex items-center space-x-3">
+        <!-- <a href="#" class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
             <svg class="w-5 h-5 mr-1 -ml-1"" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
             Previous
         </a>
+
+        <a href="#" class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+        1
+        </a>
+
+
         <a href="#" class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
             Next
             <svg class="w-5 h-5 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-        </a>
+        </a> -->
     </div>
-</div> -->
+</div>
 
 <!-- Edit User Modal -->
 <div class="fixed left-0 right-0 z-50 items-center justify-center hidden overflow-x-hidden overflow-y-auto top-4 md:inset-0 h-modal sm:h-full" id="edit-user-modal">
@@ -360,12 +373,18 @@
         // });
         // End Passing Header Token
 
+
+        // Start Pagination Info
+        // End Pagination Info
+
         // Start Fetch All Datas 
-        async function fetchalldatas(query=""){
+        async function fetchalldatasbypaginate(page=1){
             await $.ajax({
                 url:"{{'/users'}}",
                 method:"GET",
-                data:{"query":query},
+                data:{
+                    page: page
+                },
                 dataType:"json",
                 success:function(response){
                     console.log(response); // {status: 'scuccess', data: Array(2)}
@@ -376,9 +395,9 @@
                     const datas = response.data.data;
                     // console.log(datas);
                     
+                    const paginationInfo = response.data;
                     let html;
                     datas.forEach(function(data,idx){
-                        // console.log(data);
                         html += `
                         <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                             <td class="w-4 p-4">
@@ -387,7 +406,7 @@
                                     <label for="checkbox-{{-- .id --}}" class="sr-only">checkbox</label>
                                 </div>
                             </td>
-                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${++idx}</td>
+                            <td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">${paginationInfo.from + idx}</td>
                             <td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
                                 <!-- <img class="w-10 h-10 rounded-full" src="/images/users/{{-- .avatar --}}" alt="{{-- .name --}} avatar"> -->
                                 <div class="text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -415,11 +434,67 @@
 
                     // // $("#userstable tbody").html(html);
                     $("#userstable tbody").prepend(html);
+
+                    randerPagination(response.data)
                 }
             });
         }
-        fetchalldatas();
+        fetchalldatasbypaginate();
         // End Fetch All Datas
+
+        function randerPagination(paginationInfo){
+            console.log(paginationInfo);
+
+            $('#pagination-from').text(paginationInfo.from ?? 0);
+            $('#pagination-to').text(paginationInfo.to ?? 0);
+            $('#pagination-total').text(paginationInfo.total ?? 0);
+
+
+            let html = ""
+            html = paginationInfo?.links?.map((link, index) => {
+                let label = link.label
+                .replace('&laquo; Previous', 'Previous')
+                .replace('Next &raquo;', 'Next');
+
+
+                let page;
+                if (link.url) {
+                    const url = new URL(link.url);
+                    page = url.searchParams.get('page');
+                }
+
+                return `
+                    <button href="#" class="inline-flex items-center justify-center flex-1 px-3 py-2 text-sm font-medium text-center rounded-lg
+                        ${link.active ? 
+                            'text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'
+                        }
+                        ${link.url ? 'cursor-pointer' : 'cursor-not-allowed'}    
+                    "
+                    onClick = "handlePageClick(${page})"
+                    ${!link.url ? 'disabled' : ''}
+                    >
+
+                        ${label == 'Previous' ? 
+                            '<svg class="w-5 h-5 mr-1 -ml-1"" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                        : ""}
+                     
+                        ${label}
+
+                        ${label == 'Next' ? 
+                            '<svg class="w-5 h-5 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>'
+                        : ""}
+                    </button>
+                `
+            }).join('')
+
+            $('#pagination-pages').html(html);
+        }
+
+        function handlePageClick(page){
+            // console.log(page);
+            fetchalldatasbypaginate(page);
+        }
 
 
 
@@ -666,6 +741,7 @@
             });
 
         // End Single Delete
+
 
         
     </script>
