@@ -203,20 +203,22 @@ class ProductImport implements ToCollection, WithHeadingRow
 
             $this->importedCount++;
 
-            $product->update([
-                'stage' => 'default',
-            ]);
+            if (Str::contains(Str::lower((string) ($data['workflow'] ?? '')), 'stand')) {
+                $product->update([
+                    'stage' => 'default',
+                ]);
 
-            $product->latestWorkflow?->update([
-                'current_step_id' => null,
-                'status' => 'default',
-            ]);
-            // ProductWorkflow::where('product_id', $product->id)
-            // ->latest('id')
-            // ->first()
-            // ?->update([
-            //     'status' => 'default',
-            // ]);
+                $product->latestWorkflow?->update([
+                    'current_step_id' => null,
+                    'status' => 'default',
+                ]);
+                // ProductWorkflow::where('product_id', $product->id)
+                // ->latest('id')
+                // ->first()
+                // ?->update([
+                //     'status' => 'default',
+                // ]);
+            }
         }
     }
 
