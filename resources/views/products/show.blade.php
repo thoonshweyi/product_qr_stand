@@ -124,7 +124,7 @@
                 <img src="{{ asset($brandImage) }}"
                      alt=""
                      aria-hidden="true"
-                     class="pointer-events-none absolute left-1/2 top-1/2 w-3/4 -translate-x-1/2 -translate-y-1/2 opacity-[0.055] grayscale">
+                     class="pointer-events-none absolute inset-0 h-full w-full object-contain object-center opacity-[0.055] grayscale">
 
                 <div class="relative">
                     @unless ($isHouseBrand)

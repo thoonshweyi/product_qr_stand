@@ -321,12 +321,13 @@
 
         .sheet-watermark {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 90%;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
             opacity: 0.055;
             filter: grayscale(1);
-            transform: translate(-50%, -50%);
         }
 
         .sheet-details-body {
