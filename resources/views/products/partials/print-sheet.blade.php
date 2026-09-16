@@ -61,7 +61,7 @@
             <img src="{{ asset($brandImage) }}" alt="" class="sheet-watermark">
             <div class="sheet-details-body">
                 @unless ($isHouseBrand)
-                    <h2>Product Description <span>(ထုတ်ကုန်အကြောင်း)</span></h2>
+                    <!-- <h2>Product Description <span>(ထုတ်ကုန်အကြောင်း)</span></h2> -->
                 @endunless
 
                 <div class="sheet-text-body">

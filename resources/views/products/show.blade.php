@@ -60,7 +60,7 @@
                 </div>
 
                 <h1 class="w-auto flex-none self-start rounded-bl-[2.5rem] bg-[#073b78] px-5 py-2 text-center text-sm font-extrabold uppercase tracking-wide text-white sm:px-8 sm:py-2.5 sm:text-xl lg:text-2xl">
-                    Product Description
+                    Product Description <span class="normal-case">(ထုတ်ကုန်အကြောင်း)</span>
                 </h1>
             </header>
         @endif
@@ -128,11 +128,11 @@
 
                 <div class="relative">
                     @unless ($isHouseBrand)
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <h2 class="text-base font-extrabold uppercase sm:text-xl">
                             Product Description <span class="normal-case">(ထုတ်ကုန်အကြောင်း)</span>
                         </h2>
-                    </div>
+                    </div> -->
                     @endunless
 
                     <dl class="product-print-specifications grid grid-cols-[minmax(110px,1fr)_10px_minmax(0,2fr)] gap-y-0.5 text-xs font-semibold leading-5 sm:grid-cols-[220px_16px_minmax(0,1fr)] sm:text-base sm:leading-6">

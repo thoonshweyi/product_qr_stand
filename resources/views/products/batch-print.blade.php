@@ -333,9 +333,11 @@
         .sheet-details-body {
             position: relative;
             display: flex;
+            flex: 1 1 auto;
             flex-direction: column;
-            min-height: 100%;
+            min-height: 0;
             width: 100%;
+            padding: 0;
         }
 
         .sheet-details h2 {
@@ -350,18 +352,19 @@
             display: flex;
             flex: 1 1 auto;
             flex-direction: column;
-            justify-content: space-evenly;
             min-height: 0;
         }
 
         .sheet-specifications {
             display: grid;
+            flex: 0 0 auto;
             grid-template-columns: 132px 10px minmax(0, 1fr);
+            grid-auto-rows: 14px;
             gap: 0;
             margin: 0;
             font-size: 10px;
             font-weight: 900;
-            line-height: 13px;
+            line-height: 14px;
             /* -webkit-text-stroke: 0.15px currentColor; */
         }
 
@@ -379,16 +382,16 @@
         }
 
         .sheet-description {
-            display: -webkit-box;
-            overflow: hidden;
+            display: block;
+            flex: 0 0 auto;
+            height: calc(var(--description-lines) * 14px);
             margin-top: 0;
             white-space: pre-line;
-            font-size: 9px;
-            line-height: 13px;
+            font-family: "BatchPrintPyidaungsu", "BatchPrintMyanmar", "BatchPrintLatin", sans-serif;
+            font-size: 10px;
+            line-height: 14px;
             font-weight: 400;
             text-align: justify;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: var(--description-lines);
         }
 
         .sheet-footer {
@@ -601,7 +604,59 @@
     <script>
         let batchPrintRecorded = false;
 
+        const originalDescriptions = new WeakMap();
+        const descriptionSegmenter = new Intl.Segmenter('my', { granularity: 'grapheme' });
+
+        function fitPrintDescriptions() {
+            document.querySelectorAll('.sheet-description').forEach(description => {
+                if (!originalDescriptions.has(description)) {
+                    originalDescriptions.set(description, description.textContent);
+                }
+
+                const original = originalDescriptions.get(description);
+                const segments = Array.from(descriptionSegmenter.segment(original), part => part.segment);
+                const styles = getComputedStyle(description);
+                const maximumHeight = Number(styles.getPropertyValue('--description-lines')) * 14;
+                const measurement = description.cloneNode(false);
+
+                Object.assign(measurement.style, {
+                    position: 'absolute',
+                    visibility: 'hidden',
+                    pointerEvents: 'none',
+                    width: `${description.getBoundingClientRect().width}px`,
+                    height: 'auto',
+                    minHeight: '0',
+                    maxHeight: 'none',
+                    padding: '0',
+                    fontFamily: styles.fontFamily,
+                    fontSize: styles.fontSize,
+                    fontWeight: styles.fontWeight,
+                    lineHeight: '14px',
+                });
+                document.body.appendChild(measurement);
+
+                // Measure complete Myanmar graphemes; never clip a partial next line.
+                let lower = 0;
+                let upper = segments.length;
+                while (lower < upper) {
+                    const middle = Math.ceil((lower + upper) / 2);
+                    measurement.textContent = segments.slice(0, middle).join('');
+                    if (measurement.getBoundingClientRect().height <= maximumHeight + 0.1) {
+                        lower = middle;
+                    } else {
+                        upper = middle - 1;
+                    }
+                }
+
+                description.textContent = segments.slice(0, lower).join('').trimEnd();
+                measurement.remove();
+            });
+        }
+
+        document.fonts.ready.then(fitPrintDescriptions);
+
         window.addEventListener('beforeprint', function () {
+            fitPrintDescriptions(); 
             if (batchPrintRecorded) return;
 
             batchPrintRecorded = true;
