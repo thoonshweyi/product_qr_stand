@@ -80,9 +80,10 @@
                     </dl>
 
                     <div class="sheet-description"
-                        style="--description-lines: {{ $descriptionLineLimit }};">
+                        style="--description-lines: {{ $descriptionLineLimit }};"
+                        data-description-line-limit="{{ $descriptionLineLimit }}">
                         @foreach ($description_lines as $line)
-                            <div class="description-line">
+                            <div class="description-source-line">
                                 {{ $line }}
                             </div>
                         @endforeach

@@ -135,4 +135,6 @@
             }
         });
     </script>
+
+    <script src="{{ asset('assets/dist/js/product-print.js') }}" type="text/javascript"></script>
 @endsection
