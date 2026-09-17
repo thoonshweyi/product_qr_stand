@@ -396,14 +396,6 @@
     white-space: nowrap;
 }
 
-.description-source-line {
-    display: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
 .sheet-footer {
     display: flex;
     flex: 0 0 auto;

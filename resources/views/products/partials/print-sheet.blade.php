@@ -83,7 +83,7 @@
                         style="--description-lines: {{ $descriptionLineLimit }};"
                         data-description-line-limit="{{ $descriptionLineLimit }}">
                         @foreach ($description_lines as $line)
-                            <div class="description-source-line">
+                            <div class="description-line">
                                 {{ $line }}
                             </div>
                         @endforeach
