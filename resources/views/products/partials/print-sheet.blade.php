@@ -29,6 +29,12 @@
     }
 
     $isHouseBrand = filled($product->brand_icon) && false;
+
+    $description = app(\App\Services\ProductService::class)
+        ->parseProductDescription($product['description'] ?? '');
+    $description_lines = $description['description_lines'];
+    $description_lines = array_slice($description_lines, 0, $descriptionLineLimit);
+    \Log::info($description_lines);
 @endphp
 
 <article class="product-sheet">
@@ -74,7 +80,13 @@
                     </dl>
 
                     <div class="sheet-description"
-                        style="--description-lines: {{ $descriptionLineLimit }};">{{ filled($product->description) ? $product->description : 'No product description is available.' }}</div>
+                        style="--description-lines: {{ $descriptionLineLimit }};">
+                        @foreach ($description_lines as $line)
+                            <div class="description-line">
+                                {{ $line }}
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>

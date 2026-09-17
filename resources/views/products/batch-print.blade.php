@@ -386,12 +386,18 @@
             flex: 0 0 auto;
             height: calc(var(--description-lines) * 14px);
             margin-top: 0;
-            white-space: pre-line;
+            /* white-space: pre-line; */
             font-family: "BatchPrintPyidaungsu", "BatchPrintMyanmar", "BatchPrintLatin", sans-serif;
             font-size: 10px;
             line-height: 14px;
             font-weight: 400;
             text-align: justify;
+        }
+
+        .sheet-description > .description-line {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .sheet-footer {
@@ -500,6 +506,7 @@
                 break-after: auto;
                 page-break-after: auto;
             }
+
         }
     </style>
 @endsection
@@ -607,56 +614,7 @@
         const originalDescriptions = new WeakMap();
         const descriptionSegmenter = new Intl.Segmenter('my', { granularity: 'grapheme' });
 
-        function fitPrintDescriptions() {
-            document.querySelectorAll('.sheet-description').forEach(description => {
-                if (!originalDescriptions.has(description)) {
-                    originalDescriptions.set(description, description.textContent);
-                }
-
-                const original = originalDescriptions.get(description);
-                const segments = Array.from(descriptionSegmenter.segment(original), part => part.segment);
-                const styles = getComputedStyle(description);
-                const maximumHeight = Number(styles.getPropertyValue('--description-lines')) * 14;
-                const measurement = description.cloneNode(false);
-
-                Object.assign(measurement.style, {
-                    position: 'absolute',
-                    visibility: 'hidden',
-                    pointerEvents: 'none',
-                    width: `${description.getBoundingClientRect().width}px`,
-                    height: 'auto',
-                    minHeight: '0',
-                    maxHeight: 'none',
-                    padding: '0',
-                    fontFamily: styles.fontFamily,
-                    fontSize: styles.fontSize,
-                    fontWeight: styles.fontWeight,
-                    lineHeight: '14px',
-                });
-                document.body.appendChild(measurement);
-
-                // Measure complete Myanmar graphemes; never clip a partial next line.
-                let lower = 0;
-                let upper = segments.length;
-                while (lower < upper) {
-                    const middle = Math.ceil((lower + upper) / 2);
-                    measurement.textContent = segments.slice(0, middle).join('');
-                    if (measurement.getBoundingClientRect().height <= maximumHeight + 0.1) {
-                        lower = middle;
-                    } else {
-                        upper = middle - 1;
-                    }
-                }
-
-                description.textContent = segments.slice(0, lower).join('').trimEnd();
-                measurement.remove();
-            });
-        }
-
-        document.fonts.ready.then(fitPrintDescriptions);
-
         window.addEventListener('beforeprint', function () {
-            fitPrintDescriptions(); 
             if (batchPrintRecorded) return;
 
             batchPrintRecorded = true;
