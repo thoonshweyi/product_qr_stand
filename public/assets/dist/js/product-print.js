@@ -18,8 +18,6 @@ document.querySelectorAll('.sheet-description').forEach(function (container) {
             return;
         }
 
-        if(idx == lines.length -1 ) return;
-
         if (line.scrollWidth > line.clientWidth) {
             console.log('ဒီ line က မဆံ့ပါ:', line.textContent);
             let lineHeight = line.clientHeight;
@@ -31,6 +29,10 @@ document.querySelectorAll('.sheet-description').forEach(function (container) {
             let addLines = Math.floor(line.scrollHeight / lineHeight);
             console.log(addLines);
             lineCount += addLines;
+
+            if(lineCount > descriptionLineLimit){
+                line.style.whiteSpace = 'nowrap';
+            }
         }else{
             lineCount++;
         }
