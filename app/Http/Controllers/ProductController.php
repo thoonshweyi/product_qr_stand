@@ -649,6 +649,25 @@ class ProductController extends Controller
     }
 
     /**
+     * Preview the saved product using the batch print layout.
+     */
+    public function printPreview(Product $product)
+    {
+        $this->authorize('edit', $product);
+
+        $product->load([
+            'category',
+            'country',
+            'specificationValues.specification',
+        ]);
+
+        return view('products.batch-print', [
+            'products' => collect([$product]),
+            'previewProduct' => $product,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
