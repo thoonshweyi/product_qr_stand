@@ -20,8 +20,8 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths, WithTitle
 {
     private const COMPANY_MESSAGE = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
-    private const DEFAULT_DESCRIPTION_MM = "PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ \n ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။";
-    private const DEFAULT_DESCRIPTION_EN = "Shop for variety of high quality products with reasonable price at PRO 1 Global, leading provider for \n construction and home improvement products.";
+    private const DEFAULT_DESCRIPTION_MM = "PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။";
+    private const DEFAULT_DESCRIPTION_EN = "Shop for variety of high quality products with reasonable price at PRO 1 Global, leading provider for construction and home improvement products.";
 
     public function __construct(private readonly Collection $preproducts) {}
 
