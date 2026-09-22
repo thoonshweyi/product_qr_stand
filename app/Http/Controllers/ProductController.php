@@ -484,6 +484,7 @@ class ProductController extends Controller
                     ? Carbon::createFromFormat('Y-m-d', $validated['online_date'])->startOfMonth()->toDateString()
                     : null,
             ]);
+            Log::info("Product Saved");
 
             $productWorkflow = new ProductWorkflow;
             $productWorkflow->product_id = $product->id;
@@ -491,6 +492,8 @@ class ProductController extends Controller
             $productWorkflow->current_step_id = $firstWorkflowStep->id;
             $productWorkflow->status = 'ongoing';
             $productWorkflow->save();
+            Log::info("Workflow Saved");
+
 
             foreach ($specificationRows as $row) {
                 $specificationName = Str::of($row['name'])->squish()->toString();
@@ -512,6 +515,7 @@ class ProductController extends Controller
                     'value' => $row['value'],
                 ]);
             }
+            Log::info("Specifications Saved");
 
             // Start Single Image Upload
             if ($request->hasFile('main_image')) {
@@ -524,6 +528,7 @@ class ProductController extends Controller
                 $product->image = $filepath;
             }
             $product->save();
+            Log::info("Main Image Saved");
 
             if ($request->hasFile('thumbnail_image')) {
                 $file = $request->file('thumbnail_image');
@@ -535,6 +540,7 @@ class ProductController extends Controller
                 $product->thumbnail = $filepath;
             }
             $product->save();
+            Log::info("Thumbnail Image Saved");
 
             if ($request->hasFile('brand_icon')) {
                 $file = $request->file('brand_icon');
@@ -543,6 +549,7 @@ class ProductController extends Controller
                 $product->brand_icon = 'assets/img/products/'.$imagenewname;
                 $product->save();
             }
+            Log::info("Brand Icon Image Saved");
             // End Single Image Upload
 
             // foreach (['main_image' => 'main', 'thumbnail_image' => 'thumbnail'] as $inputName => $type) {
@@ -564,6 +571,7 @@ class ProductController extends Controller
             $product->qr = $qrData['path'];
             $product->qr_destination = $destinationUrl;
             $product->save();
+            Log::info("QR Code Image Saved");
             // End Generate QR
 
             DB::commit();
