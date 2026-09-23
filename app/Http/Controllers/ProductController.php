@@ -575,6 +575,7 @@ class ProductController extends Controller
             // End Generate QR
 
             DB::commit();
+            Log::info("Product Committed Successfully in Database.");
 
             return $this->sendRespond($product, 'New Product created successfully');
 
