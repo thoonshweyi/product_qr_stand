@@ -484,7 +484,7 @@ class ProductController extends Controller
                     ? Carbon::createFromFormat('Y-m-d', $validated['online_date'])->startOfMonth()->toDateString()
                     : null,
             ]);
-            Log::info("Product Saved");
+            Log::info('Product Saved. ' . ($validated['product_code'] ?? ''));
 
             $productWorkflow = new ProductWorkflow;
             $productWorkflow->product_id = $product->id;
