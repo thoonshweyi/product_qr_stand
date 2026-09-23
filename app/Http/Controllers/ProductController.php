@@ -577,8 +577,9 @@ class ProductController extends Controller
             DB::commit();
             Log::info("Product Committed Successfully in Database.");
 
-            return $this->sendRespond($product, 'New Product created successfully');
-
+            $res = $this->sendRespond($product, 'New Product created successfully');
+            Log::info("Response Successfully");
+            return $res;
         } catch (Exception $e) {
             DB::rollBack();
 
