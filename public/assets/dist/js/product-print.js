@@ -7,7 +7,7 @@ document.querySelectorAll('.sheet-description').forEach(function (container) {
         ...container.querySelectorAll('.description-line')
     ];
 
-    let lineCount = 1;
+    let lineCount = 0;
     const descriptionLineLimit = Number(
         container.dataset.descriptionLineLimit
     );
