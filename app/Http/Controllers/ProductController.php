@@ -371,6 +371,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info("Product Store Called.");
         $this->authorize('create', Product::class);
 
         // Start Validation
