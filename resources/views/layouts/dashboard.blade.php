@@ -83,7 +83,6 @@
         <!-- End Main -->
 
         <!-- Start Scripts -->
-            <script async defer src="https://buttons.github.io/buttons.js"></script>
             <!-- <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script> -->
             <script src="{{ asset('/assets/libs/flowbite-admin/app.bundle.js') }}"></script>
         <!-- End Script -->
