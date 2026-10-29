@@ -2,16 +2,26 @@
 
 namespace App\Services;
 
+use App\Exports\ProductsExport;
+use App\Models\Branch;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductSpecificationValue;
 use App\Models\ProductWorkflow;
+use App\Models\ProductWorkflowAction;
 use App\Models\Specification;
+use App\Models\Status;
 use App\Models\Workflow;
 use App\Models\WorkflowStep;
+use App\Services\OnlineProductExportDataService;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProductService
@@ -260,4 +270,258 @@ class ProductService
         return $products;
     }
 
+    public function productList(Request $request, ?string $workflowChannel = null, ?OnlineProductExportDataService $exportDataService = null)
+    {
+        $exportDataService ??= app(OnlineProductExportDataService::class);
+
+        $keyword = trim((string) $request->query('keyword', ''));
+        $statusId = $request->query('status_id');
+        $brand = trim((string) $request->query('brand', ''));
+        $stage = trim((string) $request->query('stage', ''));
+        $onlineMonth = trim((string) $request->query('online_month', ''));
+        $createdDate = trim((string) $request->query('created_date', ''));
+        $categoryId = $request->query('category_id');
+        $allowedStages = ['ongoing', 'checked', 'exported', 'finished'];
+
+        $hasSearchFilters = $keyword !== ''
+            || filled($statusId)
+            || $brand !== ''
+            || in_array($stage, $allowedStages, true)
+            || ($workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth))
+            || preg_match('/^\d{4}-\d{2}-\d{2}$/', $createdDate)
+            || $categoryId;
+
+        $currentBranchId = $request->user()?->branch_id;
+        $currentBranch = $request->user()?->branch;
+        $activeBranchCount = $workflowChannel === 'stand'
+            ? Branch::where('status_id', 3)->count()
+            : 0;
+        $productListTitle = match ($workflowChannel) {
+            'stand' => 'Stand Products',
+            'online' => 'Online Products',
+            default => 'All Products',
+        };
+
+        $productsQuery = Product::with(['country', 'status', 'user'])
+            ->when($workflowChannel, function ($query) use ($workflowChannel) {
+                $query->whereExists(function ($query) use ($workflowChannel) {
+                    $query->selectRaw('1')
+                        ->from('product_workflows')
+                        ->join('workflows', 'workflows.id', '=', 'product_workflows.workflow_id')
+                        ->whereColumn('product_workflows.product_id', 'products.id')
+                        ->where('workflows.slug', 'like', '%'.$workflowChannel.'%');
+                });
+            })
+            ->when($workflowChannel && ! $hasSearchFilters, function ($query) use ($workflowChannel, $request) {
+                $userId = auth()->id();
+                $isStandViewer = $workflowChannel === 'stand'
+                    && $request->user()->hasRoles(['Viewer']);
+
+                $query->where(function ($query) use ($userId, $isStandViewer) {
+                    $query->where('user_id', $userId)
+                        ->orWhere(function ($query) {
+                            $query->canAction();
+                        });
+
+                    if ($isStandViewer) {
+                        $query->orWhere(function ($query) {
+                            $query->visibleToStandViewerAfterChecked();
+                        });
+                    }
+                });
+            })
+            ->when($currentBranchId, function ($query) use ($currentBranchId) {
+                $query->withMax([
+                    'printRecords as current_branch_last_printed_at' => fn ($query) => $query
+                        ->where('branch_id', $currentBranchId)
+                        ->where('status', 'printed'),
+                ], 'printed_at');
+                $query->withMax([
+                    'printRecords as current_branch_last_printed_version' => fn ($query) => $query
+                        ->where('branch_id', $currentBranchId)
+                        ->where('status', 'printed'),
+                ], 'product_version');
+            })
+            ->when($workflowChannel === 'stand', function ($query) {
+                $query->selectSub(
+                    DB::table('product_print_records')
+                        ->join('branches', 'branches.id', '=', 'product_print_records.branch_id')
+                        ->selectRaw('COUNT(DISTINCT product_print_records.branch_id)')
+                        ->whereColumn('product_print_records.product_id', 'products.id')
+                        ->whereColumn('product_print_records.product_version', 'products.print_version')
+                        ->where('product_print_records.status', 'printed')
+                        ->whereNotNull('product_print_records.branch_id')
+                        ->where('branches.status_id', 3),
+                    'all_branch_printed_count'
+                );
+            })
+            ->when($workflowChannel === 'online', function ($query) {
+                $query->selectSub(
+                    DB::table('product_workflow_actions')
+                        ->selectRaw('MAX(created_at)')
+                        ->whereColumn('product_workflow_actions.product_id', 'products.id')
+                        ->whereIn('product_workflow_actions.action', ['export', 'exported']),
+                    'exported_at'
+                );
+            })
+            ->when($keyword !== '', function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('product_code', 'like', '%'.$keyword.'%')
+                        ->orWhere('name', 'like', '%'.$keyword.'%');
+                });
+            })
+            ->when(filled($statusId), fn ($query) => $query->where('status_id', $statusId))
+            ->when($brand !== '', fn ($query) => $query->where('brand', $brand))
+            ->when(
+                in_array($stage, $allowedStages, true),
+                fn ($query) => $query->where('stage', $stage)
+            )
+            ->when(
+                $workflowChannel === 'online' && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $onlineMonth),
+                fn ($query) => $query
+                    ->whereYear('online_date', (int) substr($onlineMonth, 0, 4))
+                    ->whereMonth('online_date', (int) substr($onlineMonth, 5, 2)),
+            )
+            ->when(
+                preg_match('/^\d{4}-\d{2}-\d{2}$/', $createdDate),
+                fn ($query) => $query->whereDate('created_at', $createdDate)
+            )
+            ->when(filled($categoryId), fn ($query) => $query->where('category_id', $categoryId))
+            ->when(! auth()->user()?->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
+            ->orderByDesc('id');
+
+        $products = $productsQuery
+            ->paginate(15)
+            ->withQueryString();
+
+        if ($request->document_search == 'Export') {
+            $products = $productsQuery->where('stage', 'checked')
+                ->get();
+            $preproducts = $exportDataService->prepare($products)
+                ->filter(fn ($preproduct) => filled($preproduct['onlinedata'] ?? null))
+                ->values();
+            $exportedProducts = $preproducts
+                ->pluck('product')
+                ->filter()
+                ->values();
+
+            // dd($exportedProducts);
+
+            $this->recordOnlineExportWorkflowActions($request, $exportedProducts);
+
+            return Excel::download(
+                new ProductsExport($preproducts),
+                'online-products-'.now()->format('Y-m-d').'.xlsx'
+            );
+        }
+
+        $statuses = Status::whereIn('id', [1, 2])
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        $categories = Category::where('status_id', 3)
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        if ($statuses->isEmpty()) {
+            $statuses = Status::orderBy('id')->get(['id', 'name']);
+        }
+
+        if ($categories->isEmpty()) {
+            $categories = Category::orderBy('id')->get(['id', 'name']);
+        }
+
+        $brands = Product::query()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->orderBy('brand')
+            ->pluck('brand');
+
+        
+        if(request()->ajax()){
+            return response()->json([
+                'success' => true,
+                'data'=>$products,
+                'message' => "Product List Fetched Successfully",
+            ]);
+        }
+
+        return view('products.index', compact(
+            'products',
+            'statuses',
+            'brands',
+            'currentBranch',
+            'currentBranchId',
+            'workflowChannel',
+            'productListTitle',
+            'categories',
+            'activeBranchCount'
+        ));
+    }
+
+    private function recordOnlineExportWorkflowActions(Request $request, $products): void
+    {
+        abort_unless($request->user()?->hasRoles(['Ecommerce Admin', 'Administrator']), 403, 'Only Ecommerce Admin can export online products.');
+
+        DB::transaction(function () use ($request, $products) {
+            try {
+                $isAdmin = $request->user()->hasRoles(['Admin', 'Administrator']);
+
+                foreach ($products as $product) {
+                    $productWorkflow = ProductWorkflow::query()
+                        ->where('product_id', $product->id)
+                        ->latest('id')
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $productWorkflow || $productWorkflow->status !== 'ongoing') {
+                        continue;
+                    }
+
+                    $currentStep = WorkflowStep::find($productWorkflow->current_step_id);
+                    $isOnlineWorkflow = Workflow::query()
+                        ->whereKey($productWorkflow->workflow_id)
+                        ->where('slug', 'like', '%online%')
+                        ->exists();
+                    $isExportStep = in_array(Str::lower((string) $currentStep?->action), ['export', 'exported'], true);
+                    $hasStepRole = $isAdmin
+                        || $currentStep
+                        && (
+                            ! $currentStep->role_id
+                            || $request->user()->roles()->whereKey($currentStep->role_id)->exists()
+                        );
+
+                    if (! $isOnlineWorkflow || ! $isExportStep || ! $hasStepRole) {
+                        continue;
+                    }
+
+                    $actionLog = new ProductWorkflowAction;
+                    $actionLog->product_id = $product->id;
+                    $actionLog->product_workflow_id = $productWorkflow->id;
+                    $actionLog->workflow_step_id = $currentStep->id;
+                    $actionLog->user_id = $request->user()->id;
+                    $actionLog->action = $currentStep->action;
+                    $actionLog->comment = 'Exported with Online Product Excel export.';
+                    $actionLog->save();
+
+                    $nextStep = WorkflowStep::query()
+                        ->where('workflow_id', $productWorkflow->workflow_id)
+                        ->where('step_no', '>', $currentStep->step_no)
+                        ->orderBy('step_no')
+                        ->orderBy('id')
+                        ->first();
+
+                    $product->stage = $currentStep->action;
+                    $product->save();
+
+                    $productWorkflow->current_step_id = $nextStep?->id;
+                    $productWorkflow->status = $nextStep ? 'ongoing' : 'completed';
+                    $productWorkflow->save();
+                }
+            } catch (Exception $e) {
+                Log::info('Export Workflow Exception: '.$e->getMessage());
+            }
+        });
+    }
 }

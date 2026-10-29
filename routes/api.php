@@ -26,5 +26,5 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
-
+Route::apiResource("products",ProductController::class,["as"=>"api"]);
 Route::get("/productsdashboard",[ProductController::class,"dashboard"]);

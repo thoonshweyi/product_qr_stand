@@ -100,11 +100,11 @@ class Product extends Model
         ? WorkflowStep::find($productWorkflow->current_step_id)
         : null;
 
-        $isAdmin = request()->user()->hasRoles(['Admin', 'Administrator']);
+        $isAdmin = request()->user()?->hasRoles(['Admin', 'Administrator']);
         $hasStepRole = $currentWorkflowStep
             && (
                 ! $currentWorkflowStep->role_id
-                || request()->user()->roles()->whereKey($currentWorkflowStep->role_id)->exists()
+                || request()->user()?->roles()->whereKey($currentWorkflowStep->role_id)->exists()
             );
 
         $canWorkflowAction = $currentWorkflowStep
