@@ -157,7 +157,8 @@ class Product extends Model
     {
         $sizeValue = $this->relationLoaded('specificationValues')
             ? $this->specificationValues
-                ->firstWhere('specification_id', 10)
+                // ->firstWhere('specification_id', 10)
+                ->firstWhere('slug',"size")
                 ?->value
             : $this->specificationValues()
                 ->where('specification_id', 10)
