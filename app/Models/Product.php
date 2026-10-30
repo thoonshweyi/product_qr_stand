@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TileSizeNormalizer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,6 +43,7 @@ class Product extends Model
     // Method 2 Can Action
     protected $appends = [
         'can_action',
+        'normalized_size',
     ];
 
     public function specificationValues()
@@ -148,6 +150,19 @@ class Product extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereIn('stage', ['checked','finished']);
+        return $query->whereIn('stage', ['checked', 'finished']);
+    }
+
+    public function getNormalizedSizeAttribute()
+    {
+        $sizeValue = $this->relationLoaded('specificationValues')
+            ? $this->specificationValues
+                ->firstWhere('specification_id', 10)
+                ?->value
+            : $this->specificationValues()
+                ->where('specification_id', 10)
+                ->value('value');
+
+        return TileSizeNormalizer::normalize($sizeValue);
     }
 }
