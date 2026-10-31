@@ -322,7 +322,7 @@
     height: 100%;
     object-fit: contain;
     object-position: center;
-    opacity: 0.055;
+    opacity: 0.1;
     filter: grayscale(1);
 }
 
