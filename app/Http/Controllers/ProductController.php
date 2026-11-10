@@ -243,7 +243,7 @@ class ProductController extends Controller
                         $submittedNames = collect($value)
                             ->pluck('name')
                             ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
-                        $requiredSpecifications = collect($requiresOnlineDate ? self::ONLINE_REQUIRED_SPECIFICATIONS : [])
+                        $requiredSpecifications = collect($requiresOnlineDate ? self::STAND_REQUIRED_SPECIFICATIONS : [])
                             ->merge($requiresMainImage ? self::STAND_REQUIRED_SPECIFICATIONS : [])
                             ->unique();
                         $missing = $requiredSpecifications
@@ -840,7 +840,7 @@ class ProductController extends Controller
                         $submittedNames = collect($value)
                             ->pluck('name')
                             ->map(fn ($name) => Str::lower(Str::squish((string) $name)));
-                        $requiredSpecifications = collect($requiresOnlineDate ? self::ONLINE_REQUIRED_SPECIFICATIONS : [])
+                        $requiredSpecifications = collect($requiresOnlineDate ? self::STAND_REQUIRED_SPECIFICATIONS : [])
                             ->merge($requiresMainImage ? self::STAND_REQUIRED_SPECIFICATIONS : [])
                             ->unique();
                         $missing = $requiredSpecifications

@@ -622,7 +622,7 @@ $canEditDefault = request()->user()->can('editDefault', $product) ?? false;
 
         function fixedRequiredSpecifications() {
             const names = [];
-            if (requiresOnlineDate) names.push(...fixedOnlineSpecifications);
+            if (requiresOnlineDate) names.push(...fixedStandSpecifications);
             if (requiresMainImage) names.push(...fixedStandSpecifications);
 
             return [...new Set(names)];
