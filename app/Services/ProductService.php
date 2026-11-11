@@ -390,10 +390,6 @@ class ProductService
             ->when(! auth()->user()?->can('viewany', Product::class), fn ($query) => $query->where('status_id', 1))
             ->orderByDesc('id');
 
-        $products = $productsQuery
-            ->paginate(15)
-            ->withQueryString();
-
         if ($request->document_search == 'Export') {
             $products = $productsQuery->where('stage', 'checked')
                 ->get();
@@ -405,7 +401,6 @@ class ProductService
                 ->filter()
                 ->values();
 
-            // dd($exportedProducts);
 
             $this->recordOnlineExportWorkflowActions($request, $exportedProducts);
 
@@ -414,6 +409,10 @@ class ProductService
                 'online-products-'.now()->format('Y-m-d').'.xlsx'
             );
         }
+
+        $products = $productsQuery
+            ->paginate(15)
+            ->withQueryString();
 
         $statuses = Status::whereIn('id', [1, 2])
             ->orderBy('id')
