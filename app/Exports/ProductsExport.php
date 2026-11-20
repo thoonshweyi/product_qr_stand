@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -16,10 +15,14 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 
-class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths, WithTitle, WithColumnFormatting
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
+class ProductsExport extends DefaultValueBinder implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping, WithColumnWidths, WithTitle, WithCustomValueBinder
 {
     private const COMPANY_MESSAGE = 'PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။';
     private const DEFAULT_DESCRIPTION_MM = "PRO 1 Global Home Center မှ အရည်အသွေးကောင်းမွန် သော ပစ္စည်းများကိုသာ ပစ္စည်းမှန်စျေးနှုန်းမှန်ကန်စွာ ရောင်းချသဖြင့် ယုံကြည်စိတ်ချစွာ ၀ယ်ယူနိုင်ပါသည်။";
@@ -146,7 +149,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         // MM-101,MM-102,MM-103,MM-104,MM-105,MM-106,MM-107,MM-108,MM-109,MM-110,MM-113,MM-114,MM-115
 
         return [
-            "'".$onlinedata->product_code,
+            $onlinedata->product_code,
             $onlinedata->product_name,
             $onlinedata->product_name,
             $onlinedata->brand_name,
@@ -160,7 +163,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             $descriptionMm,
             $onlinedata->unit,
             '', // show_pro1_logo: online data
-            "'".$onlinedata->item_code, // item_code: online data
+            $onlinedata->item_code, // item_code: online data
             $onlinedata->item_name, // item_name: online data
             '', // item_color: online data
             $onlinedata->item_sell_price, // item_sell_price: online data
@@ -259,11 +262,16 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         ];
     }
 
-    public function columnFormats(): array
+    public function bindValue(Cell $cell, $value)
     {
-        return [
-            'A' => NumberFormat::FORMAT_TEXT, // product_code
-            'O' => NumberFormat::FORMAT_TEXT, // item_code
-        ];
+        // Product Code (A) and Item Code (O)
+        if (in_array($cell->getColumn(), ['A', 'O']) && $value !== null) {
+            $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
+
+            return true;
+        }
+
+        return parent::bindValue($cell, $value);
     }
+
 }
