@@ -146,7 +146,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
         // MM-101,MM-102,MM-103,MM-104,MM-105,MM-106,MM-107,MM-108,MM-109,MM-110,MM-113,MM-114,MM-115
 
         return [
-            $onlinedata->product_code,
+            "'".$onlinedata->product_code,
             $onlinedata->product_name,
             $onlinedata->product_name,
             $onlinedata->brand_name,
@@ -160,7 +160,7 @@ class ProductsExport implements FromCollection, ShouldAutoSize, WithEvents, With
             $descriptionMm,
             $onlinedata->unit,
             '', // show_pro1_logo: online data
-            $onlinedata->item_code, // item_code: online data
+            "'".$onlinedata->item_code, // item_code: online data
             $onlinedata->item_name, // item_name: online data
             '', // item_color: online data
             $onlinedata->item_sell_price, // item_sell_price: online data
